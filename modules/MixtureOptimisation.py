@@ -1,18 +1,15 @@
-from PyQt4 import QtCore, QtGui
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Icon import Icon
-# from ccpn.ui.gui.widgets.VerticalTab import VerticalTabWidget
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.widgets.Module import CcpnModule
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-# from ccpn.ui.gui.popups.SampleSetupPopup import ExcludeRegions
 from collections import OrderedDict
-from ccpn.AnalysisScreen.lib.SimulatedAnnealing import  iterateAnnealing,  scoreMixture, showScoresPerMixture
+
+from PyQt4 import QtGui
+
 from ccpn.AnalysisScreen.lib.MixturesGeneration import _getMixturesFromVirtualSamples, _createSamples
+from ccpn.AnalysisScreen.lib.SimulatedAnnealing import  iterateAnnealing, showScoresPerMixture
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
 
 
 class SimulatedAnnealingWidgets(QtGui.QFrame):

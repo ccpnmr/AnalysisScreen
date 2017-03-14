@@ -1,23 +1,21 @@
 __author__ = 'luca'
 
-import math
 from functools import partial
 
 from PyQt4 import QtCore, QtGui
-from ccpn.AnalysisScreen.modules.MixtureOptimisation import MixtureOptimisation
-from numpy import array, amin, average
+
 from ccpn.AnalysisScreen.lib.MixturesGeneration import getCompounds, _createSamples
-from ccpn.AnalysisScreen.lib.SimulatedAnnealing import randomDictMixtures,  getMixtureInfo , calculateOverlapCount,scoreMixture
-from ccpn.ui.gui.widgets.Menu import Menu
-# from ccpn.ui.gui.lib.Window import navigateToPeakPosition
+from ccpn.AnalysisScreen.lib.SimulatedAnnealing import calculateOverlapCount,scoreMixture
+from ccpn.AnalysisScreen.modules.MixtureOptimisation import MixtureOptimisation
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CompoundView import CompoundView
-from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
+from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 

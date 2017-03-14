@@ -1,20 +1,15 @@
 __author__ = 'luca'
 
-
-from functools import partial
 from PyQt4 import QtCore, QtGui
-from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.GroupBox import GroupBox
-from ccpn.ui.gui.widgets.ListWidget import ListWidget
 
-from ccpn.ui.gui.widgets.Module import CcpnModule
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ObjectTableItemDelegate
-
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.CompoundView import CompoundView
+from ccpn.ui.gui.widgets.GroupBox import GroupBox
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.CompoundView import CompoundView, Variant, importSmiles
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+
 # from ccpn.ui.gui.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 
 Qt = QtCore.Qt
@@ -398,7 +393,6 @@ class ShowScreeningHits(CcpnModule):
 
   def _hitTableCallback(self, row:int=None, col:int=None, obj:object=None):
     ''' Documentation '''
-    from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
 
     peaks = self._getPullDownObj().substance.referenceSpectra[0].peakLists[1].peaks
     # displayed = self.project.getByPid('GD:user.View.1D:H')
