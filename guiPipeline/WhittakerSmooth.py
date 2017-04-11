@@ -8,6 +8,7 @@ import pyqtgraph as pg
 from ccpn.ui.gui.widgets.PipelineWidgets import PipelineBox, PipelineDropArea
 
 
+
 WidgetSetters = OrderedDict([
                             ('CheckBox',      'setChecked'),
                             ('PulldownList',  'set'       ),
