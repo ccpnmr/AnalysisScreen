@@ -76,8 +76,8 @@ def matchedPosition(samplePeaks, componentPeaks, tolerance:float=0.005, minimumM
    return set(list(matchedPositions))
 
 def _subtractTwoSpectra(stdOffResonance, stdOnResonance):
-  stdOffResonanceArray = stdOffResonance._apiDataSource.get1dSpectrumData()[1]
-  stdOnResonanceArray = stdOnResonance._apiDataSource.get1dSpectrumData()[1]
+  stdOffResonanceArray = stdOffResonance.get1dSpectrumData()[1]
+  stdOnResonanceArray = stdOnResonance.get1dSpectrumData()[1]
 
   stdDifference = stdOffResonanceArray - stdOnResonanceArray
   return stdDifference
