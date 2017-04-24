@@ -60,7 +60,7 @@ class MixtureAnalysis(CcpnModule):
     self.application = self.mainWindow.application
     self.preferences = self.application.preferences
     self.generalPreferences = self.preferences.general
-    self.colourScheme = self.generalPreferences.colourScheme
+    # self.colourScheme = self.generalPreferences.colourScheme
 
 
     self.listOfSample = []
@@ -217,15 +217,16 @@ class MixtureAnalysis(CcpnModule):
     ''' This creates buttons according with how many spectra are inside the mixture. '''
     self.toolBarComponents.clear()
     for sampleComponent in sample.sampleComponents:
-      if len(sampleComponent.substance.referenceSpectra) > 0:
-        spectrum = sampleComponent.substance.referenceSpectra[0]
-      else:
-        spectrum = self.project.getByPid('SP:' + str(sampleComponent.substance.name))
-      self.componentButton = Button(self, text=spectrum.id)#,toggle=True)
-      self.componentButton.clicked.connect(partial(self._toggleComponentButton, spectrum, sample, self.componentButton))
-      # self.componentButton.setChecked(False)
-      self.componentButton.setFixedHeight(40)
-      self.toolBarComponents.addWidget(self.componentButton)
+      if sampleComponent.substance is not None:
+        if len(sampleComponent.substance.referenceSpectra) > 0:
+          spectrum = sampleComponent.substance.referenceSpectra[0]
+        else:
+          spectrum = self.project.getByPid('SP:' + str(sampleComponent.substance.name))
+        self.componentButton = Button(self, text=spectrum.id)#,toggle=True)
+        self.componentButton.clicked.connect(partial(self._toggleComponentButton, spectrum, sample, self.componentButton))
+        # self.componentButton.setChecked(False)
+        self.componentButton.setFixedHeight(40)
+        self.toolBarComponents.addWidget(self.componentButton)
 
 
 
@@ -241,27 +242,27 @@ class MixtureAnalysis(CcpnModule):
         if item != componentButton:
           buttons.append(item)
 
-    for item in buttons:
-      if self.colourScheme == 'dark':
-        item.setStyleSheet("background-color: #2a3358")
-        pressedButton.setStyleSheet("background-color: #020F31")
-      else:
-        item.setStyleSheet("background-color: #fbf4cc; border: 1px solid  #bd8413; color: #122043")
-        pressedButton.setStyleSheet("background-color: #bd8413")
+    # for item in buttons:
+    #   if self.colourScheme == 'dark':
+    #     item.setStyleSheet("background-color: #2a3358")
+    #     pressedButton.setStyleSheet("background-color: #020F31")
+    #   else:
+    #     item.setStyleSheet("background-color: #fbf4cc; border: 1px solid  #bd8413; color: #122043")
+    #     pressedButton.setStyleSheet("background-color: #bd8413")
 
     for peakList in spectrum.peakLists:
       self.peakListObjects.append(peakList.peaks)
       self.peakTable.setObjects(self.peakListObjects[-1])
 
     for sampleComponent in sample.sampleComponents:
-
-      if len(sampleComponent.substance.referenceSpectra)>0:
-        if sampleComponent.substance.referenceSpectra[0] == spectrum:
-          smiles = sampleComponent.substance.smiles
-          if smiles is not None:
-            self.compoundView  = CompoundView(self, smiles=smiles, preferences=self.preferences)
-            self.tabPeaksMoleculeLayout.addWidget(self.compoundView, 1,1)
-            self.compoundView.resetView()
+      if sampleComponent.substance is not None:
+        if len(sampleComponent.substance.referenceSpectra)>0:
+          if sampleComponent.substance.referenceSpectra[0] == spectrum:
+            smiles = sampleComponent.substance.smiles
+            if smiles is not None:
+              self.compoundView  = CompoundView(self, smiles=smiles, preferences=self.preferences)
+              self.tabPeaksMoleculeLayout.addWidget(self.compoundView, 1,1)
+              self.compoundView.resetView()
 
 
   ''' ######## ======== Second Tab properties (Multiple Compound View ====== ########   '''
@@ -271,15 +272,15 @@ class MixtureAnalysis(CcpnModule):
     self._clearTabMoleculeView(sample)
 
     for component in sample.sampleComponents:
-      chemicalName = (''.join(str(x) for x in component.substance.synonyms))
+      if component.substance is not None:
+        chemicalName = (''.join(str(x) for x in component.substance.synonyms))
 
-      smiles = component.substance.smiles
-      print(smiles)
-      if smiles is not None:
-        self.compoundViewTab2 = CompoundView(self, smiles=smiles, preferences=self.preferences)
-        self.compoundViewTab2.setMaximumWidth(180)
-        self.tabMoleculeViewLayout.addWidget(self.compoundViewTab2)
-        self.compoundViewTab2.resetView()
+        smiles = component.substance.smiles
+        if smiles is not None:
+          self.compoundViewTab2 = CompoundView(self, smiles=smiles, preferences=self.preferences)
+          self.compoundViewTab2.setMaximumWidth(180)
+          self.tabMoleculeViewLayout.addWidget(self.compoundViewTab2)
+          self.compoundViewTab2.resetView()
 
 
   def _clearTabMoleculeView(self, sample):
@@ -678,12 +679,13 @@ class MixtureAnalysis(CcpnModule):
     ''' displays all the spectra present in a mixture '''
     currentDisplay = self._clearDisplayView()
     for sampleComponent in sample.sampleComponents:
-      if len(sampleComponent.substance.referenceSpectra)>0:
-        currentDisplay.displaySpectrum(sampleComponent.substance.referenceSpectra[0])
-      else:
-        spectrum = self.project.getByPid('SP:'+str(sampleComponent.substance.name))
-        if spectrum is not None:
-          currentDisplay.displaySpectrum(spectrum)
+      if sampleComponent.substance is not None:
+        if len(sampleComponent.substance.referenceSpectra)>0:
+          currentDisplay.displaySpectrum(sampleComponent.substance.referenceSpectra[0])
+        else:
+          spectrum = self.project.getByPid('SP:'+str(sampleComponent.substance.name))
+          if spectrum is not None:
+            currentDisplay.displaySpectrum(spectrum)
 
   def _navigateToPosition(self, peaks):
     ''' for a given peak, it navigates to the peak position on the display  '''
