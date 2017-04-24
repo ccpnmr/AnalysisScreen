@@ -45,26 +45,30 @@ from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 green = QtGui.QColor('Green')
 red = QtGui.QColor('Red')
 yellow = QtGui.QColor('yellow')
+DefaultMinimalDistance = 0.01
 
 class MixtureAnalysis(CcpnModule):
 
   '''Creates a module to analyse the mixtures'''
 
-  def __init__(self, parent=None, minimalDistance=0.01, project=None):
+  def __init__(self,project=None, minimalDistance=None):
     super(MixtureAnalysis, self)
     CcpnModule.__init__(self, name='Mixture Analysis')
 
     self.project = project
-    self.mainWindow = parent
+    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+
+    self.mainWindow = self.application.ui.mainWindow
     self.moduleArea = self.mainWindow.moduleArea
-    self.application = self.mainWindow.application
     self.preferences = self.application.preferences
-    self.generalPreferences = self.preferences.general
-    # self.colourScheme = self.generalPreferences.colourScheme
+    self.current = self.application.current
 
 
     self.listOfSample = []
+    if minimalDistance is None:
+      minimalDistance = DefaultMinimalDistance
     self.minimalDistance = minimalDistance
+
     ######## ======== Icons ====== ########
     self.settingIcon = Icon('icons/applications-system')
     self.exportIcon = Icon('icons/export')
@@ -132,6 +136,13 @@ class MixtureAnalysis(CcpnModule):
       for sample in self.project.samples:
         if sample.isVirtual:
           self.virtualSamples.append(sample)
+          if not hasattr(sample, 'overlaps'):
+            sample.overlaps = None
+          elif not hasattr(sample, 'score'):
+            sample.score = None
+        for sampleComponent in sample.sampleComponents:
+          if not hasattr(sampleComponent, 'score'):
+            sampleComponent.score = None
     return self.virtualSamples
 
 
@@ -146,9 +157,11 @@ class MixtureAnalysis(CcpnModule):
                Column('Score',lambda sample:str(sample.score)),
               ]
 
+
     self.scoringTable = ObjectTable(self, columns, objects=[], selectionCallback=self._tableSelection)
     self.scoringTable.setFixedWidth(400)
     if len(self._getVirtualSamples())>0:
+
       self.scoringTable.setObjects(self._getVirtualSamples())
     self.analysisFrameLayout.addWidget(self.scoringTable)
 
@@ -179,39 +192,28 @@ class MixtureAnalysis(CcpnModule):
     self.tabPeaksMoleculeLayout.addWidget(self.peakTable, 1,0)
 
 
-  # def _selectPeak(self, row:int=None, col:int=None, obj:object=None):
-  #   ''' this callback  '''
-  #   self.selectedTablePeaks = self.peakTable.getSelectedObjects()
-  #   for peak in self.selectedTablePeaks:
-  #     if peak.isSelected:
-  #       print(self.project._appBase.current.peaks, 'currents')
-  #       # self.project._appBase.current.clearPeaks()
-  #     else:
-  #       peak.isSelected = True
-  #       self.current.peak = peak
-
-  def _findSelectedPeaks(self, peaks:None):
-    ''' this callback, registered with a notifier, allows to select a peak either on the table, compoundView or
-    guiSpectrum display and highLight the respective peak/s or atom/s on compoundView, table , display '''
-    # self.peakTable.clearSelection()
-    selectedPeaks = []
-    if self.project.strips:
-      currentDisplayed = self.project.strips[0]
-      if self.project._appBase.current.peaks:
-        self.currentPeaks = self.project._appBase.current.peaks
-        if self.peakTable.objects:
-          for peak in self.currentPeaks:
-            if peak in self.peakTable.objects:
-              self.peakTable.setCurrentObject(peak)
-              selectedPeaks.append(peak)
-
-    if selectedPeaks:
-      print(selectedPeaks, 'selected peaks')
-      self.peakTable.setCurrentObjects(selectedPeaks)
-
-      for atom, atomObject in self.compoundView.atomViews.items():
-        if atom.name == 'H1':
-          atomObject.select()
+  # def _findSelectedPeaks(self, peaks:None):
+  #   ''' this callback, registered with a notifier, allows to select a peak either on the table, compoundView or
+  #   guiSpectrum display and highLight the respective peak/s or atom/s on compoundView, table , display '''
+  #   # self.peakTable.clearSelection()
+  #   selectedPeaks = []
+  #   if self.project.strips:
+  #     currentDisplayed = self.project.strips[0]
+  #     if self.project._appBase.current.peaks:
+  #       self.currentPeaks = self.project._appBase.current.peaks
+  #       if self.peakTable.objects:
+  #         for peak in self.currentPeaks:
+  #           if peak in self.peakTable.objects:
+  #             self.peakTable.setCurrentObject(peak)
+  #             selectedPeaks.append(peak)
+  #
+  #   if selectedPeaks:
+  #     print(selectedPeaks, 'selected peaks')
+  #     self.peakTable.setCurrentObjects(selectedPeaks)
+  #
+  #     for atom, atomObject in self.compoundView.atomViews.items():
+  #       if atom.name == 'H1':
+  #         atomObject.select()
 
   def _createButtons(self, sample):
     ''' This creates buttons according with how many spectra are inside the mixture. '''
@@ -375,9 +377,10 @@ class MixtureAnalysis(CcpnModule):
       header.setTextColor(color)
       self.leftListWidget.addItem(header)
       for sampleComponent in sample.sampleComponents:
-        spectrum = sampleComponent.substance.referenceSpectra[0]
-        item = QtGui.QListWidgetItem(str(sampleComponent.name) + ' Single Score = ' + str(sampleComponent.score))
-        self.leftListWidget.addItem(item)
+        if sampleComponent.substance is not None:
+          # spectrum = sampleComponent.substance.referenceSpectra[0]
+          item = QtGui.QListWidgetItem(str(sampleComponent.name) + ' Single Score = ' + str(sampleComponent.score))
+          self.leftListWidget.addItem(item)
 
 
         #   self.leftListWidget.addItem(item)
