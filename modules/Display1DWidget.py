@@ -1,10 +1,12 @@
 
 from PyQt4 import QtGui
 
+#TODO:LUCA: do not work of Qt directly; use our subclassed types
 
 class Display1DWidget(QtGui.QFrame):
   def __init__(self, parent=None, project=None, **kw):
     super(Display1DWidget, self).__init__(parent)
+#TODO:LUCA: get in a proper way
     if self._appBase.ui.mainWindow is not None:
       self.mainWindow = self._appBase.ui.mainWindow
     else:

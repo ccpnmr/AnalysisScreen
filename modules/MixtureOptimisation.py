@@ -12,6 +12,7 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 
 
+#TODO:LUCA: do not QtWidgets directly
 class SimulatedAnnealingWidgets(QtGui.QFrame):
   def __init__(self, initialTemp=1000, finalTemp=1, stepTemp=1000, constantTemp=30, coolingMethod='Linear', iterations=3):
     QtGui.QFrame.__init__(self)
