@@ -49,7 +49,7 @@ class Screen(Framework):
 
   def showMixtureAnalysis(self, position='bottom', relativeTo=None):
     """ Displays the Mixtures Analysis Module """
-    showSa = MixtureAnalysis(self.ui.mainWindow,  project=self.project)
+    showSa = MixtureAnalysis(project=self.project)
     self.ui.mainWindow.moduleArea.addModule(showSa, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showMixtureAnalysis()")
     self.project._logger.info("application.showMixtureAnalysis()")
