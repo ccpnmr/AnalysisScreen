@@ -51,14 +51,13 @@ class MixtureAnalysis(CcpnModule):
 
   '''Creates a module to analyse the mixtures'''
 
-  def __init__(self,project=None, minimalDistance=None):
+  def __init__(self,project, mainWindow, minimalDistance=None):
     super(MixtureAnalysis, self)
-    CcpnModule.__init__(self, name='Mixture Analysis')
+    CcpnModule.__init__(self, mainWindow=mainWindow, name='Mixture Analysis')
 
     self.project = project
-    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
-
-    self.mainWindow = self.application.ui.mainWindow
+    self.mainWindow = mainWindow
+    self.application = self.mainWindow.application
     self.moduleArea = self.mainWindow.moduleArea
     self.preferences = self.application.preferences
     self.current = self.application.current

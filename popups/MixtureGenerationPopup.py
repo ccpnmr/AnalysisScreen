@@ -371,7 +371,7 @@ class MixtureGenerationPopup(QtGui.QDialog):
 
   def _openMixtureAnalysisModule(self):
     '''   '''
-    mixtureAnalysis = MixtureAnalysis(minimalDistance=self.ppmDistance.value(), project=self.project)
+    mixtureAnalysis = MixtureAnalysis(minimalDistance=self.ppmDistance.value(), project=self.project, mainWindow=self.mainWindow)
     mixtureAnalysisModule = self.moduleArea.addModule(mixtureAnalysis, position='bottom')
 
     spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
