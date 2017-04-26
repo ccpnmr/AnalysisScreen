@@ -762,7 +762,7 @@ class MixtureAnalysis(CcpnModule):
     dataFrame.to_excel(filePath, sheet_name='Mixtures', index=False)
 
   def _openOptimisationModule(self):
-    mixtureOptimisation = MixtureOptimisation(self.mainWindow, virtualSamples=self._getVirtualSamples(),
+    mixtureOptimisation = MixtureOptimisation(mainWindow=self.mainWindow, virtualSamples=self._getVirtualSamples(),
                           mixtureAnalysisModule=self, minimalDistance = self.minimalDistance, project=self.project)
 
     mixtureOptimisationModule = self.moduleArea.addModule(mixtureOptimisation, position='bottom')

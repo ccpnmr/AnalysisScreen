@@ -10,12 +10,12 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.Frame import Frame
 
 
-#TODO:LUCA: do not QtWidgets directly
-class SimulatedAnnealingWidgets(QtGui.QFrame):
+class SimulatedAnnealingWidgets(Frame):
   def __init__(self, initialTemp=1000, finalTemp=1, stepTemp=1000, constantTemp=30, coolingMethod='Linear', iterations=3):
-    QtGui.QFrame.__init__(self)
+    Frame.__init__(self)
 
     self.mainLayout = QtGui.QGridLayout()
     self.setLayout(self.mainLayout)
@@ -106,12 +106,12 @@ class MixtureOptimisation(CcpnModule):
 
   '''Creates a module to analyse the mixtures'''
 
-  def __init__(self, parent=None, virtualSamples=None, mixtureAnalysisModule=None, minimalDistance=0.01, project=None):
+  def __init__(self, virtualSamples=None, mixtureAnalysisModule=None, minimalDistance=0.01, project=None, mainWindow=None):
     super(MixtureOptimisation, self)
-    CcpnModule.__init__(self, name='Mixture Optimisation')
+    CcpnModule.__init__(self,mainWindow=mainWindow, name='Mixture Optimisation')
 
     self.project = project
-    self.mainWindow = parent
+    self.mainWindow = mainWindow
     self.application = self.mainWindow.application
     self.mixtureAnalysisModule = mixtureAnalysisModule
     self.minimalDistance = minimalDistance
@@ -119,7 +119,7 @@ class MixtureOptimisation(CcpnModule):
     self.virtualSamples = virtualSamples
 
     ######## ======== Set Main Layout ====== ########
-    self.mainFrame = QtGui.QFrame()
+    self.mainFrame = Frame()
     self.mainLayout = QtGui.QVBoxLayout()
     self.mainFrame.setLayout(self.mainLayout)
     self.layout.addWidget(self.mainFrame, 0, 0)
@@ -153,7 +153,7 @@ class MixtureOptimisation(CcpnModule):
 
 
   def _setTabOtherOptions(self):
-    self.tab2Frame = QtGui.QFrame()
+    self.tab2Frame = Frame()
     self.tab2Layout = QtGui.QGridLayout()
     self.tab2Frame.setLayout(self.tab2Layout)
     self.tabWidget.addTab(self.tab2Frame, 'Others')
