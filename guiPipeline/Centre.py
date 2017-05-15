@@ -17,11 +17,11 @@ WidgetSetters = OrderedDict([
                            ])
 
 class Centre(PipelineBox):
-  def __init__(self, parent=None, name=None, params=None, project=None, **kw):
+  def __init__(self,application, parent=None, name=None, params=None,  **kw):
     super(Centre, self)
     PipelineBox.__init__(self, name=name,)
-    self.project = project
-    self.current = self.project._appBase.current
+    self.application = application
+    self.project = self.application.project
     self.spectra = [spectrum.pid for spectrum in self.project.spectra]
 
     if parent is not None:

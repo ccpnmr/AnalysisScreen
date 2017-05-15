@@ -18,11 +18,10 @@ WidgetSetters = OrderedDict([
                            ])
 
 class AlignSpectra(PipelineBox):
-  def __init__(self, parent=None, name=None, params=None, project=None, **kw):
+  def __init__(self, parent=None, name=None, params=None, **kw):
     super(AlignSpectra, self)
     PipelineBox.__init__(self, name=name,)
     self.project = project
-    self.current = self.project._appBase.current
     self.spectra = [spectrum.pid for spectrum in self.project.spectra]
     if parent is not None:
       self.pipelineModule = parent

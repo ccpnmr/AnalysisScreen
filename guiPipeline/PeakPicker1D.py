@@ -3,7 +3,7 @@ from collections import OrderedDict
 from PyQt4 import QtGui , QtCore
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.PipelineWidgets import PipelineBox
-from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
@@ -23,11 +23,11 @@ WidgetSetters = OrderedDict([
                            ])
 
 class PeakPicker1D(PipelineBox):
-  def __init__(self, parent=None, name=None, params=None, project=None, **kw):
+  def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(PeakPicker1D, self)
     PipelineBox.__init__(self, name=name, )
-    self.project = project
-    self.application = self.project._appBase
+    self.application = application
+    self.project = self.application.project
     self._setMainLayout()
     self._createWidgets()
     self.params = params

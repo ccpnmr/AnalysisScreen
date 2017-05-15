@@ -18,13 +18,14 @@ WidgetSetters = OrderedDict([
                            ])
 
 class SegmentalAlign(PipelineBox):
-  def __init__(self, parent=None, name=None, pipelineArea=None, params=None, project=None, **kw):
+  def __init__(self,application, parent=None, name=None, pipelineArea=None, params=None, **kw):
     super(SegmentalAlign, self)
     PipelineBox.__init__(self, name=name, pipelineArea=pipelineArea)
     if parent is not None:
       self.pipelineModule = parent
-    self.project = project
-    self.current = self.project._appBase.current
+    self.application = application
+    self.current = self.application.current
+    self.project = self.application.project
     self.spectra = [spectrum.pid for spectrum in self.project.spectra]
 
     self._setMainLayout()

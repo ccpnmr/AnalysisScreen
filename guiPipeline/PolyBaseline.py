@@ -27,11 +27,11 @@ WidgetSetters = OrderedDict([
                            ])
 
 class PolyBaseline(PipelineBox):
-  def __init__(self, parent=None, name=None, params=None, project=None, **kw):
+  def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(PolyBaseline, self)
     PipelineBox.__init__(self, name=name,)
-    self.project = project
-    self.current = self.project._appBase.current
+    self.application = application
+    self.project = self.application.project
 
     if parent is not None:
       self.pipelineModule = parent
@@ -58,7 +58,7 @@ class PolyBaseline(PipelineBox):
 
   def _createWidgets(self):
 
-    self.polyBaselineWidget = PolyBaselineWidget(project=self.project)
+    self.polyBaselineWidget = PolyBaselineWidget(application=self.application)
     self.mainLayout.addWidget(self.polyBaselineWidget,0,0)
 
 
@@ -88,14 +88,15 @@ class PolyBaseline(PipelineBox):
 from ccpn.ui.gui.widgets.Base import Base
 class PolyBaselineWidget(QtGui.QWidget, Base):
 
-  def __init__(self, parent=None, project=None, **kw):
+  def __init__(self,application, parent=None, **kw):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
-    self.current = project._appBase.current
     self.orderLabel = Label(self, 'Order ', grid=(0, 0))
     self.orderBox = Spinbox(self, grid=(0, 1))
     self.orderBox.setMinimum(2)
     self.orderBox.setMaximum(5)
+    self.application = application
+    self.current = self.application.current
     if self.current.spectrumGroup is not None:
       self.controlPointMaximum = max([spectrum.spectrumLimits[0][1] for spectrum in self.current.spectrumGroup.spectra])
       self.controlPointMinimum = min([spectrum.spectrumLimits[0][0] for spectrum in self.current.spectrumGroup.spectra])

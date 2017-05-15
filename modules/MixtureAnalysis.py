@@ -51,12 +51,12 @@ class MixtureAnalysis(CcpnModule):
 
   '''Creates a module to analyse the mixtures'''
 
-  def __init__(self,project, mainWindow, minimalDistance=None):
+  def __init__(self, mainWindow, minimalDistance=None):
     super(MixtureAnalysis, self)
     CcpnModule.__init__(self, mainWindow=mainWindow, name='Mixture Analysis')
 
-    self.project = project
     self.mainWindow = mainWindow
+    self.project = self.mainWindow.project
     self.application = self.mainWindow.application
     self.moduleArea = self.mainWindow.moduleArea
     self.preferences = self.application.preferences
@@ -64,6 +64,7 @@ class MixtureAnalysis(CcpnModule):
 
 
     self.listOfSample = []
+    # FIXME ADD SETTER/GETTER FOR minimalDistance
     if minimalDistance is None:
       minimalDistance = DefaultMinimalDistance
     self.minimalDistance = minimalDistance
@@ -121,10 +122,7 @@ class MixtureAnalysis(CcpnModule):
     self.tabWidget.addTab(self.tabMixturesManagement, 'Mixtures Management')
     self._mixtureManagementWidgets()
 
-    ######## ========  registerNotify ====== ########
-    # self.current = project._appBase.current
-    # self.current.registerNotify(self._findSelectedPeaks, 'peaks')
-    # self._findSelectedPeaks(peaks=None)
+
 
 
 
@@ -198,8 +196,8 @@ class MixtureAnalysis(CcpnModule):
   #   selectedPeaks = []
   #   if self.project.strips:
   #     currentDisplayed = self.project.strips[0]
-  #     if self.project._appBase.current.peaks:
-  #       self.currentPeaks = self.project._appBase.current.peaks
+  #     if self.current.peaks:
+  #       self.currentPeaks = self.current.peaks
   #       if self.peakTable.objects:
   #         for peak in self.currentPeaks:
   #           if peak in self.peakTable.objects:

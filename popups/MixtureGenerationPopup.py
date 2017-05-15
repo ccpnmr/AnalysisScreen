@@ -39,15 +39,17 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Button import Button
 from collections import OrderedDict
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 
-class MixtureGenerationPopup(QtGui.QDialog):
 
-  def __init__(self, parent=None, project=None,  **kw):
-    super(MixtureGenerationPopup, self).__init__(parent)
+class MixtureGenerationPopup(CcpnDialog):
 
-    self.project = project
-    self.mainWindow = parent
+  def __init__(self, mainWindow, title='Mixture Generation Setup', **kw):
+    CcpnDialog.__init__(self, parent=mainWindow, setLayout=False, windowTitle=title, **kw)
+
+    self.mainWindow = mainWindow
+    self.project = self.mainWindow.project
     self.moduleArea = self.mainWindow.moduleArea
     self.application = self.mainWindow.application
     self.generalPreferences = self.application.preferences.general
@@ -72,7 +74,6 @@ class MixtureGenerationPopup(QtGui.QDialog):
   def _setMainLayout(self):
     self.mainLayout = QtGui.QGridLayout()
     self.setLayout(self.mainLayout)
-    self.setWindowTitle("Mixture Generation Setup")
     self.resize(600, 500)
 
   def _setTabs(self):

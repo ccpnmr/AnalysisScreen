@@ -6,6 +6,7 @@ from ccpn.AnalysisScreen.popups.MixtureGenerationPopup import MixtureGenerationP
 from ccpn.AnalysisScreen.modules.MixtureAnalysis import MixtureAnalysis
 from ccpn.AnalysisScreen.modules.ScreeningSettings import initialiseScreeningPipelineModule
 from ccpn.AnalysisScreen.modules.ShowScreeningHits import ShowScreeningHits
+from ccpn.ui.gui.widgets import MessageDialog
 
 applicationName = 'Screen'
 
@@ -33,15 +34,18 @@ class Screen(Framework):
     self.addApplicationMenuSpec(menuSpec)
 
   def showPickPeakPopup(self):
-    popup = PickPeak1DPopup(parent=self.ui.mainWindow, project=self.project)
-    popup.exec_()
-    popup.raise_()
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
-    self.project._logger.info("application.showSamplePopup()")
+    if not self.project.peakLists:
+      MessageDialog.showWarning('No PeakList Found','')
+      return
+    else:
+      popup = PickPeak1DPopup(mainWindow=self.ui.mainWindow)
+      popup.exec_()
+      popup.raise_()
+
 
   def showMixtureGenerationPopup(self):
     """Displays Sample creation popup."""
-    popup = MixtureGenerationPopup(self.ui.mainWindow,  project=self.project)
+    popup = MixtureGenerationPopup(mainWindow=self.ui.mainWindow)
     popup.exec_()
     popup.raise_()
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
@@ -49,20 +53,24 @@ class Screen(Framework):
 
   def showMixtureAnalysis(self, position='bottom', relativeTo=None):
     """ Displays the Mixtures Analysis Module """
-    showSa = MixtureAnalysis(project=self.project, mainWindow=self.ui.mainWindow)
+    showSa = MixtureAnalysis(mainWindow=self.ui.mainWindow)
     self.ui.mainWindow.moduleArea.addModule(showSa, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showMixtureAnalysis()")
     self.project._logger.info("application.showMixtureAnalysis()")
 
   def showScreeningPipeline(self, position='bottom', relativeTo=None):
-    initialiseScreeningPipelineModule(project=self.project, application=self,)
+    initialiseScreeningPipelineModule(mainWindow=self.ui.mainWindow)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showScreeningPipeline()")
     self.project._logger.info("application.showScreeningPipeline()")
 
   def showHitAnalysisModule(self, position='top', relativeTo= None):
-    self.showScreeningHits = ShowScreeningHits(self.ui.mainWindow,  project=self.project)
-    self.ui.mainWindow.moduleArea.addModule(self.showScreeningHits, position, None)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showHitAnalysisModule()")
-    self.project._logger.info("application.showHitAnalysisModule()")
+    if not self.project.spectrumHits:
+      MessageDialog.showWarning('No Spectrum Hits Found','')
+      return
+    else:
+      self.showScreeningHits = ShowScreeningHits(mainWindow=self.ui.mainWindow)
+      self.ui.mainWindow.moduleArea.addModule(self.showScreeningHits, position, None)
+      self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showHitAnalysisModule()")
+      self.project._logger.info("application.showHitAnalysisModule()")
 
     #########################################    End setup Menus      #############################################

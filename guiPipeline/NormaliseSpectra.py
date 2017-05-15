@@ -19,15 +19,15 @@ WidgetSetters = OrderedDict([
 
 
 class NormaliseSpectra(PipelineBox):
-  def __init__(self, parent=None, name=None, params=None, project=None, **kw):
+  def __init__(self, application, parent=None, name=None, params=None,  **kw):
 
     super(NormaliseSpectra, self)
     PipelineBox.__init__(self,name=name,)
-
+    self.application = application
+    self.project = self.application.project
     if parent is not None:
       self.pipelineModule = parent
 
-    self.project = project
     self.spectra = [spectrum.pid for spectrum in self.project.spectra]
 
     self._setMainLayout()

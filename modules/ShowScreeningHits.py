@@ -39,16 +39,16 @@ Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
 class ShowScreeningHits(CcpnModule):
-  def __init__(self, parent=None, project=None, **kw):
+  def __init__(self, mainWindow, **kw):
     super(ShowScreeningHits, self)
-    CcpnModule.__init__(self, name='Hit Analysis')
-    self.project = project
-    # self.setFixedHeight(300)
+    CcpnModule.__init__(self, mainWindow=mainWindow, name='Hit Analysis')
 
-    self.mainWindow = parent
+    # self.setFixedHeight(300)
+    self.mainWindow = mainWindow
+    self.project = self.mainWindow.project
+    self.application = self.mainWindow.application
     self.moduleArea = self.mainWindow.moduleArea
-    self.preferences = self.project._appBase.preferences
-    self.colourScheme = self.project._appBase.colourScheme
+    self.preferences = self.application.preferences
 
     ######## ======== Set modules on moduleArea ====== ########
 

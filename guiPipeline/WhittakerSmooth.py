@@ -22,7 +22,7 @@ WidgetSetters = OrderedDict([
                            ])
 
 class WhittakerSmooth(PipelineBox):
-  def __init__(self, parent=None, name=None, params=None, project=None, **kw):
+  def __init__(self, application, parent=None, name=None, params=None, **kw):
 
     super(WhittakerSmooth, self)
     PipelineBox.__init__(self,name=name,)
@@ -30,8 +30,9 @@ class WhittakerSmooth(PipelineBox):
       self.pipelineModule = parent
     self.linePoints = []
     self.points = []
-    self.project = project
-    self.current = self.project._appBase.current
+    self.application = application
+    self.project = self.application.project
+    self.current = self.application.current
     self.spectra = [spectrum.pid for spectrum in self.project.spectra]
 
     self._setMainLayout()

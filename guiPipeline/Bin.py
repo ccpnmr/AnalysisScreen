@@ -19,11 +19,11 @@ WidgetSetters = OrderedDict([
                            ])
 
 class Bin(PipelineBox):
-  def __init__(self, parent=None, name=None, params=None, project=None, **kw):
+  def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(Bin, self)
     PipelineBox.__init__(self, name=name,)
-    self.project = project
-    self.current = self.project._appBase.current
+    self.application = application
+    self.project = self.application.project
     self.spectra = [spectrum.pid for spectrum in self.project.spectra]
 
     self._setMainLayout()

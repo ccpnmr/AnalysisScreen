@@ -94,7 +94,7 @@ class ScreenExcelReader(object):
 
 
     self.directoryPath = self.getWorkingDirectoryPath()
-    self.preferences = self.project._appBase.preferences
+    self.preferences = self.application.preferences
     self.preferences.general.dataPath = str(self.directoryPath)
 
     self.brukerDirs = self.getBrukerTopDirs()

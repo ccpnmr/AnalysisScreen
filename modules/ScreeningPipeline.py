@@ -55,7 +55,7 @@ class StdSpectrumCreatorBox(PipelineBox,):
     PipelineBox.__init__(self,name=name, pipelineArea=pipelineArea)
 
     self.project = project
-    self.path = self.project._appBase.preferences.general.auxiliaryFilesPath + '/'
+    self.path = self.application.preferences.general.auxiliaryFilesPath + '/'
     self._setMainLayout()
     self._createWidgets()
 
@@ -114,7 +114,7 @@ class StdSpectrumCreator(QtGui.QWidget, Base):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
     self.project = project
-    self.path = self.project._appBase.preferences.general.auxiliaryFilesPath+'/'
+    self.path = self.application.preferences.general.auxiliaryFilesPath+'/'
 
 
     self.createButton = Button(self, text = 'create new spectrum', callback=self._createSpectrumDifference,
@@ -403,13 +403,14 @@ class MatchPeaks(QtGui.QWidget):
 
 
 class ExcludeBaselinePoints(QtGui.QWidget, Base):
-  def __init__(self, parent, project, spectra=None, **kw):
+  def __init__(self, parent, application, spectra=None, **kw):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
     self.pointLabel = Label(self, 'Exclusion Points ', grid=(0, 0))
     self.pointBox1 = Spinbox(self, grid=(0, 1), max=100000000000, min=-100000000000)
     self.pointBox2 = Spinbox(self, grid=(0, 2), max=100000000000, min=-100000000000)
-    self.current = project._appBase.current
+    self.application = application
+    self.current = self.application.current
     self.pickOnSpectrumButton = Button(self, grid=(0, 3), toggle=True, icon='icons/target3+',hPolicy='fixed')
     self.pickOnSpectrumButton.setChecked(False)
     self.multiplierLabel = Label(self, 'Baseline Multipler', grid=(0, 4))
