@@ -85,45 +85,45 @@ def _loadScreenLookupFile(project, path:str, subType:str):
 
 class ScreenExcelReader(object):
   def __init__(self, project, path):
-    self.project = project
-    self.path = path
-    self.pandasFile = pd.ExcelFile(path)
+    self._project = project
+    self._path = path
+    self._pandasFile = pd.ExcelFile(self._path)
 
-    self.createDataFrames()
-    self.createSpectrumGroups()
+    self._createDataFrames()
+    self._createSpectrumGroups()
 
 
-    self.directoryPath = self.getWorkingDirectoryPath()
+    self.directoryPath = self._getWorkingDirectoryPath()
     try:
-      self.preferences = self.project._mainWidow.application.preferences
+      self.preferences = self._project._mainWidow.application.preferences
       self.preferences.general.dataPath = str(self.directoryPath)
     except:
       project._logger.warning('Data Path not set in preferences')
 
-    self.brukerDirs = self.getBrukerTopDirs()
-    self.fullBrukerFilePaths = self.getFullBrukerFilePaths(self.brukerDirs)
+    self.brukerDirs = self._getBrukerTopDirs()
+    self.fullBrukerFilePaths = self._getFullBrukerFilePaths(self.brukerDirs)
 
-    self.createReferencesDataDicts()
-    self.initialiseParsingSamples()
+    self._createReferencesDataDicts()
+    self._initialiseParsingSamples()
 
 
-  def createDataFrames(self):
-    self.referencesDataFrame = self.pandasFile.parse('References')
+  def _createDataFrames(self):
+    self.referencesDataFrame = self._pandasFile.parse('References')
     self.referencesDataFrame.fillna('Empty', inplace=True)
-    self.samplesDataFrame = self.pandasFile.parse('Samples')
+    self.samplesDataFrame = self._pandasFile.parse('Samples')
     self.samplesDataFrame.fillna('Empty', inplace=True)
 
-  def getWorkingDirectoryPath(self):
-    xlsLookupPath = pathlib.Path(self.path)
+  def _getWorkingDirectoryPath(self):
+    xlsLookupPath = pathlib.Path(self._path)
     return str(xlsLookupPath.parent)
 
-  def getBrukerTopDirs(self):
+  def _getBrukerTopDirs(self):
     dirs = os.listdir(str(self.directoryPath))
     excludedFiles = ('.DS_Store', '.xls')
     brukerDirs = [dir for dir in dirs if not dir.endswith(excludedFiles)]
     return brukerDirs
 
-  def getFullBrukerFilePaths(self, brukerDirs):
+  def _getFullBrukerFilePaths(self, brukerDirs):
     fullPaths = []
     for spectrumName in brukerDirs:
       path = self.directoryPath + '/' + spectrumName
@@ -134,7 +134,7 @@ class ScreenExcelReader(object):
             fullPaths.append(fullPath)
     return fullPaths
 
-  def createReferencesDataDicts(self):
+  def _createReferencesDataDicts(self):
     self.referencesDataDicts = []
     for spectrumName, spectrumPath in zip(self.brukerDirs, self.fullBrukerFilePaths):
       for name in self.referencesDataFrame[SPECTRUM_NAME]:
@@ -143,34 +143,34 @@ class ScreenExcelReader(object):
             for key, value in data.items():
               if key == SPECTRUM_NAME:
                 if str(value) == str(spectrumName):
-                  spectrum = self.project.loadData(spectrumPath)
-                  self.setRefSpectrumProperties(spectrum[0])
+                  spectrum = self._project.loadData(spectrumPath)
+                  self._setRefSpectrumProperties(spectrum[0])
 
                   dataDict = {spectrum[0]: data}
-                  self.createNewSubstance(dataDict)
+                  self._createNewSubstance(dataDict)
 
-  def initialiseParsingSamples(self):
-    self.createSamplesDataDicts()
+  def _initialiseParsingSamples(self):
+    self._createSamplesDataDicts()
     for samplesDataDict in self.samplesDataDicts:
-      self.getSampleSpectra(samplesDataDict)
+      self._getSampleSpectra(samplesDataDict)
 
-  def setRefSpectrumProperties(self, spectrum):
+  def _setRefSpectrumProperties(self, spectrum):
     spectrum.experimentType = 'H'
-    referenceSpectrumGroup = self.project.getByPid('SG:References')
+    referenceSpectrumGroup = self._project.getByPid('SG:References')
     referenceSpectrumGroup.spectra += (spectrum, )
 
-  def createSamplesDataDicts(self):
+  def _createSamplesDataDicts(self):
     self.samplesDataDicts = []
     for data in self.samplesDataFrame.to_dict(orient="index").values():
       for key, value in data.items():
         if key == SAMPLE_NAME:
-          sample = self.project.newSample(str(value))
+          sample = self._project.newSample(str(value))
           dataDict = {sample: data}
           self._setWrapperProperties(sample, SAMPLE_PROPERTIES, data)
-          self.addSampleComponents(sample, data)
+          self._addSampleComponents(sample, data)
           self.samplesDataDicts.append(dataDict)
 
-  def addSampleComponents(self, sample, data):
+  def _addSampleComponents(self, sample, data):
     sampleComponents = [[header, sampleComponentName] for header, sampleComponentName in data.items() if
                         header == SAMPLE_COMPONENTS]
     for name in sampleComponents[0][1].split(','):
@@ -178,10 +178,10 @@ class ScreenExcelReader(object):
       sampleComponent.role = 'Compound'
 
 
-  def getSampleSpectra(self, samplesDataDict):
+  def _getSampleSpectra(self, samplesDataDict):
     for sample, data in samplesDataDict.items():
       for spectrumNameHeader, experimentType in EXP_TYPES.items():
-        spectrum = self.getSpectrum(data, spectrumNameHeader)
+        spectrum = self._getSpectrum(data, spectrumNameHeader)
         if spectrum:
           if spectrumNameHeader == SPECTRUM_OFF_RESONANCE:
             spectrum.comment = SPECTRUM_OFF_RESONANCE
@@ -189,11 +189,11 @@ class ScreenExcelReader(object):
             spectrum.comment = SPECTRUM_ON_RESONANCE
           spectrum.experimentType = experimentType
           sample.spectra += (spectrum, )
-      self.setSpectrumGroups(sample, data)
+      self._setSpectrumGroups(sample, data)
 
-  def setSpectrumGroups(self, sample, data):
+  def _setSpectrumGroups(self, sample, data):
 
-    withTarget = self.getDFValue('with_Target', data)
+    withTarget = self._getDFValue('with_Target', data)
     for spectrum in sample.spectra:
       if spectrum.experimentType == 'H':
         if withTarget == 'Yes':
@@ -216,33 +216,33 @@ class ScreenExcelReader(object):
         else:
           self.wLNoTargetSG.spectra += (spectrum,)
 
-  def getSpectrum(self, data, header):
+  def _getSpectrum(self, data, header):
       spectrumName = [[excelHeader, value] for excelHeader, value in data.items()
                                   if excelHeader == header and value != 'Empty']
       if len(spectrumName)>0:
         brukerDir = [str(spectrumName[0][1])]
-        path = self.getFullBrukerFilePaths(brukerDir)
-        spectrum = self.project.loadData(path[0])
+        path = self._getFullBrukerFilePaths(brukerDir)
+        spectrum = self._project.loadData(path[0])
         return spectrum[0]
 
-  def createSpectrumGroups(self):
+  def _createSpectrumGroups(self):
     for key, value in SPECTRUM_GROUPS.items():
-      setattr(self, key, self.project.newSpectrumGroup(str(value)))
+      setattr(self, key, self._project.newSpectrumGroup(str(value)))
 
-  def createNewSubstance(self, dataDict):
+  def _createNewSubstance(self, dataDict):
     for spectrum, data in dataDict.items():
-      substance = self.project.newSubstance(name=spectrum.id)
+      substance = self._project.newSubstance(name=spectrum.id)
       substance.referenceSpectra = [spectrum]
       self._setWrapperProperties(substance, SUBSTANCE_PROPERTIES, data)
 
   def _setWrapperProperties(self, wrapperObject, properties, dataframe):
     for property in properties:
       if property == 'synonyms':
-        setattr(wrapperObject, property, (self.getDFValue(property, dataframe),))
+        setattr(wrapperObject, property, (self._getDFValue(property, dataframe),))
       else:
-        setattr(wrapperObject, property, self.getDFValue(property, dataframe))
+        setattr(wrapperObject, property, self._getDFValue(property, dataframe))
 
-  def getDFValue(self, header, data):
+  def _getDFValue(self, header, data):
     value = [[excelHeader, value] for excelHeader, value in data.items()
                      if excelHeader == str(header) and value != 'Empty']
     if len(value) > 0:
