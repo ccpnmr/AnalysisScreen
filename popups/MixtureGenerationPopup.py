@@ -372,7 +372,7 @@ class MixtureGenerationPopup(CcpnDialog):
 
   def _openMixtureAnalysisModule(self):
     '''   '''
-    mixtureAnalysis = MixtureAnalysis(minimalDistance=self.ppmDistance.value(), project=self.project, mainWindow=self.mainWindow)
+    mixtureAnalysis = MixtureAnalysis(minimalDistance=self.ppmDistance.value(), mainWindow=self.mainWindow)
     mixtureAnalysisModule = self.moduleArea.addModule(mixtureAnalysis, position='bottom')
 
     spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
