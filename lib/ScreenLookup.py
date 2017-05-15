@@ -94,8 +94,11 @@ class ScreenExcelReader(object):
 
 
     self.directoryPath = self.getWorkingDirectoryPath()
-    self.preferences = self.application.preferences
-    self.preferences.general.dataPath = str(self.directoryPath)
+    try:
+      self.preferences = self.project._mainWidow.application.preferences
+      self.preferences.general.dataPath = str(self.directoryPath)
+    except:
+      project._logger.warning('Data Path not set in preferences')
 
     self.brukerDirs = self.getBrukerTopDirs()
     self.fullBrukerFilePaths = self.getFullBrukerFilePaths(self.brukerDirs)
