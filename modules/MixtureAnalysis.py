@@ -48,8 +48,11 @@ yellow = QtGui.QColor('yellow')
 DefaultMinimalDistance = 0.01
 
 class MixtureAnalysis(CcpnModule):
-
   '''Creates a module to analyse the mixtures'''
+
+  includeSettingsWidget = False
+  className = 'MixtureAnalysis'
+
 
   def __init__(self, mainWindow, minimalDistance=None):
     super(MixtureAnalysis, self)

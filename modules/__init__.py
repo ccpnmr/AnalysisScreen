@@ -21,7 +21,7 @@ __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: CCPN $"
+__author__ = "$Author: Luca $"
 
 __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
@@ -30,3 +30,18 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 
 
 
+def _importScreenModules(modulesDict):
+  '''
+  moduleDict = Dict with module name class: guiModule name
+  return a list with imported CCPN gui Modules
+  '''
+  screenModules = []
+  import pkgutil as _pkgutil
+  import inspect as _inspect
+  for className, ccpnModuleName in modulesDict.items():
+    for loader, name, isPpkg in _pkgutil.walk_packages(__path__):
+      module = loader.find_module(name).load_module(name)
+      for name, obj in _inspect.getmembers(module):
+        if className == name:
+          screenModules.append(obj)
+  return screenModules

@@ -3,6 +3,7 @@ from ccpn.core.Project import Project
 from ccpn.AnalysisScreen.lib.ScreenLookup import _loadScreenLookupFile
 from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
 from ccpn.AnalysisScreen.popups.MixtureGenerationPopup import MixtureGenerationPopup
+from ccpn.AnalysisScreen.modules import _importScreenModules
 from ccpn.AnalysisScreen.modules.MixtureAnalysis import MixtureAnalysis
 from ccpn.AnalysisScreen.modules.ScreeningSettings import initialiseScreeningPipelineModule
 from ccpn.AnalysisScreen.modules.ShowScreeningHits import ShowScreeningHits
@@ -32,6 +33,10 @@ class Screen(Framework):
                 )
 
     self.addApplicationMenuSpec(menuSpec)
+
+    # screenModules = _importScreenModules({'MixtureAnalysis': 'Mixture Analysis'})
+    # showSa = screenModules[0](mainWindow=self.mainWindow)
+    # self.ui.mainWindow.moduleArea.addModule(showSa)
 
   def showPickPeakPopup(self):
     if not self.project.peakLists:
