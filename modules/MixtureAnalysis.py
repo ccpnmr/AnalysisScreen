@@ -54,9 +54,9 @@ class MixtureAnalysis(CcpnModule):
   className = 'MixtureAnalysis'
 
 
-  def __init__(self, mainWindow, minimalDistance=None):
+  def __init__(self, mainWindow, name='Mixture Analysis', minimalDistance=None):
     super(MixtureAnalysis, self)
-    CcpnModule.__init__(self, mainWindow=mainWindow, name='Mixture Analysis')
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     self.mainWindow = mainWindow
     self.project = self.mainWindow.project

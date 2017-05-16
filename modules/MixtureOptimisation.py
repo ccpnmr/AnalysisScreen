@@ -106,12 +106,12 @@ class MixtureOptimisation(CcpnModule):
 
   '''Creates a module to analyse the mixtures'''
 
-  def __init__(self, virtualSamples=None, mixtureAnalysisModule=None, minimalDistance=0.01, project=None, mainWindow=None):
+  def __init__(self, mainWindow, name='Mixture Optimisation', virtualSamples=None, mixtureAnalysisModule=None, minimalDistance=0.01,):
     super(MixtureOptimisation, self)
-    CcpnModule.__init__(self,mainWindow=mainWindow, name='Mixture Optimisation')
+    CcpnModule.__init__(self, mainWindow=mainWindow,  name=name)
 
-    self.project = project
     self.mainWindow = mainWindow
+    self.project = mainWindow.project
     self.application = self.mainWindow.application
     self.mixtureAnalysisModule = mixtureAnalysisModule
     self.minimalDistance = minimalDistance

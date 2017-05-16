@@ -39,9 +39,15 @@ Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
 class ShowScreeningHits(CcpnModule):
-  def __init__(self, mainWindow, **kw):
+
+  includeSettingsWidget = False
+  maxSettingsState = 2
+  settingsOnTop = True
+  className = 'ShowScreeningHits'
+
+  def __init__(self, mainWindow, name='Hit Analysis', **kw):
     super(ShowScreeningHits, self)
-    CcpnModule.__init__(self, mainWindow=mainWindow, name='Hit Analysis')
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     # self.setFixedHeight(300)
     self.mainWindow = mainWindow
