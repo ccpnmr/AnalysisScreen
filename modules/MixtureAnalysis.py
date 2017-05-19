@@ -37,6 +37,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CompoundView import CompoundView
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.Menu import Menu
@@ -46,24 +47,24 @@ from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 green = QtGui.QColor('Green')
 red = QtGui.QColor('Red')
 yellow = QtGui.QColor('yellow')
-DefaultMinimalDistance = 0.01
+DefaultMinimalDistance = 0.01 #ppm
 
 class MixtureAnalysis(CcpnModule):
   '''Creates a module to analyse the mixtures'''
 
   includeSettingsWidget = False
+  maxSettingsState = 2
   className = 'MixtureAnalysis'
 
 
   def __init__(self, mainWindow, name='Mixture Analysis', minimalDistance=None):
     super(MixtureAnalysis, self)
 
-    if mainWindow is None: #This allows opening the popup for graphical tests
-      self.project = None
-      CcpnModule.__init__(self, mainWindow=None, area=None, name=name)
+    #This allows opening the popup for graphical tests
+    self.project = None
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
-    else:
-      CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+    if mainWindow is not None:
       self.mainWindow = mainWindow
       self.project = self.mainWindow.project
       self.application = self.mainWindow.application
@@ -73,20 +74,20 @@ class MixtureAnalysis(CcpnModule):
 
 
     self.listOfSample = []
-    # FIXME ADD SETTER/GETTER FOR minimalDistance
+
     if minimalDistance is None:
       minimalDistance = DefaultMinimalDistance
     self.minimalDistance = minimalDistance
 
     ######## ======== Icons ====== ########
-    self.settingIcon = Icon('icons/applications-system')
+    self.settingIcon = Icon('icons/configure')
     self.exportIcon = Icon('icons/export')
 
     ######## ======== Set Main Layout ====== ########
-    self.mainFrame = QtGui.QFrame()
+    self.mainFrame = Frame(self.mainWidget, setLayout=False)
     self.mainLayout = QtGui.QVBoxLayout()
     self.mainFrame.setLayout(self.mainLayout)
-    self.layout.addWidget(self.mainFrame, 0,0)
+    self.mainWidget.getLayout().addWidget(self.mainFrame, 0,0)
 
     ######## ======== Set Secondary Layout ====== ########
     self.settingFrameLayout = QtGui.QHBoxLayout()
@@ -103,7 +104,7 @@ class MixtureAnalysis(CcpnModule):
     self.analysisFrameLayout.addWidget(self.tabWidget)
 
     ######## ======== Create 1thTab with peak Table and Molecule view  ====== ########
-    self.tabPeaksMolecule = QtGui.QFrame()
+    self.tabPeaksMolecule = Frame(None, setLayout=False)
     self.tabPeaksMoleculeLayout = QtGui.QGridLayout()
     self.tabPeaksMolecule.setLayout(self.tabPeaksMoleculeLayout)
     self.tabWidget.addTab(self.tabPeaksMolecule, 'Components peaks')
@@ -111,29 +112,29 @@ class MixtureAnalysis(CcpnModule):
     self.tabPeaksMoleculeLayout.addWidget(self.toolBarComponents, 0,0,1,0)
 
     ######## ========  Create 2ndTab with multiple Molecule view ====== ########
-    self.tabMoleculeView = QtGui.QFrame()
+    self.tabMoleculeView = Frame(None, setLayout=False)
     self.tabMoleculeViewLayout = QtGui.QHBoxLayout()
     self.tabMoleculeView.setLayout(self.tabMoleculeViewLayout)
     self.tabWidget.addTab(self.tabMoleculeView, 'Components structure')
     self._tableComponentPeaks()
 
     ######## ========  Create 3thTab with Components Info ====== ########
-    self.tabMoleculeInfo = QtGui.QFrame()
+    self.tabMoleculeInfo = Frame(None, setLayout=False)
     self.tabMoleculeInfoLayout = QtGui.QVBoxLayout()
     self.tabMoleculeInfo.setLayout(self.tabMoleculeInfoLayout)
     self.tabWidget.addTab(self.tabMoleculeInfo, 'Components Info')
     self._widgetsTabComponentsInfo()
 
     ######## ========  Create 4thTab Mixtures Management ====== ########
-    self.tabMixturesManagement = QtGui.QFrame()
+    self.tabMixturesManagement = Frame(None, setLayout=False)
     self.tabMixturesManagementLayout = QtGui.QGridLayout()
     self.tabMixturesManagement.setLayout(self.tabMixturesManagementLayout)
     self.tabWidget.addTab(self.tabMixturesManagement, 'Mixtures Management')
     self._mixtureManagementWidgets()
 
 
-
-
+  def setMinimalDistanceForNewMixtures(self, value):
+    self.minimalDistance = value
 
   def _getVirtualSamples(self):
     ''' Returns spectra mixtures (virtual samples) across all project sample '''
@@ -250,14 +251,6 @@ class MixtureAnalysis(CcpnModule):
       if hasattr(item, 'callback'):
         if item != componentButton:
           buttons.append(item)
-
-    # for item in buttons:
-    #   if self.colourScheme == 'dark':
-    #     item.setStyleSheet("background-color: #2a3358")
-    #     pressedButton.setStyleSheet("background-color: #020F31")
-    #   else:
-    #     item.setStyleSheet("background-color: #fbf4cc; border: 1px solid  #bd8413; color: #122043")
-    #     pressedButton.setStyleSheet("background-color: #bd8413")
 
     for peakList in spectrum.peakLists:
       self.peakListObjects.append(peakList.peaks)
@@ -771,7 +764,7 @@ class MixtureAnalysis(CcpnModule):
 
   def _openOptimisationModule(self):
     mixtureOptimisation = MixtureOptimisation(mainWindow=self.mainWindow, virtualSamples=self._getVirtualSamples(),
-                          mixtureAnalysisModule=self, minimalDistance = self.minimalDistance, project=self.project)
+                          mixtureAnalysisModule=self, minimalDistance = self.minimalDistance,)
 
     mixtureOptimisationModule = self.moduleArea.addModule(mixtureOptimisation, position='bottom')
 

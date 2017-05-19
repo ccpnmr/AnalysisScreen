@@ -141,7 +141,8 @@ class MixtureOptimisation(CcpnModule):
                                    callbacks=[self._recalculateMixtures, self._applyNewMixtures],
                                    icons=[None, None],
                                    tipTexts=[ None, None],
-                                   direction='H')
+                                   direction='H',
+                                   hAlign= 'c')
     self.buttonsFrameLayout.addWidget(self.panelButtons)
     # self._disableButtons()
 
