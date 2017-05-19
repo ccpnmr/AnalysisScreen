@@ -32,6 +32,7 @@ from ccpn.AnalysisScreen.lib.SimulatedAnnealing import calculateOverlapCount,sco
 from ccpn.AnalysisScreen.modules.MixtureOptimisation import MixtureOptimisation
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Button import Button
+
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CompoundView import CompoundView
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -56,14 +57,19 @@ class MixtureAnalysis(CcpnModule):
 
   def __init__(self, mainWindow, name='Mixture Analysis', minimalDistance=None):
     super(MixtureAnalysis, self)
-    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
-    self.mainWindow = mainWindow
-    self.project = self.mainWindow.project
-    self.application = self.mainWindow.application
-    self.moduleArea = self.mainWindow.moduleArea
-    self.preferences = self.application.preferences
-    self.current = self.application.current
+    if mainWindow is None: #This allows opening the popup for graphical tests
+      self.project = None
+      CcpnModule.__init__(self, mainWindow=None, area=None, name=name)
+
+    else:
+      CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+      self.mainWindow = mainWindow
+      self.project = self.mainWindow.project
+      self.application = self.mainWindow.application
+      self.moduleArea = self.mainWindow.moduleArea
+      self.preferences = self.application.preferences
+      self.current = self.application.current
 
 
     self.listOfSample = []
@@ -132,17 +138,18 @@ class MixtureAnalysis(CcpnModule):
   def _getVirtualSamples(self):
     ''' Returns spectra mixtures (virtual samples) across all project sample '''
     self.virtualSamples= []
-    if len(self.project.samples)>0:
-      for sample in self.project.samples:
-        if sample.isVirtual:
-          self.virtualSamples.append(sample)
-          if not hasattr(sample, 'overlaps'):
-            sample.overlaps = None
-          elif not hasattr(sample, 'score'):
-            sample.score = None
-        for sampleComponent in sample.sampleComponents:
-          if not hasattr(sampleComponent, 'score'):
-            sampleComponent.score = None
+    if self.project is not None:
+      if len(self.project.samples)>0:
+        for sample in self.project.samples:
+          if sample.isVirtual:
+            self.virtualSamples.append(sample)
+            if not hasattr(sample, 'overlaps'):
+              sample.overlaps = None
+            elif not hasattr(sample, 'score'):
+              sample.score = None
+          for sampleComponent in sample.sampleComponents:
+            if not hasattr(sampleComponent, 'score'):
+              sampleComponent.score = None
     return self.virtualSamples
 
 
@@ -775,3 +782,25 @@ class MixtureAnalysis(CcpnModule):
     df = DataFrame({'Mixture': [c.id for c in self.project.sampleComponents if c.sample.isVirtual]})
 
     return df
+
+
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+
+  app = TestApplication()
+
+  win = QtGui.QMainWindow()
+
+  moduleArea = CcpnModuleArea(mainWindow=None, )
+  module = MixtureAnalysis(mainWindow=None)
+  moduleArea.addModule(module)
+
+  win.setCentralWidget(moduleArea)
+  win.resize(1000, 500)
+  win.setWindowTitle('Testing %s' % module.moduleName)
+  win.show()
+
+  app.start()
+
