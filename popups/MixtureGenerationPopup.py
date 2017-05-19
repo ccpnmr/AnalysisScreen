@@ -32,6 +32,7 @@ from ccpn.AnalysisScreen.lib.MixturesGeneration import _initialiseMixtures
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Slider import SliderSpinBox
@@ -48,14 +49,17 @@ class MixtureGenerationPopup(CcpnDialog):
   def __init__(self, mainWindow, title='Mixture Generation Setup', **kw):
     CcpnDialog.__init__(self, parent=mainWindow, setLayout=False, windowTitle=title, **kw)
 
-    self.mainWindow = mainWindow
-    self.project = self.mainWindow.project
-    self.moduleArea = self.mainWindow.moduleArea
-    self.application = self.mainWindow.application
-    self.generalPreferences = self.application.preferences.general
-    self.colourScheme = self.generalPreferences.colourScheme
+    if mainWindow is None: #This allows opening the popup for graphical tests
+      self.project = None
+    else:
+      self.project = self.mainWindow.project
+      self.moduleArea = self.mainWindow.moduleArea
+      self.application = self.mainWindow.application
+      self.generalPreferences = self.application.preferences.general
+      self.colourScheme = self.generalPreferences.colourScheme
+
     self.settingIcon = Icon('icons/applications-system')
-    self.excludedRegionsWidgets = ExcludeRegions()
+    self.excludedRegionsWidgets = ExcludeRegions(self)
     self.simulatedAnnealingParams = [OrderedDict([('initialTemp', 100), ('finalTemp', 1), ('max steps', 10),
                                     ('temp constant', 50), ('cooling method', 'Linear'), ('iteration', 1)])]
 
@@ -78,11 +82,11 @@ class MixtureGenerationPopup(CcpnDialog):
 
   def _setTabs(self):
     self.tabWidget = QtGui.QTabWidget()
-    self.tabGeneralSetup = QtGui.QFrame()
+    self.tabGeneralSetup = Frame(self, setLayout=False)
     self.tabGeneralSetupLayout = QtGui.QGridLayout()
     self.tabGeneralSetup.setLayout(self.tabGeneralSetupLayout)
 
-    self.tabPickPeaksSetup = QtGui.QFrame()
+    self.tabPickPeaksSetup = Frame(self, setLayout=False)
     self.tabPickPeaksSetupLayout = QtGui.QGridLayout()
     self.tabPickPeaksSetup.setLayout(self.tabPickPeaksSetupLayout)
 
@@ -95,7 +99,7 @@ class MixtureGenerationPopup(CcpnDialog):
                                        texts=['Cancel', 'Perform'],
                                        callbacks=[self.reject, self._genereteMixture],
                                        tipTexts=[None, None],
-                                       direction='h', hAlign='r')
+                                       direction='h', hAlign='c')
 
   def _addWidgetsToMainLayout(self):
     self.mainLayout.addWidget(self.tabWidget, 0, 0, 1, 2)
@@ -107,40 +111,43 @@ class MixtureGenerationPopup(CcpnDialog):
     mode = ['Select number of Mixtures','Select number of components']
 
     #
-    self.calculationMethodLabel = Label(self, 'Calculation method')
-    self.calculationMethod = RadioButtons(self, texts= methods,
+    self.calculationMethodLabel = Label(None, 'Calculation method')
+    self.calculationMethod = RadioButtons(None, texts= methods,
                                                selectedInd=0,
                                                callback=self._showSAoptionWidgets,
                                                direction='h',
+                                          hAlign='c',
                                                tipTexts=None)
-    #
-    self.saSettingsLabel = Label(self, 'SA settings')
-    self.saSettingsButton = Button(self, text='', callback=self._showSAsettings, icon=self.settingIcon)
+    # #
+    self.saSettingsLabel = Label(None, 'SA settings')
+    self.saSettingsButton = Button(None, text='', callback=self._showSAsettings, icon=self.settingIcon)
 
     self.saSettingsButton.setFixedSize(30,30)
 
     #
     self.modeLabel = Label(self, text='Select mode')
-    self.modeRadioButtons = RadioButtons(self, texts=mode,
+    self.modeRadioButtons = RadioButtons(None, texts=mode,
                                                selectedInd=1,
                                                callback=self._modeSelection,
                                                direction='v',
+                                               hAlign='c',
                                                tipTexts=None)
     #
     self.numberLabel = Label(self, text='Select number')
-    self.numberSlider = SliderSpinBox(self, value=2, startVal=2, endVal=100, step=1, bigStep=5)
+    self.numberSlider = SliderSpinBox(None, value=2, startVal=2, endVal=100, step=1, bigStep=5,
+                                      hAlign='c')
 
     #
-    self.distanceLabel = Label(self, text="Minimal distance between peaks")
-    self.ppmDistance = DoubleSpinbox(self)
+    self.distanceLabel = Label(None, text="Minimal distance between peaks")
+    self.ppmDistance = DoubleSpinbox(None)
     self.ppmDistance.setRange(0.00, 0.20)
     self.ppmDistance.setValue(0.01)
     self.ppmDistance.setSingleStep(0.01)
     self.ppmDistance.setSuffix(" ppm")
-
     #
-    self.selectSpectraLabel = Label(self, text="Select SpectrumGroup")
-    self.selectSpectraPullDown = PulldownList(self)
+    # #
+    self.selectSpectraLabel = Label(None, text="Select SpectrumGroup")
+    self.selectSpectraPullDown = PulldownList(None)
 
     #
     # self.replaceLabel = Label(self, text="Replace current mixtures")
@@ -286,15 +293,16 @@ class MixtureGenerationPopup(CcpnDialog):
   def _populatePullDownSelection(self):
     '''   '''
     self.dataPullDown = ['Select An Option']
-    if len(self.project.spectrumGroups)>0:
-      self.dataPullDown.append('All Spectra')
-      for spectrumGroup in self.project.spectrumGroups:
-         self.dataPullDown.append(spectrumGroup.pid)
-    self.selectSpectraPullDown.setData(self.dataPullDown)
-    if 'SG:H' in self.dataPullDown:
-      self.selectSpectraPullDown.select('SG:H')
+    if self.project is not None:
+      if len(self.project.spectrumGroups)>0:
+        self.dataPullDown.append('All Spectra')
+        for spectrumGroup in self.project.spectrumGroups:
+           self.dataPullDown.append(spectrumGroup.pid)
+      self.selectSpectraPullDown.setData(self.dataPullDown)
+      if 'SG:H' in self.dataPullDown:
+        self.selectSpectraPullDown.select('SG:H')
 
-    self.selectSpectraPullDown.activated[str].connect(self._setPerformButtonStatus)
+      self.selectSpectraPullDown.activated[str].connect(self._setPerformButtonStatus)
 
   def _getPullDownSelectionSpectra(self):
     '''   '''
@@ -427,12 +435,12 @@ class SAsettingPopup(QtGui.QDialog):
 
 
 
-    # DARK
-    # QDialog
-    # QPushButton:!enabled
-    # {
-    #   color:  # 122043;
-    #     background - color:  # 7F7F7F;
-    # padding: 2
-    # px;
-    # }
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+
+  app = TestApplication()
+  popup = MixtureGenerationPopup(mainWindow=None)
+  popup.show()
+  popup.raise_()
+  app.start()
