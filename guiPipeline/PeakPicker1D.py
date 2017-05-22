@@ -27,7 +27,11 @@ class PeakPicker1D(PipelineBox):
     super(PeakPicker1D, self)
     PipelineBox.__init__(self, name=name, )
     self.application = application
-    self.project = self.application.project
+    self.project = None
+
+    if self.application is not None:
+      self.project = self.application.project
+
     self._setMainLayout()
     self._createWidgets()
     self.params = params
@@ -130,19 +134,21 @@ class PeakPicker1D(PipelineBox):
     self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text='Select All',grid=(0, 0))
     self.spectrumCheckBox.stateChanged.connect(self._checkAllSpectra)
     self.allCheckBoxes = []
-    for i, spectrum in enumerate(self.project.spectra):
-      self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(spectrum.id), grid=(i+1, 0))
-      self.allCheckBoxes.append(self.spectrumCheckBox)
+    if self.project is not None:
+      for i, spectrum in enumerate(self.project.spectra):
+        self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(spectrum.id), grid=(i+1, 0))
+        self.allCheckBoxes.append(self.spectrumCheckBox)
 
   def _addSpectrumGroupsCheckBoxes(self):
     self.spGroupsCheckBox = CheckBox(self.scrollAreaWidgetContents, text='Select All SG', grid=(0, 0))
     self.spGroupsCheckBox.hide()
     self.spGroupsCheckBox.stateChanged.connect(self._checkAllSpectrumGroups)
     self.allSG_CheckBoxes = []
-    for i, sg in enumerate(self.project.spectrumGroups):
-      self.spectrumGroupCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(sg.pid), grid=(i + 1, 0))
-      self.allSG_CheckBoxes.append(self.spectrumGroupCheckBox)
-      self.spectrumGroupCheckBox.hide()
+    if self.project is not None:
+      for i, sg in enumerate(self.project.spectrumGroups):
+        self.spectrumGroupCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(sg.pid), grid=(i + 1, 0))
+        self.allSG_CheckBoxes.append(self.spectrumGroupCheckBox)
+        self.spectrumGroupCheckBox.hide()
 
   def _checkAllSpectrumGroups(self, state):
     if len(self.allSG_CheckBoxes) > 0:
@@ -164,8 +170,9 @@ class PeakPicker1D(PipelineBox):
     spectra = []
     for cb in self.allCheckBoxes:
       if cb.isChecked():
-        spectrum = self.project.getByPid('SP:' + str(cb.text()))
-        spectra.append(spectrum)
+        if self.project is not None:
+          spectrum = self.project.getByPid('SP:' + str(cb.text()))
+          spectra.append(spectrum)
     return spectra
 
 
@@ -173,9 +180,10 @@ class PeakPicker1D(PipelineBox):
     spectra = []
     for sg in self.allSG_CheckBoxes:
       if sg.isChecked():
-        spectrumGroup = self.project.getByPid(str(sg.text()))
-        if len(spectrumGroup.spectra)>0:
-          spectra.append(spectrumGroup.spectra)
+        if self.project is not None:
+          spectrumGroup = self.project.getByPid(str(sg.text()))
+          if len(spectrumGroup.spectra)>0:
+            spectra.append(spectrumGroup.spectra)
     if len(spectra)>0:
       return list([item for sublist in spectra for item in sublist])
     else:

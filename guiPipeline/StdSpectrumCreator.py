@@ -34,9 +34,14 @@ class StdSpectrumCreator(PipelineBox):
     if parent is not None:
       self.pipelineModule = parent
     self.application = application
-    self.project = self.application.project
+    self.project = None
+    self.directoryPath = ''
+
+    if self.application is not None:
+      self.project = self.application.project
+      self.directoryPath = self.application.preferences.general.dataPath + '/'
+
     self.saveIcon = Icon('icons/save')
-    self.directoryPath = self.application.preferences.general.dataPath + '/'
     self._setMainLayout()
     self._createWidgets()
     self.params = params
@@ -72,14 +77,15 @@ class StdSpectrumCreator(PipelineBox):
 
   def _getSaveDirectory(self):
     dialog = FileDialog(fileMode=FileDialog.Directory, text='Save in ',
-                        acceptMode=FileDialog.AcceptSave, preferences=self.application.preferences.general)
+                        acceptMode=FileDialog.AcceptSave)
     self.directoryPath = dialog.selectedFile()
     if self.directoryPath is not None:
       self.lineEditPath.setText(str(self.directoryPath)+'/')
 
   def _createSpectrumDifference(self):
     from ccpn.AnalysisScreen.lib.Screening import createStdDifferenceSpectrum
-    createStdDifferenceSpectrum(self.project, self.lineEditPath.text())
+    if self.project is not None:
+      createStdDifferenceSpectrum(self.project, self.lineEditPath.text())
 
 
   def getWidgetsParams(self):

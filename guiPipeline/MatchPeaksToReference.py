@@ -24,11 +24,15 @@ WidgetSetters = OrderedDict([
                            ])
 
 class MatchPeaksToReference(PipelineBox):
-  def __init__(self,application, parent=None, name=None, params=None, **kw):
+  def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(MatchPeaksToReference, self)
     PipelineBox.__init__(self, name=name,)
     self.application = application
-    self.project = self.application.project
+    self.project = None
+
+    if self.application is not None:
+      self.project = self.application.project
+
     self.saveIcon = Icon('icons/save')
     self._setMainLayout()
     self._createWidgets()
