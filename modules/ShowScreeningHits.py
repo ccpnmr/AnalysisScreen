@@ -42,7 +42,7 @@ class ShowScreeningHits(CcpnModule):
 
   includeSettingsWidget = False
   maxSettingsState = 2
-  settingsOnTop = True
+  settingsPosition = 'top'
   className = 'ShowScreeningHits'
 
   def __init__(self, mainWindow, name='Hit Analysis', **kw):
