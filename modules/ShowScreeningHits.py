@@ -32,6 +32,9 @@ from ccpn.ui.gui.widgets.GroupBox import GroupBox
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.ListWidget import ListWidget
+
 
 # from ccpn.ui.gui.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 
@@ -49,18 +52,22 @@ class ShowScreeningHits(CcpnModule):
     super(ShowScreeningHits, self)
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
-    # self.setFixedHeight(300)
-    self.mainWindow = mainWindow
-    self.project = self.mainWindow.project
-    self.application = self.mainWindow.application
-    self.moduleArea = self.mainWindow.moduleArea
-    self.preferences = self.application.preferences
+    self._spectrumHits = []
+
+    if mainWindow is not None:
+      self.mainWindow = mainWindow
+      self.project = self.mainWindow.project
+      self.application = self.mainWindow.application
+      self.moduleArea = self.mainWindow.moduleArea
+      self.preferences = self.application.preferences
+      self.current = self.application.current
+      self._spectrumHits = self.project.spectrumHits
 
     ######## ======== Set modules on moduleArea ====== ########
 
-    if 'BLANK DISPLAY' in self.moduleArea.findAll()[1]:
-      blankDisplay = self.moduleArea.findAll()[1]['BLANK DISPLAY']
-      blankDisplay.close()
+      if 'BLANK DISPLAY' in self.moduleArea.findAll()[1]:
+        blankDisplay = self.moduleArea.findAll()[1]['BLANK DISPLAY']
+        blankDisplay.close()
 
     ######## ======== Icons ====== ########
     self.acceptIcon = Icon('icons/dialog-apply')
@@ -75,10 +82,10 @@ class ShowScreeningHits(CcpnModule):
     self.exportIcon = Icon('icons/export')
 
     ######## ======== Set Main Layout ====== ########
-    self.mainFrame = QtGui.QFrame()
+    self.mainFrame = Frame(self.mainWidget, setLayout=False)
     self.mainLayout = QtGui.QVBoxLayout()
     self.mainFrame.setLayout(self.mainLayout)
-    self.layout.addWidget(self.mainFrame, 0,0)
+    self.mainWidget.getLayout().addWidget(self.mainFrame, 0,0)
 
     ######## ======== Set Secondary Layout ====== ########
     self.settingFrameLayout = QtGui.QHBoxLayout()
@@ -95,7 +102,7 @@ class ShowScreeningHits(CcpnModule):
   def _createHitTableGroup(self):
     '''GroupBox: creates the hitTableGroup'''
 
-    self.hitTableGroup = GroupBox()
+    self.hitTableGroup = Frame(self.mainWidget, setLayout=False)
     self.hitTableGroup.setFixedWidth(320)
     self.hitTableGroupVLayout = QtGui.QGridLayout()
     self.hitTableGroupVLayout.setAlignment(QtCore.Qt.AlignTop)
@@ -108,7 +115,7 @@ class ShowScreeningHits(CcpnModule):
   def _createHitSelectionGroup(self):
     '''GroupBox creates the hitSelectionGroup'''
 
-    self.hitSelectionGroup = GroupBox()
+    self.hitSelectionGroup = Frame(self.mainWidget, setLayout=False)
     self.hitSelectionGroup.setFixedWidth(250)
     self.hitSelectionGroupLayout = QtGui.QVBoxLayout()
     self.hitSelectionGroupLayout.setAlignment(QtCore.Qt.AlignTop)
@@ -121,7 +128,7 @@ class ShowScreeningHits(CcpnModule):
   def _createHitDetailsGroup(self):
     '''GroupBox creates the hitDetailsGroup'''
 
-    self.hitDetailsGroup = GroupBox()
+    self.hitDetailsGroup = Frame(self.mainWidget, setLayout=False)
     # self.hitDetailsGroup.setFixedWidth(200)
     self.hitDetailsGroupLayout = QtGui.QGridLayout()
     self.hitDetailsGroupLayout.setAlignment(QtCore.Qt.AlignTop)
@@ -133,10 +140,10 @@ class ShowScreeningHits(CcpnModule):
   def _createSettingGroup(self):
     '''GroupBox creates the settingGroup'''
 
-    self.settingButtons = ButtonList(self, texts = ['','',],
-                                     callbacks=[self._createExportButton, self._createViewSettingButton, ],
-                                     icons=[self.exportIcon,self.settingIcon,],
-                                     tipTexts=['', ''], direction='H')
+    self.settingButtons = ButtonList(self, texts = ['',],
+                                     callbacks=[self._createExportButton,],
+                                     icons=[self.exportIcon,],
+                                     tipTexts=['',], direction='H')
     self.settingButtons.setStyleSheet("background-color: transparent")
     self.settingFrameLayout.addStretch(1)
     self.settingFrameLayout.addWidget(self.settingButtons)
@@ -154,16 +161,17 @@ class ShowScreeningHits(CcpnModule):
 
     self.hitTable = ObjectTable(self, columns, actionCallback=self._hitTableCallback, selectionCallback=self._showAllOnTableSelection, objects=[])
     self.hitTableGroupVLayout.addWidget(self.hitTable)
-    self.listOfHits = self.project.spectrumHits
-    for hit in self.listOfHits:
+
+    for hit in self._spectrumHits:
+      # FIXME hack
       hit.comment = 'No'
-    self.hitTable.setObjects(self.listOfHits)
+    self.hitTable.setObjects(self._spectrumHits)
 
 
   def _createHitDetailsWidgets(self):
     ''' Documentation '''
 
-    self.listWidgetsHitDetails = QtGui.QListWidget()
+    self.listWidgetsHitDetails = ListWidget(self)
     # self.listWidgetsHitDetails.setMaximumSize(400,200)
     self.listWidgetsHitDetails.setMinimumSize(200,200)
     self.hitDetailsGroupLayout.addWidget(self.listWidgetsHitDetails, 1,0)
@@ -619,3 +627,23 @@ class ShowScreeningHits(CcpnModule):
 #     self.strip.viewBox.autoRange()
 
 # project.spectrumDisplays[0].spectrumActionDict[project.spectrumDisplays[0].spectrumViews[0].spectrum._apiDataSource].setChecked(False)
+
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+
+  app = TestApplication()
+
+  win = QtGui.QMainWindow()
+
+  moduleArea = CcpnModuleArea(mainWindow=None, )
+  module = ShowScreeningHits(mainWindow=None)
+  moduleArea.addModule(module)
+
+  win.setCentralWidget(moduleArea)
+  win.resize(1000, 500)
+  win.setWindowTitle('Testing %s' % module.moduleName)
+  win.show()
+
+  app.start()
