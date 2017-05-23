@@ -25,7 +25,6 @@ class BaselineCorrection(PipelineBox):
     super(BaselineCorrection, self)
     PipelineBox.__init__(self, name=name,)
     self.parent = parent
-    print(parent)
     self.project = None
     if project is not None:
       self.project = project

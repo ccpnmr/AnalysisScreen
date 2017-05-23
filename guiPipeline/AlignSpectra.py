@@ -25,15 +25,14 @@ class AlignSpectra(PipelineBox):
     super(AlignSpectra, self)
     PipelineBox.__init__(self, name=name,)
 
-    # self.spectra = [spectrum.pid for spectrum in self.project.spectra]
-    # if parent is not None:
+    self.parent = parent
     #   self.pipelineModule = parent
     self.project = None
     if project is not None:
       self.project = project
 
     self._setMainLayout()
-    # self._createWidgets()
+    self._createWidgets()
     self.params = params
     if self.params is not None:
       self._setParams()
@@ -44,11 +43,24 @@ class AlignSpectra(PipelineBox):
   def applicationsSpecific(self):
     return ['AnalysisScreen']
 
+  @property
+  def _inputData(self):
+    if self.parent is not None:
+      return list(self.parent._inputData)
+    else:
+      return []
+
   def runMethod(self):
     from ccpn.AnalysisScreen.lib.spectralProcessing.align import alignment
     if self.project is not None:
-      alignment._alignSpectra(self.project.spectra[0], self.project.spectra[1:-1] )
-      print('Running ',  self.name())
+      referenceSpectrum = self.spectrumPulldown.currentObject()
+      spectra = [spectrum for spectrum in self._inputData if spectrum != referenceSpectrum]
+      if referenceSpectrum is not None:
+        print(referenceSpectrum)
+        print(spectra)
+        if spectra:
+          alignment._alignSpectra(referenceSpectrum, spectra)
+          print('Running ',  self.name())
 
   def _setMainLayout(self):
     self.mainFrame = QtGui.QFrame()
@@ -57,20 +69,21 @@ class AlignSpectra(PipelineBox):
     self.layout.addWidget(self.mainFrame, 0, 0, 0, 0)
 
   def _createWidgets(self):
-    self.spectrumLabel = Label(self, 'Spectrum',)
+    self.spectrumLabel = Label(self, 'Reference Spectrum')
     self.spectrumPulldown = PulldownList(self,)
-    self.spectrumPulldown.setData(self.spectra)
+    if self._inputData:
+      self.spectrumPulldown.setData(texts=[sp.pid for sp in self._inputData],objects=self._inputData)
 
     self.mainLayout.addWidget(self.spectrumLabel, 0, 0)
     self.mainLayout.addWidget(self.spectrumPulldown, 0, 1)
 
   def getWidgetsParams(self):
-    # spectrumPulldown = self.spectrumPulldown.currentText()
-    #
-    # params = OrderedDict([
-    #                       ('spectrumPulldown', spectrumPulldown),
-    #                       ])
-    # self.params = params
+    spectrumPulldown = self.spectrumPulldown.currentText()
+
+    params = OrderedDict([
+                          ('spectrumPulldown', spectrumPulldown),
+                          ])
+    self.params = params
     return self.params
 
 
