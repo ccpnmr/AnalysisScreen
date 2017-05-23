@@ -17,17 +17,14 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class AlignSpectra(PipelineBox):
+class BaselineCorrection(PipelineBox):
 
   preferredMethod = True
 
   def __init__(self, parent=None, project=None, name=None, params=None, **kw):
-    super(AlignSpectra, self)
+    super(BaselineCorrection, self)
     PipelineBox.__init__(self, name=name,)
 
-    # self.spectra = [spectrum.pid for spectrum in self.project.spectra]
-    # if parent is not None:
-    #   self.pipelineModule = parent
     self.project = None
     if project is not None:
       self.project = project
@@ -39,16 +36,31 @@ class AlignSpectra(PipelineBox):
       self._setParams()
 
   def methodName(self):
-    return 'Align Spectra'
+    return 'Baseline Correction'
 
   def applicationsSpecific(self):
     return ['AnalysisScreen']
 
+  def _baselineCorrection(self, spectra):
+    correctedSpectra = []
+    for sp in spectra:
+      from ccpn.AnalysisScreen.lib.spectralProcessing.baselineCorrection import CWBC
+      x = sp.positions
+      y = sp.intensities
+      newX, newy = CWBC.baselineCorrection(x, y, flatten=True)
+      sp._positions = newX
+      sp._intensities = newy
+      correctedSpectra.append(sp)
+    return correctedSpectra
+
   def runMethod(self):
-    from ccpn.AnalysisScreen.lib.spectralProcessing.align import alignment
+
+    print('Running ',  self.name())
     if self.project is not None:
-      alignment._alignSpectra(self.project.spectra[0], self.project.spectra[1:-1] )
-      print('Running ',  self.name())
+      correctedSpectra = self._baselineCorrection(self.project.spectra)
+    print('Done ', self.name())
+
+
 
   def _setMainLayout(self):
     self.mainFrame = QtGui.QFrame()
