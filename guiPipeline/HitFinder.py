@@ -23,9 +23,9 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class MatchPeaksToReference(PipelineBox):
+class HitFinder(PipelineBox):
   def __init__(self, application, parent=None, name=None, params=None, **kw):
-    super(MatchPeaksToReference, self)
+    super(HitFinder, self)
     PipelineBox.__init__(self, name=name,)
     self.application = application
     self.project = None
@@ -43,7 +43,7 @@ class MatchPeaksToReference(PipelineBox):
       self._setParams()
 
   def methodName(self):
-    return 'Match Peaks To Reference'
+    return 'Hit Finder'
 
   def _setMainLayout(self):
     self.mainFrame = QtGui.QFrame()
@@ -90,8 +90,8 @@ class MatchPeaksToReference(PipelineBox):
   def runMethod(self):
     print('Running ',  self.methodName())
     self._matchPosition()
-    if self.showHitModuleCheckBox.isChecked():
-      self._showHitsModule()
+    # if self.showHitModuleCheckBox.isChecked():
+    #   self._showHitsModule()
 
 
   def applicationsSpecific(self):
@@ -133,7 +133,7 @@ class MatchPeaksToReference(PipelineBox):
   def _showHitsModule(self):
     if len(self.project.spectrumHits)>0:
       from ccpn.AnalysisScreen.modules.ShowScreeningHits import ShowScreeningHits
-      showScreeningHits = ShowScreeningHits(parent=self.application.ui.mainWindow, project=self.project)
+      showScreeningHits = ShowScreeningHits(mainWindow=self.mainWindow)
       showScreeningHitsModule = self.application.ui.mainWindow.moduleArea.addModule(showScreeningHits, position='bottom')
       spectrumDisplay = self.application.ui.mainWindow.createSpectrumDisplay(self.project.spectra[0])
 

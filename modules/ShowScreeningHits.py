@@ -63,6 +63,7 @@ class ShowScreeningHits(CcpnModule):
       self.current = self.application.current
       self._spectrumHits = self.project.spectrumHits
 
+
     ######## ======== Set modules on moduleArea ====== ########
 
       if 'BLANK DISPLAY' in self.moduleArea.findAll()[1]:
@@ -245,7 +246,7 @@ class ShowScreeningHits(CcpnModule):
 
     newHit = sampleComponent.sample.spectra[0].newSpectrumHit(substanceName=str(sampleComponent.substance.name))
     newHit.comment = 'NewUserHit'
-    self.listOfHits.append(newHit)
+    self._spectrumHits.append(newHit)
     self.pullDownHit.setEnabled(False)
     self._updateHitTable()
     self._moveNextRow()
@@ -261,6 +262,7 @@ class ShowScreeningHits(CcpnModule):
     ''' Documentation '''
 
     # currentDisplayed = self.project.getByPid('GD:user.View.1D:H')
+
     currentDisplayed = self.project.strips[0]
     for spectrumView in currentDisplayed.spectrumViews:
       spectrumView.delete()
@@ -303,11 +305,11 @@ class ShowScreeningHits(CcpnModule):
     '''
     hitToDelete = self.pullDownHit.getObject()
     hitToDelete.delete()
-    if hitToDelete in self.listOfHits:
-      self.listOfHits.remove(hitToDelete)
+    if hitToDelete in self._spectrumHits:
+      self._spectrumHits.remove(hitToDelete)
     self._moveNextRow()
     self._updateHitTable()
-    if len(self.listOfHits)<=0:
+    if len(self._spectrumHits)<=0:
       self._clearDisplayView()
       self.pullDownHit.setData([])
 
@@ -431,9 +433,12 @@ class ShowScreeningHits(CcpnModule):
   def _hitTableCallback(self, row:int=None, col:int=None, obj:object=None):
     ''' Documentation '''
 
-    peaks = self._getPullDownObj().substance.referenceSpectra[0].peakLists[1].peaks
-    # displayed = self.project.getByPid('GD:user.View.1D:H')
-    displayed = self.project.strips[0]._parent
+    pass
+    # FIXME TODO
+    # peaks = self._getPullDownObj().substance.referenceSpectra[0].peakLists[1].peaks
+    # from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+    # if self._current.strip is not None:
+    #   navigateToPositionInStrip(strip=self._current.strip, positions=peak.position)
     # for peak in peaks:
     #   navigateToPeakPosition(self.project, peak=peak, selectedDisplays=[displayed.pid], markPositions=True)
 
@@ -482,7 +487,7 @@ class ShowScreeningHits(CcpnModule):
     rejectedHit.comment = 'No'
     self._updateHitTable()
 
-  def _showAllOnTableSelection(self, row:int=None, col:int=None, obj:object=None):
+  def _showAllOnTableSelection(self, *kw):
     ''' Documentation '''
 
     objRow = self.hitTable.getCurrentObject()
@@ -601,7 +606,7 @@ class ShowScreeningHits(CcpnModule):
 
   def _updateHitTable(self):
     ''' Documentation '''
-    self.hitTable.setObjects(self.listOfHits)
+    self.hitTable.setObjects(self._spectrumHits)
 
   def _hidePeakList(self):
     for peakListView in self.project.strips[0].spectrumDisplay.peakListViews:
