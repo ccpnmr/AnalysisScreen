@@ -65,13 +65,13 @@ class AlignSpectra(PipelineBox):
     self.mainLayout.addWidget(self.spectrumPulldown, 0, 1)
 
   def getWidgetsParams(self):
-    spectrumPulldown = self.spectrumPulldown.currentText()
-
-    params = OrderedDict([
-                          ('spectrumPulldown', spectrumPulldown),
-                          ])
-    self.params = params
-    return params
+    # spectrumPulldown = self.spectrumPulldown.currentText()
+    #
+    # params = OrderedDict([
+    #                       ('spectrumPulldown', spectrumPulldown),
+    #                       ])
+    # self.params = params
+    return self.params
 
 
   def _setParams(self):

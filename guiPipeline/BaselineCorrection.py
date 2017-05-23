@@ -77,16 +77,18 @@ class BaselineCorrection(PipelineBox):
     self.mainLayout.addWidget(self.spectrumPulldown, 0, 1)
 
   def getWidgetsParams(self):
-    spectrumPulldown = self.spectrumPulldown.currentText()
 
-    params = OrderedDict([
-                          ('spectrumPulldown', spectrumPulldown),
-                          ])
-    self.params = params
-    return params
+    # spectrumPulldown = self.spectrumPulldown.currentText()
+    #
+    # params = OrderedDict([
+    #                       ('spectrumPulldown', spectrumPulldown),
+    #                       ])
+    # self.params = params
+    return self.params
 
 
   def _setParams(self):
+
     for widgetName, value in self.params.items():
       try:
         widget = getattr(self, str(widgetName))

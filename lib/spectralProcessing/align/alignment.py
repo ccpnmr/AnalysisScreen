@@ -50,8 +50,6 @@ def getShift(ref_x, ref_y, target_y):
   return (np.argmax(signal.correlate(ref_y, target_y)) - len(target_y)) * np.mean(np.diff(ref_x))
 
 
-
-
 def _alignSpectra(referenceSpectrum, spectra):
 
   alignedSpectra = []
