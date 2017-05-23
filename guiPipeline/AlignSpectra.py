@@ -18,15 +18,23 @@ WidgetSetters = OrderedDict([
                            ])
 
 class AlignSpectra(PipelineBox):
-  def __init__(self, parent=None, name=None, params=None, **kw):
+
+  preferredMethod = True
+
+  def __init__(self, parent=None, project=None, name=None, params=None, **kw):
     super(AlignSpectra, self)
     PipelineBox.__init__(self, name=name,)
-    self.project = project
-    self.spectra = [spectrum.pid for spectrum in self.project.spectra]
-    if parent is not None:
-      self.pipelineModule = parent
+    print('$$$$',parent)
+
+    # self.spectra = [spectrum.pid for spectrum in self.project.spectra]
+    # if parent is not None:
+    #   self.pipelineModule = parent
+    self.project = None
+    if project is not None:
+      self.project = project
+
     self._setMainLayout()
-    self._createWidgets()
+    # self._createWidgets()
     self.params = params
     if self.params is not None:
       self._setParams()
@@ -35,10 +43,13 @@ class AlignSpectra(PipelineBox):
     return 'Align Spectra'
 
   def applicationsSpecific(self):
-    return ['AnalysisMetabolomics']
+    return ['AnalysisScreen']
 
   def runMethod(self):
-    print('Running ',  self.name())
+    from ccpn.AnalysisScreen.lib.spectralProcessing.align import alignment
+    if self.project is not None:
+      alignment._alignSpectra(self.project.spectra[0], self.project.spectra[1:-1] )
+      print('Running ',  self.name())
 
   def _setMainLayout(self):
     self.mainFrame = QtGui.QFrame()
