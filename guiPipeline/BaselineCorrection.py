@@ -1,5 +1,5 @@
-
 from PyQt4 import QtGui
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.PipelineWidgets import PipelineBox, PipelineDropArea
@@ -24,13 +24,14 @@ class BaselineCorrection(PipelineBox):
   def __init__(self, parent=None, project=None, name=None, params=None, **kw):
     super(BaselineCorrection, self)
     PipelineBox.__init__(self, name=name,)
-
+    self.parent = parent
+    print(parent)
     self.project = None
     if project is not None:
       self.project = project
 
     self._setMainLayout()
-    # self._createWidgets()
+    self._createWidgets()
     self.params = params
     if self.params is not None:
       self._setParams()
@@ -56,25 +57,28 @@ class BaselineCorrection(PipelineBox):
   def runMethod(self):
 
     print('Running ',  self.name())
-    if self.project is not None:
-      correctedSpectra = self._baselineCorrection(self.project.spectra)
+    print(self._getInputData())
+    # if self.project is not None:
+    #   correctedSpectra = self._baselineCorrection(self.project.spectra)
     print('Done ', self.name())
 
-
+  def _getInputData(self):
+    if self.parent is not None:
+      return list(self.parent._inputData)
+    else:
+      return []
 
   def _setMainLayout(self):
-    self.mainFrame = QtGui.QFrame()
+    self.mainFrame = Frame(None, setLayout=False)
     self.mainLayout = QtGui.QGridLayout()
     self.mainFrame.setLayout(self.mainLayout)
     self.layout.addWidget(self.mainFrame, 0, 0, 0, 0)
 
   def _createWidgets(self):
-    self.spectrumLabel = Label(self, 'Spectrum',)
-    self.spectrumPulldown = PulldownList(self,)
-    self.spectrumPulldown.setData(self.spectra)
+    self.spectrumLabel = Label(self, 'Baseline Correction',)
+
 
     self.mainLayout.addWidget(self.spectrumLabel, 0, 0)
-    self.mainLayout.addWidget(self.spectrumPulldown, 0, 1)
 
   def getWidgetsParams(self):
 
