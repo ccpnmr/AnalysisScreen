@@ -177,6 +177,9 @@ def matchSTDToReference(project, minDistance):
             if len(merit) > 0:
               newHit.meritCode = str(merit[0]) + '%'
 
+            print("New Hit found")
+
+
 
 def _loadSpectrumDifference(project, path, sample, SGname='SG:STD'):
   newSpectrumStd = project.loadData(path)

@@ -117,6 +117,7 @@ class HitFinder(PipelineBox):
 
 
 
+
   def _stdEfficency(self, spectrumOffResonancePeaks, spectrumOnResonancePeaks, matchedPositions):
 
     efficiency = []
