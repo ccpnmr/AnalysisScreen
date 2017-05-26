@@ -61,7 +61,7 @@ class MethodTemplate(GuiPipe):
     super(MethodTemplate, self)
     GuiPipe.__init__(self,name=name,)
     if parent is not None:
-      self.pipelineModule = parent
+      self.parent = parent
     self.project = project
     self._setMainLayout()
     self._createWidgets()

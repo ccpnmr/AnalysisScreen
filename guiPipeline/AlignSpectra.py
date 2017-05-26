@@ -26,7 +26,7 @@ class AlignSpectra(GuiPipe):
     GuiPipe.__init__(self, name=name, )
 
     self.parent = parent
-    #   self.pipelineModule = parent
+    #   self.parent = parent
     self.project = None
     if project is not None:
       self.project = project
