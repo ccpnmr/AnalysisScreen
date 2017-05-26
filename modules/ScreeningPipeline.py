@@ -42,17 +42,17 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.widgets.PipelineWidgets import PipelineBox, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
 
-class StdSpectrumCreatorBox(PipelineBox,):
+class StdSpectrumCreatorBox(GuiPipe, ):
   def __init__(self, name=None, pipelineArea=None, params=None, project=None, **kw):
 
     super(StdSpectrumCreatorBox, self)
-    PipelineBox.__init__(self,name=name, pipelineArea=pipelineArea)
+    GuiPipe.__init__(self, name=name, pipelineArea=pipelineArea)
 
     self.project = project
     self.path = self.application.preferences.general.auxiliaryFilesPath + '/'

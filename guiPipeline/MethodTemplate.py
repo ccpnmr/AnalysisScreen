@@ -41,7 +41,7 @@ from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from collections import OrderedDict
-from ccpn.ui.gui.widgets.PipelineWidgets import PipelineBox
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 
 
 WidgetSetters = OrderedDict([
@@ -56,10 +56,10 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class MethodTemplate(PipelineBox):
+class MethodTemplate(GuiPipe):
   def __init__(self, parent=None, name=None, params=None, project=None, **kw):
     super(MethodTemplate, self)
-    PipelineBox.__init__(self,name=name,)
+    GuiPipe.__init__(self,name=name,)
     if parent is not None:
       self.pipelineModule = parent
     self.project = project

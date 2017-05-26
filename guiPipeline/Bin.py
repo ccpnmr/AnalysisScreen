@@ -3,7 +3,7 @@ from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
 from collections import OrderedDict
-from ccpn.ui.gui.widgets.PipelineWidgets import PipelineBox, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
 
 
 WidgetSetters = OrderedDict([
@@ -18,12 +18,12 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class Bin(PipelineBox):
+class Bin(GuiPipe):
   preferredMethod = False
 
   def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(Bin, self)
-    PipelineBox.__init__(self, name=name,)
+    GuiPipe.__init__(self, name=name, )
     self.application = application
     self.project = self.application.project
     self.spectra = [spectrum.pid for spectrum in self.project.spectra]

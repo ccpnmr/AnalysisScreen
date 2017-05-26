@@ -8,7 +8,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from collections import OrderedDict
 import pyqtgraph as pg
-from ccpn.ui.gui.widgets.PipelineWidgets import PipelineBox, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
 
 WidgetSetters = OrderedDict([
                             ('CheckBox',      'setChecked'),
@@ -22,11 +22,11 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class AlignToReference(PipelineBox):
+class AlignToReference(GuiPipe):
   preferredMethod = False
   def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(AlignToReference, self)
-    PipelineBox.__init__(self, name=name)
+    GuiPipe.__init__(self, name=name)
     self.application = application
     self.project = self.application.project
     self.current = self.application.current

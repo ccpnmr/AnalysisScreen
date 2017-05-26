@@ -2,7 +2,7 @@ from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.PipelineWidgets import PipelineBox, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
 from collections import OrderedDict
 
 WidgetSetters = OrderedDict([
@@ -17,13 +17,13 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class BaselineCorrection(PipelineBox):
+class BaselineCorrection(GuiPipe):
 
   preferredMethod = True
 
   def __init__(self, parent=None, project=None, name=None, params=None, **kw):
     super(BaselineCorrection, self)
-    PipelineBox.__init__(self, name=name,)
+    GuiPipe.__init__(self, name=name, )
     self.parent = parent
     self.project = None
     if project is not None:
