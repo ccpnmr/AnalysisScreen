@@ -28,6 +28,8 @@ WidgetSetters = OrderedDict([
                            ])
 
 class StdSpectrumCreator(PipelineBox):
+  preferredMethod = False
+
   def __init__(self,application, parent=None, name=None, params=None, **kw):
     super(StdSpectrumCreator, self)
     PipelineBox.__init__(self, name=name,)
@@ -49,7 +51,7 @@ class StdSpectrumCreator(PipelineBox):
     if self.params is not None:
       self._setParams()
 
-  def methodName(self):
+  def pipeName(self):
     return 'Std Spectrum Creator'
 
   def _setMainLayout(self):

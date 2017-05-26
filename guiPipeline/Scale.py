@@ -18,6 +18,8 @@ WidgetSetters = OrderedDict([
                            ])
 
 class Scale(PipelineBox):
+  preferredMethod = False
+
   def __init__(self,application, parent=None, name=None, params=None,  **kw):
     super(Scale, self)
     PipelineBox.__init__(self, name=name, )
@@ -33,7 +35,7 @@ class Scale(PipelineBox):
     if self.params is not None:
       self._setParams()
 
-  def methodName(self):
+  def pipeName(self):
     return 'Scale'
 
   def runMethod(self):

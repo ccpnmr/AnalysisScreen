@@ -19,6 +19,8 @@ WidgetSetters = OrderedDict([
                            ])
 
 class Bin(PipelineBox):
+  preferredMethod = False
+
   def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(Bin, self)
     PipelineBox.__init__(self, name=name,)
@@ -34,7 +36,7 @@ class Bin(PipelineBox):
     if parent is not None:
       self.pipelineModule = parent
 
-  def methodName(self):
+  def pipeName(self):
     return 'Bin'
 
   def runMethod(self):

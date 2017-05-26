@@ -25,6 +25,8 @@ WidgetSetters = OrderedDict([
                            ])
 
 class ExcludeBaselinePoints(PipelineBox):
+  preferredMethod = False
+
   def __init__(self, application, parent=None, name=None, params=None,  **kw):
     super(ExcludeBaselinePoints, self)
     PipelineBox.__init__(self, name=name,)
@@ -41,7 +43,7 @@ class ExcludeBaselinePoints(PipelineBox):
     if self.params is not None:
       self._setParams()
 
-  def methodName(self):
+  def pipeName(self):
     return 'Exclude Baseline Points'
 
   def runMethod(self):

@@ -35,7 +35,7 @@ class BaselineCorrection(PipelineBox):
     if self.params is not None:
       self._setParams()
 
-  def methodName(self):
+  def pipeName(self):
     return 'Baseline Correction'
 
   def applicationsSpecific(self):

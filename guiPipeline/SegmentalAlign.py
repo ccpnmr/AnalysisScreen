@@ -18,6 +18,8 @@ WidgetSetters = OrderedDict([
                            ])
 
 class SegmentalAlign(PipelineBox):
+  preferredMethod = False
+
   def __init__(self,application, parent=None, name=None, pipelineArea=None, params=None, **kw):
     super(SegmentalAlign, self)
     PipelineBox.__init__(self, name=name, pipelineArea=pipelineArea)
@@ -34,7 +36,7 @@ class SegmentalAlign(PipelineBox):
     if self.params is not None:
       self._setParams()
 
-  def methodName(self):
+  def pipeName(self):
     return 'Segmental Align'
 
   def runMethod(self):

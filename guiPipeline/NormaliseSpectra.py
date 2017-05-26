@@ -19,6 +19,8 @@ WidgetSetters = OrderedDict([
 
 
 class NormaliseSpectra(PipelineBox):
+  preferredMethod = False
+
   def __init__(self, application, parent=None, name=None, params=None,  **kw):
 
     super(NormaliseSpectra, self)
@@ -39,7 +41,7 @@ class NormaliseSpectra(PipelineBox):
       self._setParams()
 
 
-  def methodName(self):
+  def pipeName(self):
     return 'Normalise Spectra'
 
   def runMethod(self):

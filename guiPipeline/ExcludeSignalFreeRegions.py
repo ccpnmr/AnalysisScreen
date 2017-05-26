@@ -24,6 +24,8 @@ WidgetSetters = OrderedDict([
 
 
 class ExcludeSignalFreeRegions(PipelineBox):
+  preferredMethod = False
+
   def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(ExcludeSignalFreeRegions, self)
     PipelineBox.__init__(self, name=name,)
@@ -40,7 +42,7 @@ class ExcludeSignalFreeRegions(PipelineBox):
       self._setParams()
 
 
-  def methodName(self):
+  def pipeName(self):
     return 'Exclude Signal Free Regions'
 
   def applicationsSpecific(self):

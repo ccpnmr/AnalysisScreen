@@ -37,7 +37,7 @@ class AlignSpectra(PipelineBox):
     if self.params is not None:
       self._setParams()
 
-  def methodName(self):
+  def pipeName(self):
     return 'Align Spectra'
 
   def applicationsSpecific(self):

@@ -22,6 +22,8 @@ WidgetSetters = OrderedDict([
                            ])
 
 class WhittakerSmooth(PipelineBox):
+  preferredMethod = False
+
   def __init__(self, application, parent=None, name=None, params=None, **kw):
 
     super(WhittakerSmooth, self)
@@ -41,7 +43,7 @@ class WhittakerSmooth(PipelineBox):
     if self.params is not None:
       self._setParams()
 
-  def methodName(self):
+  def pipeName(self):
     return 'Whittaker Smooth'
 
   def runMethod(self):

@@ -24,6 +24,8 @@ WidgetSetters = OrderedDict([
                            ])
 
 class HitFinder(PipelineBox):
+  preferredMethod = False
+
   def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(HitFinder, self)
     PipelineBox.__init__(self, name=name,)
@@ -42,7 +44,7 @@ class HitFinder(PipelineBox):
     if self.params is not None:
       self._setParams()
 
-  def methodName(self):
+  def pipeName(self):
     return 'Hit Finder'
 
   def _setMainLayout(self):
@@ -88,7 +90,7 @@ class HitFinder(PipelineBox):
 
 
   def runMethod(self):
-    print('Running ',  self.methodName())
+    print('Running ',  self.pipeName())
     self._matchPosition()
     # if self.showHitModuleCheckBox.isChecked():
     #   self._showHitsModule()

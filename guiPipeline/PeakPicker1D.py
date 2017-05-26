@@ -42,7 +42,7 @@ class PeakPicker1D(PipelineBox):
     if parent is not None:
       self.pipelineModule = parent
 
-  def methodName(self):
+  def pipeName(self):
     return 'Peak picker 1D'
 
   def applicationsSpecific(self):
@@ -118,7 +118,7 @@ class PeakPicker1D(PipelineBox):
 
 
   def runMethod(self):
-    print('Running ',  self.methodName())
+    print('Running ',  self.pipeName())
     if self._inputData:
       self._pickPeaks(self._inputData)
     else:
@@ -157,7 +157,7 @@ class PeakPicker1D(PipelineBox):
     if self.pipelineModule is not None:
       currentPipeline = OrderedDict(self.pipelineModule.currentRunningPipeline)
       for box, value in currentPipeline.items():
-        if box.methodName() == 'Exclude Signal Free Regions':
+        if box.pipeName() == 'Exclude Signal Free Regions':
           ignoredRegions += value
       if len(ignoredRegions)>0:
         return ignoredRegions

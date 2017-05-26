@@ -23,6 +23,7 @@ WidgetSetters = OrderedDict([
                            ])
 
 class AlignToReference(PipelineBox):
+  preferredMethod = False
   def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(AlignToReference, self)
     PipelineBox.__init__(self, name=name)
@@ -38,7 +39,7 @@ class AlignToReference(PipelineBox):
     if parent is not None:
       self.pipelineModule = parent
 
-  def methodName(self):
+  def pipeName(self):
     return 'Align To Reference'
 
   def runMethod(self):

@@ -4,16 +4,16 @@ Adding a new file in this folder (guiPipeline) will automatically make the metho
 
 To get it working keep unmodified the following function names:
 
- - methodName
+ - pipeName
  - runMethod
  - applicationsSpecific
  - getWidgetsParams
 
-They are called from the pipelineModule and the 'methodName' from the __init__ script in this folder.
+They are called from the pipelineModule and the 'pipeName' from the __init__ script in this folder.
 
 
 
-methodName : ----------- is used to set the text in the selection pulldown in the pipelineModule and set the box name
+pipeName : ----------- is used to set the text in the selection pulldown in the pipelineModule and set the box name
                          in the pipelineArea.
 
 runMethod : ------------ is used as callback from the pipelineModule 'goButton' to run the method algorithm/s
@@ -70,7 +70,7 @@ class MethodTemplate(PipelineBox):
     if self.params is not None:
       self._setParams()
 
-  def methodName(self):
+  def pipeName(self):
     return 'Method Template'
 
   def runMethod(self):

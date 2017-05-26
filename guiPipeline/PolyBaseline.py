@@ -27,6 +27,8 @@ WidgetSetters = OrderedDict([
                            ])
 
 class PolyBaseline(PipelineBox):
+  preferredMethod = False
+
   def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(PolyBaseline, self)
     PipelineBox.__init__(self, name=name,)
@@ -41,7 +43,7 @@ class PolyBaseline(PipelineBox):
     if self.params is not None:
       self._setParams()
 
-  def methodName(self):
+  def pipeName(self):
     return 'Poly Baseline'
 
   def applicationsSpecific(self):
