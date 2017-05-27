@@ -3,7 +3,7 @@ from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from collections import OrderedDict
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import WidgetPipe, PipelineDropArea
 
 WidgetSetters = OrderedDict([
                             ('CheckBox',      'setChecked'),
@@ -18,13 +18,13 @@ WidgetSetters = OrderedDict([
                            ])
 
 
-class NormaliseSpectra(GuiPipe):
-  preferredMethod = False
+class NormaliseSpectra(WidgetPipe):
+  preferredPipe = False
 
   def __init__(self, application, parent=None, name=None, params=None,  **kw):
 
     super(NormaliseSpectra, self)
-    GuiPipe.__init__(self, name=name, )
+    WidgetPipe.__init__(self, name=name, )
     self.application = application
     self.project = self.application.project
     if parent is not None:

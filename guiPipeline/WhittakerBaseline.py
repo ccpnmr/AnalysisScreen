@@ -8,7 +8,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from collections import OrderedDict
 import pyqtgraph as pg
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import WidgetPipe, PipelineDropArea
 
 
 
@@ -24,12 +24,12 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class WhittakerBaseline(GuiPipe):
-  preferredMethod = False
+class WhittakerBaseline(WidgetPipe):
+  preferredPipe = False
 
   def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(WhittakerBaseline, self)
-    GuiPipe.__init__(self, name=name, )
+    WidgetPipe.__init__(self, name=name, )
     if parent is not None:
       self.pipelineModule = parent
     self.application = application

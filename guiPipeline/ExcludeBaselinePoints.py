@@ -9,7 +9,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from collections import OrderedDict
 import pyqtgraph as pg
 from functools import partial
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import WidgetPipe, PipelineDropArea
 
 
 WidgetSetters = OrderedDict([
@@ -24,12 +24,12 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class ExcludeBaselinePoints(GuiPipe):
-  preferredMethod = False
+class ExcludeBaselinePoints(WidgetPipe):
+  preferredPipe = False
 
   def __init__(self, application, parent=None, name=None, params=None,  **kw):
     super(ExcludeBaselinePoints, self)
-    GuiPipe.__init__(self, name=name, )
+    WidgetPipe.__init__(self, name=name, )
     self.application = application
     self.project = self.application.project
     self.current = self.application.current

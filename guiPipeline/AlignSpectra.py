@@ -2,7 +2,7 @@
 from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import WidgetPipe, PipelineDropArea
 from collections import OrderedDict
 
 WidgetSetters = OrderedDict([
@@ -17,13 +17,13 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class AlignSpectra(GuiPipe):
+class AlignSpectra(WidgetPipe):
 
-  preferredMethod = True
+  preferredPipe = True
 
   def __init__(self, parent=None, project=None, name=None, params=None, **kw):
     super(AlignSpectra, self)
-    GuiPipe.__init__(self, name=name, )
+    WidgetPipe.__init__(self, name=name, )
 
     self.parent = parent
     #   self.parent = parent

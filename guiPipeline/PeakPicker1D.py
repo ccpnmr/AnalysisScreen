@@ -2,7 +2,7 @@
 from collections import OrderedDict
 from PyQt4 import QtGui , QtCore
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
+from ccpn.ui.gui.widgets.PipelineWidgets import WidgetPipe
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
@@ -25,12 +25,12 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class PeakPicker1D(GuiPipe):
-  preferredMethod = True
+class PeakPicker1D(WidgetPipe):
+  preferredPipe = True
 
   def __init__(self, parent=None,project=None, name=None, params=None, **kw):
     super(PeakPicker1D, self)
-    GuiPipe.__init__(self, name=name, )
+    WidgetPipe.__init__(self, name=name, )
     self.parent = parent
     self.project = project
     self._setMainLayout()

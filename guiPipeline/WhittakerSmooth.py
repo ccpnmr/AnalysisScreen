@@ -5,7 +5,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from collections import OrderedDict
 import pyqtgraph as pg
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import WidgetPipe, PipelineDropArea
 
 
 
@@ -21,13 +21,13 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class WhittakerSmooth(GuiPipe):
-  preferredMethod = False
+class WhittakerSmooth(WidgetPipe):
+  preferredPipe = False
 
   def __init__(self, application, parent=None, name=None, params=None, **kw):
 
     super(WhittakerSmooth, self)
-    GuiPipe.__init__(self, name=name, )
+    WidgetPipe.__init__(self, name=name, )
     if parent is not None:
       self.pipelineModule = parent
     self.linePoints = []
