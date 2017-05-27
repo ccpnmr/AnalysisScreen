@@ -6,7 +6,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
 from collections import OrderedDict
 import pyqtgraph as pg
-from ccpn.ui.gui.widgets.PipelineWidgets import WidgetPipe, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
 from functools import partial
 import copy
 
@@ -23,12 +23,12 @@ WidgetSetters = OrderedDict([
                            ])
 
 
-class ExcludeSignalFreeRegions(WidgetPipe):
+class ExcludeSignalFreeRegions(GuiPipe):
   preferredPipe = False
 
   def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(ExcludeSignalFreeRegions, self)
-    WidgetPipe.__init__(self, name=name, )
+    GuiPipe.__init__(self, name=name, )
 
     self.application = application
     self.project = self.application.project

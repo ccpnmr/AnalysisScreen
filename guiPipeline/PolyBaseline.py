@@ -1,7 +1,7 @@
 
 from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PipelineWidgets import WidgetPipe
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
@@ -26,12 +26,12 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class PolyBaseline(WidgetPipe):
+class PolyBaseline(GuiPipe):
   preferredPipe = False
 
   def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(PolyBaseline, self)
-    WidgetPipe.__init__(self, name=name, )
+    GuiPipe.__init__(self, name=name, )
     self.application = application
     self.project = self.application.project
 

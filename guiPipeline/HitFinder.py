@@ -8,7 +8,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 import decimal
-from ccpn.ui.gui.widgets.PipelineWidgets import WidgetPipe, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
 
 
 WidgetSetters = OrderedDict([
@@ -23,12 +23,12 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class HitFinder(WidgetPipe):
+class HitFinder(GuiPipe):
   preferredPipe = False
 
   def __init__(self, application, parent=None, name=None, params=None, **kw):
     super(HitFinder, self)
-    WidgetPipe.__init__(self, name=name, )
+    GuiPipe.__init__(self, name=name, )
     self.application = application
     self.project = None
 

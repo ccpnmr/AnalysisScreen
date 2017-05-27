@@ -11,7 +11,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
-from ccpn.ui.gui.widgets.PipelineWidgets import WidgetPipe, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
 
 transparentStyle = "background-color: transparent; border: 0px solid transparent"
 
@@ -27,12 +27,12 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class StdSpectrumCreator(WidgetPipe):
+class StdSpectrumCreator(GuiPipe):
   preferredPipe = False
 
   def __init__(self,application, parent=None, name=None, params=None, **kw):
     super(StdSpectrumCreator, self)
-    WidgetPipe.__init__(self, name=name, )
+    GuiPipe.__init__(self, name=name, )
     if parent is not None:
       self.pipelineModule = parent
     self.application = application

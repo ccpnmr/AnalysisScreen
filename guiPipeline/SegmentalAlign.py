@@ -2,7 +2,7 @@ from PyQt4 import QtGui
 from collections import OrderedDict
 import pyqtgraph as pg
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.PipelineWidgets import WidgetPipe, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
 
 
 WidgetSetters = OrderedDict([
@@ -17,12 +17,12 @@ WidgetSetters = OrderedDict([
                             ('TextEditor',    'setText'   ),
                            ])
 
-class SegmentalAlign(WidgetPipe):
+class SegmentalAlign(GuiPipe):
   preferredPipe = False
 
   def __init__(self,application, parent=None, name=None, pipelineArea=None, params=None, **kw):
     super(SegmentalAlign, self)
-    WidgetPipe.__init__(self, name=name, pipelineArea=pipelineArea)
+    GuiPipe.__init__(self, name=name, pipelineArea=pipelineArea)
     if parent is not None:
       self.pipelineModule = parent
     self.application = application
