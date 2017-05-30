@@ -38,6 +38,7 @@ class Screen(Framework):
     # showSa = screenModules[0](mainWindow=self.mainWindow)
     # self.ui.mainWindow.moduleArea.addModule(showSa)
 
+
   def showPickPeakPopup(self):
     if not self.project.peakLists:
       MessageDialog.showWarning('No PeakList Found','')
@@ -64,7 +65,12 @@ class Screen(Framework):
     self.project._logger.info("application.showMixtureAnalysis()")
 
   def showScreeningPipeline(self, position='bottom', relativeTo=None):
-    initialiseScreeningPipelineModule(mainWindow=self.ui.mainWindow)
+    from ccpn.ui.gui.modules.PipelineModule import GuiPipeline
+    from ccpn.pipes import _pipeLoader
+    pipes = _pipeLoader()
+    guiPipeline = GuiPipeline(mainWindow=self.ui.mainWindow, pipes=pipes, templates=None)
+    self.ui.mainWindow.moduleArea.addModule(guiPipeline, position='bottom')
+
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showScreeningPipeline()")
     self.project._logger.info("application.showScreeningPipeline()")
 

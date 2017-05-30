@@ -1,14 +1,4 @@
 
-__all__ = []
-
-import pkgutil as _pkgutil
-import inspect as _inspect
-
-for loader, name, isPpkg in _pkgutil.walk_packages(__path__):
-  module = loader.find_module(name).load_module(name)
-  for name, obj in _inspect.getmembers(module):
-    if hasattr(obj, 'pipeName'):
-      __all__.append(obj)
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -33,3 +23,20 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+
+
+def _pipeLoader():
+  loadedPipes = []
+
+  from ccpn.framework.lib.Pipe import Pipe
+  import pkgutil as _pkgutil
+  import inspect as _inspect
+
+  for loader, name, isPpkg in _pkgutil.walk_packages(__path__):
+    module = loader.find_module(name).load_module(name)
+    for name, obj in _inspect.getmembers(module):
+      if isinstance(obj, Pipe):
+        loadedPipes.append(obj)
+
+  return loadedPipes

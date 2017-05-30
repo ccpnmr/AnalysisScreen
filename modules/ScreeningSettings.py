@@ -42,7 +42,8 @@ templates =   OrderedDict((
 
 
 def initialiseScreeningPipelineModule(mainWindow):
-  from ccpn.AnalysisScreen import guiPipeline as _pm
-  pipelineMethods = _pm.__all__
+  from ccpn.AnalysisScreen.guiPipeline import _pipeLoader
+  print(_pipeLoader())
+  pipelineMethods = [] #_pm.__all__
   guiPipeline= GuiPipeline(mainWindow=mainWindow, pipelineMethods=pipelineMethods, templates=templates)
   mainWindow.moduleArea.addModule(guiPipeline, position='bottom')
