@@ -66,9 +66,8 @@ class Screen(Framework):
 
   def showScreeningPipeline(self, position='bottom', relativeTo=None):
     from ccpn.ui.gui.modules.PipelineModule import GuiPipeline
-    from ccpn.pipes import _pipeLoader
-    pipes = _pipeLoader()
-    guiPipeline = GuiPipeline(mainWindow=self.ui.mainWindow, pipes=pipes, templates=None)
+    from ccpn.pipes import loadedPipes
+    guiPipeline = GuiPipeline(mainWindow=self.ui.mainWindow, pipes=loadedPipes, templates=None)
     self.ui.mainWindow.moduleArea.addModule(guiPipeline, position='bottom')
 
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showScreeningPipeline()")
