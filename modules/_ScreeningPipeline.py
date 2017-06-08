@@ -291,9 +291,9 @@ class PickPeaksWidget(QtGui.QWidget):
     for sample in self.project.samples:
       if not sample.isVirtual:
         for spectrum in sample.spectra:
-         spectrum.peakLists[0].pickPeaks1dFiltered(size=9, ignoredRegions=None, noiseThreshold=0)
+         spectrum.peakLists[0].pickPeaks1dFiltered(size=9, ignoredRegions=None, positiveNoiseThreshold=0)
         for sampleComponent in sample.sampleComponents:
-          sampleComponent.substance.referenceSpectra[0].peakLists[0].pickPeaks1dFiltered(ignoredRegions=None, noiseThreshold=0)
+          sampleComponent.substance.referenceSpectra[0].peakLists[0].pickPeaks1dFiltered(ignoredRegions=None, positiveNoiseThreshold=0)
 
   def _populatePullDowns(self):
     if len(self.project.samples)>0:
