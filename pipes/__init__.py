@@ -1,5 +1,4 @@
 
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -10,37 +9,25 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
 __dateModified__ = "$dateModified: 2017-04-07 11:41:14 +0100 (Fri, April 07, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: TJ $"
+__author__ = "$Author: Luca Mureddu $"
+
 __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
-#=========================================================================================
+#====================================
 
 
-
-from ccpn.framework import Framework
-from ccpn.AnalysisScreen.AnalysisScreen import Screen as Application
-from ccpn.framework.Version import applicationVersion
-
-if __name__ == '__main__':
-  from ccpn.util.GitTools import getAllRepositoriesGitCommit
-  applicationVersion = 'development: {AnalysisScreen:.8s}'.format(**getAllRepositoriesGitCommit())
-
-  # argument parser
-  parser = Framework.defineProgramArguments()
-
-  # add any additional commandline argument here
-  commandLineArguments = parser.parse_args()
-
-  application = Application('AnalysisScreen', applicationVersion, commandLineArguments)
-  Framework._getApplication = lambda: application
-  application.start()
+import pkgutil as _pkgutil
+for loader, name, isPpkg in _pkgutil.walk_packages(__path__):
+  module = loader.find_module(name).load_module(name)
+  print('MOD', module)
