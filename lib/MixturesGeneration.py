@@ -157,7 +157,7 @@ def _getCurrentVirtualSamples(project):
 
 def _pickPeaks(spectra, filter, filterMode, ignoredRegions, noiseThreshold):
   for spectrum in spectra:
-    spectrum.peakLists[0].pickPeaks1dFiltered(size=filter, mode=filterMode, ignoredRegions=ignoredRegions,
+    spectrum.peakLists[0].pickPeaks1dFiltered(size=filter, mode=filterMode, excludeRegions=ignoredRegions,
                                               positiveNoiseThreshold=noiseThreshold)
 
 
