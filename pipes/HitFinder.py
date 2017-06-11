@@ -117,7 +117,7 @@ class HitFinderGuiPipe(GuiPipe):
         _getWidgetByAtt(self, ReferenceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
         _getWidgetByAtt(self, TargetSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
 
-        # Hack to select reference spectrum group in the correct box by matching name
+        # Lazy Hack for trying to select reference spectrum group in the correct pulldown by matching name
         for sg in spectrumGroups:
           if ReferenceSpectrumGroupName == sg.name:
             _getWidgetByAtt(self, ReferenceSpectrumGroup).select(sg)
