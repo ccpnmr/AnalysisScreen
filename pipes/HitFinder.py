@@ -45,6 +45,7 @@ import numpy as np
 ReferenceSpectrumGroup = 'referenceSpectrumGroup'
 TargetSpectrumGroup = 'targetSpectrumGroup'
 MinimumDistance = 'minimumDistance'
+DefaultMinimumDistance = 0.01
 
 ReferenceSpectrumGroupName = 'References'
 PipeName = 'Hit Finder'
@@ -81,7 +82,7 @@ class HitFinderGuiPipe(GuiPipe):
     setattr(self, TargetSpectrumGroup, PulldownList(self.pipeFrame, grid=(1, 1)))
 
     self.minimumDistanceLabel = Label(self.pipeFrame, text='Minimum Distance between two peaks (ppm)',  grid=(2, 0))
-    setattr(self, MinimumDistance, LineEdit(self.pipeFrame, text=str(0.001),  grid=(2, 1), hAlign='l'))
+    setattr(self, MinimumDistance, LineEdit(self.pipeFrame, text=str(DefaultMinimumDistance),  grid=(2, 1), hAlign='l'))
 
     self._updateWidgets()
 
@@ -127,7 +128,8 @@ class HitFinder(SpectraPipe):
 
   _kwargs  =   {
                ReferenceSpectrumGroup: 'spectrumGroup.pid',
-               TargetSpectrumGroup: 'spectrumGroup.pid',
+               TargetSpectrumGroup:    'spectrumGroup.pid',
+               MinimumDistance:     DefaultMinimumDistance,
                }
 
 
