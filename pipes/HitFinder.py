@@ -29,6 +29,7 @@ from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
@@ -46,7 +47,10 @@ ReferenceSpectrumGroup = 'referenceSpectrumGroup'
 TargetSpectrumGroup = 'targetSpectrumGroup'
 MinimumDistance = 'minimumDistance'
 DefaultMinimumDistance = 0.01
-
+SearchMode = 'searchMode'
+SearchModeOptions = ['LineBroadening', 'IntesityChanged']
+MinimumEfficiency = 'minimalEfficiency'
+DefaultEfficiency = 10
 ReferenceSpectrumGroupName = 'References'
 PipeName = 'Hit Finder'
 
@@ -75,14 +79,26 @@ class HitFinderGuiPipe(GuiPipe):
     super(HitFinderGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
-    self.referenceSpectrumLabel = Label(self.pipeFrame, 'Reference Spectrum Group',  grid=(0,0))
-    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame, grid=(0, 1)))
+    row = 0
+    self.referenceSpectrumLabel = Label(self.pipeFrame, 'Reference Spectrum Group',  grid=(row,0))
+    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
 
-    self.targetSpectrumLabel = Label(self.pipeFrame, 'Target Spectrum Group', grid=(1, 0))
-    setattr(self, TargetSpectrumGroup, PulldownList(self.pipeFrame, grid=(1, 1)))
+    row += 1
+    self.targetSpectrumLabel = Label(self.pipeFrame, 'Target Spectrum Group', grid=(row, 0))
+    setattr(self, TargetSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
 
-    self.minimumDistanceLabel = Label(self.pipeFrame, text='Minimum Distance between two peaks (ppm)',  grid=(2, 0))
-    setattr(self, MinimumDistance, LineEdit(self.pipeFrame, text=str(DefaultMinimumDistance),  grid=(2, 1), hAlign='l'))
+    row += 1
+    self.searchModeLabel = Label(self.pipeFrame, 'Search Mode', grid=(row, 0))
+    setattr(self, SearchMode, PulldownList(self.pipeFrame, texts=SearchModeOptions, grid=(row, 1)))
+
+    row += 1
+    self.searchModeLabel = Label(self.pipeFrame, 'Minimal DefaultEfficiency', grid=(row, 0))
+    setattr(self, MinimumEfficiency, DoubleSpinbox(self.pipeFrame, value=DefaultEfficiency, grid=(row, 1), hAlign='l'))
+
+
+    row += 1
+    self.minimumDistanceLabel = Label(self.pipeFrame, text='Match peaks within (ppm)',  grid=(row, 0))
+    setattr(self, MinimumDistance, LineEdit(self.pipeFrame, text=str(DefaultMinimumDistance),  grid=(row, 1), hAlign='l'))
 
     self._updateWidgets()
 
@@ -129,7 +145,9 @@ class HitFinder(SpectraPipe):
   _kwargs  =   {
                ReferenceSpectrumGroup: 'spectrumGroup.pid',
                TargetSpectrumGroup:    'spectrumGroup.pid',
+               SearchMode: SearchModeOptions[0],
                MinimumDistance:     DefaultMinimumDistance,
+               MinimumEfficiency: DefaultEfficiency,
                }
 
 
