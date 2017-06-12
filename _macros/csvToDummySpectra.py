@@ -73,16 +73,16 @@ _createDummies(spectra,)
 
 #  all in
 import pandas as pd
-filePaths = ['/Users/luca/AnalysisV3/data/testProjects/AnalysisScreen_Demo1/Demo_aligmentSpetra/10.csv',
-             '/Users/luca/AnalysisV3/data/testProjects/AnalysisScreen_Demo1/Demo_aligmentSpetra/10s.csv',
-             '/Users/luca/AnalysisV3/data/testProjects/AnalysisScreen_Demo1/Demo_aligmentSpetra/10ss.csv']
+filePaths = ['/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component1_1H_Yes_Target.csv',
+             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component2_1H_Yes_Target.csv',
+             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component3_1H_Yes_Target.csv']
 spectra = []
 for path in filePaths:
     fileName = path.split('/')[-1].split('.')[0]
     dataFrame = pd.read_csv(path)
-    dataFrame.columns = ['x', 'y']
+    dataFrame.columns = ['','x', 'y']
     x = dataFrame.as_matrix(columns=['x']).ravel()
-    y = dataFrame.as_matrix(columns=['y']).ravel()*-1
+    y = dataFrame.as_matrix(columns=['y']).ravel()
     ds = project.createDummySpectrum(('H',), str(fileName))
     ds._positions = x
     ds._intensities = y
@@ -92,7 +92,7 @@ from ccpn.util.Hdf5 import convertDataToHdf5
 a = project.spectra[0]
 b = project.spectra[1]
 c = project.spectra[2]
-path = '/Users/luca/AnalysisV3/data/testProjects/AnalysisScreen_Demo1/Demo_aligmentSpetra/'
+path = '/Users/luca/AnalysisV3/data/testProjects/AnalysisScreen_Demo1/demoLineBroadening/'
 a_fullPath = str(path)+str(a.name)+'.hdf5'
 b_fullPath = str(path)+str(b.name)+'.hdf5'
 c_fullPath = str(path)+str(c.name)+'.hdf5'

@@ -33,7 +33,7 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.AnalysisScreen.lib.experimentAnalysis.LineBroadening import findBroadenedPeaks
 from scipy import signal
 import numpy as np
 
@@ -145,14 +145,24 @@ class HitFinder(SpectraPipe):
                }
 
 
+  def _getSpectrumGroup(self, pid):
+    return self.project.getByPid(pid)
 
   def runPipe(self, spectra):
     '''
     :param spectra: inputData
     :return: aligned spectra
     '''
-    print('Not Implemented')
 
+    referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
+    targetSpectrumGroup = self._getSpectrumGroup(self._kwargs[TargetSpectrumGroup])
+
+    if referenceSpectrumGroup and targetSpectrumGroup is not None:
+      if len(referenceSpectrumGroup.spectra) == len(targetSpectrumGroup.spectra):
+        for referenceSpectrum, targetSpectrum in zip(referenceSpectrumGroup.spectra, targetSpectrumGroup.spectra):
+          hits = findBroadenedPeaks(referenceSpectrum, targetSpectrum, minimalDiff=0.05, limitRange=0.01,
+                                    peakListIndex=2)
+          print(hits, referenceSpectrum.name)
 
 
 HitFinder.register() # Registers the pipe in the pipeline
