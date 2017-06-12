@@ -92,13 +92,12 @@ class HitFinderGuiPipe(GuiPipe):
     setattr(self, SearchMode, PulldownList(self.pipeFrame, texts=SearchModeOptions, grid=(row, 1)))
 
     row += 1
-    self.searchModeLabel = Label(self.pipeFrame, 'Minimal DefaultEfficiency', grid=(row, 0))
+    self.searchModeLabel = Label(self.pipeFrame, 'Minimal Default Efficiency' , grid=(row, 0))
     setattr(self, MinimumEfficiency, DoubleSpinbox(self.pipeFrame, value=DefaultEfficiency, grid=(row, 1), hAlign='l'))
-
 
     row += 1
     self.minimumDistanceLabel = Label(self.pipeFrame, text='Match peaks within (ppm)',  grid=(row, 0))
-    setattr(self, MinimumDistance, LineEdit(self.pipeFrame, text=str(DefaultMinimumDistance),  grid=(row, 1), hAlign='l'))
+    setattr(self, MinimumDistance, LineEdit(self.pipeFrame, text=str(DefaultMinimumDistance), textAligment='l', grid=(row, 1), hAlign='l'))
 
     self._updateWidgets()
 
@@ -107,20 +106,15 @@ class HitFinderGuiPipe(GuiPipe):
 
 
   def _setDataPullDowns(self):
-    data = list(self.spectrumGroups)
-    if len(data)>0:
-      spectrumGroups = []
-      for datum in data:
-        if isinstance(datum, SpectrumGroup):
-          spectrumGroups.append(datum)
-      if len(spectrumGroups)>0:
-        _getWidgetByAtt(self, ReferenceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
-        _getWidgetByAtt(self, TargetSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
+    spectrumGroups = list(self.spectrumGroups)
+    if len(spectrumGroups)>0:
+      _getWidgetByAtt(self, ReferenceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
+      _getWidgetByAtt(self, TargetSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
 
-        # Lazy Hack for trying to select reference spectrum group in the correct pulldown by matching name
-        for sg in spectrumGroups:
-          if ReferenceSpectrumGroupName == sg.name:
-            _getWidgetByAtt(self, ReferenceSpectrumGroup).select(sg)
+      # trying to select reference spectrum group in the correct pulldown by matching name
+      for sg in spectrumGroups:
+        if ReferenceSpectrumGroupName in sg.name:
+          _getWidgetByAtt(self, ReferenceSpectrumGroup).select(sg)
 
 
 
@@ -145,9 +139,9 @@ class HitFinder(SpectraPipe):
   _kwargs  =   {
                ReferenceSpectrumGroup: 'spectrumGroup.pid',
                TargetSpectrumGroup:    'spectrumGroup.pid',
-               SearchMode: SearchModeOptions[0],
-               MinimumDistance:     DefaultMinimumDistance,
-               MinimumEfficiency: DefaultEfficiency,
+               SearchMode:              SearchModeOptions[0],
+               MinimumDistance:         DefaultMinimumDistance,
+               MinimumEfficiency:       DefaultEfficiency,
                }
 
 
