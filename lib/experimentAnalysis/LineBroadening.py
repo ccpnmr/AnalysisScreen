@@ -23,7 +23,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 17, 2017) $"
 # Start of code
 #=========================================================================================
 
-
+from ccpn.AnalysisScreen.lib.experimentAnalysis.MatchPositions import matchPeaks
 INCREASED = 'Increased'
 DECREASED = 'Decreased'
 BELOWTRESHOLD = 'Below threshold'
@@ -62,7 +62,7 @@ def comparePeakArea(areaA, areaB, minimalDiff):
   return BELOWTRESHOLD, 0
 
 
-def findBroadenedPeaks(ReferenceSpectrum, targetSpectrum, minimalDiff=0.01, limitRange=0.01, peakListIndex=0):
+def findBroadenedPeaks(ReferenceSpectrum, targetSpectrum, minimalDiff=0.01, limitRange=0.01, peakListIndex=1):
   '''
   :param spectrumA:  Reference spectrum  -> object
   :param spectrumB:  Target spectrum object -> object
@@ -72,7 +72,7 @@ def findBroadenedPeaks(ReferenceSpectrum, targetSpectrum, minimalDiff=0.01, limi
   '''
 
   peakHits = []
-  matches = mp.matchPeaks(reference=ReferenceSpectrum, spectrumB=targetSpectrum, limitRange=limitRange,
+  matches = matchPeaks(reference=ReferenceSpectrum, spectrumB=targetSpectrum, limitRange=limitRange,
                           peakListIndex=peakListIndex)
   for match in matches:
     referencePeak, targetPeak, pos = match

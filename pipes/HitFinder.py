@@ -48,10 +48,14 @@ TargetSpectrumGroup = 'targetSpectrumGroup'
 MinimumDistance = 'minimumDistance'
 DefaultMinimumDistance = 0.01
 SearchMode = 'searchMode'
-SearchModeOptions = ['LineBroadening', 'IntesityChanged']
+ReferencePeakList = 'referencePeakList'
+SearchModeOptions = {'LineBroadening':findBroadenedPeaks, 'IntesityChanged': None}
 MinimumEfficiency = 'minimalEfficiency'
+
 DefaultEfficiency = 10
 ReferenceSpectrumGroupName = 'References'
+DefaultReferencePeakList =  0
+
 PipeName = 'Hit Finder'
 
 ########################################################################################################################
@@ -75,6 +79,7 @@ class HitFinderGuiPipe(GuiPipe):
   preferredPipe = True
   pipeName = PipeName
 
+
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
     super(HitFinderGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
@@ -88,8 +93,12 @@ class HitFinderGuiPipe(GuiPipe):
     setattr(self, TargetSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
 
     row += 1
+    self.peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
+    setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, texts=[str(n) for n in range(5)], grid=(row, 1)))
+
+    row += 1
     self.searchModeLabel = Label(self.pipeFrame, 'Search Mode', grid=(row, 0))
-    setattr(self, SearchMode, PulldownList(self.pipeFrame, texts=SearchModeOptions, grid=(row, 1)))
+    setattr(self, SearchMode, PulldownList(self.pipeFrame, texts=list(SearchModeOptions.keys()), grid=(row, 1)))
 
     row += 1
     self.searchModeLabel = Label(self.pipeFrame, 'Minimal Default Efficiency' , grid=(row, 0))
@@ -139,11 +148,14 @@ class HitFinder(SpectraPipe):
   _kwargs  =   {
                ReferenceSpectrumGroup: 'spectrumGroup.pid',
                TargetSpectrumGroup:    'spectrumGroup.pid',
-               SearchMode:              SearchModeOptions[0],
+               SearchMode:              list(SearchModeOptions.keys())[0],
                MinimumDistance:         DefaultMinimumDistance,
                MinimumEfficiency:       DefaultEfficiency,
+               ReferencePeakList:       DefaultReferencePeakList,
                }
 
+  def _addNewHit(self, spectrum, peaks):
+    spectrum.newSpectrumHit()
 
   def _getSpectrumGroup(self, pid):
     return self.project.getByPid(pid)
@@ -156,14 +168,24 @@ class HitFinder(SpectraPipe):
 
     referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
     targetSpectrumGroup = self._getSpectrumGroup(self._kwargs[TargetSpectrumGroup])
+    searchMode = self._kwargs[SearchMode]
+    minimumDistance = float(self._kwargs[MinimumDistance])
+    minimumEfficiency = float(self._kwargs[MinimumEfficiency])
+    nPeakList = int(self._kwargs[ReferencePeakList])
 
     if referenceSpectrumGroup and targetSpectrumGroup is not None:
       if len(referenceSpectrumGroup.spectra) == len(targetSpectrumGroup.spectra):
         for referenceSpectrum, targetSpectrum in zip(referenceSpectrumGroup.spectra, targetSpectrumGroup.spectra):
-          hits = findBroadenedPeaks(referenceSpectrum, targetSpectrum, minimalDiff=0.05, limitRange=0.01,
-                                    peakListIndex=2)
-          print(hits, referenceSpectrum.name)
+            print('Start')
+            hits = findBroadenedPeaks(referenceSpectrum, targetSpectrum, minimalDiff=0.05, limitRange=minimumDistance,
+                                      peakListIndex=nPeakList)
 
+            if len(hits)>0:
+              print(referenceSpectrum, hits)
+
+
+
+    return spectra
 
 HitFinder.register() # Registers the pipe in the pipeline
 
