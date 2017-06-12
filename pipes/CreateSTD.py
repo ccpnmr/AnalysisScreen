@@ -33,7 +33,6 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from ccpn.AnalysisScreen.lib.experimentAnalysis.LineBroadening import findBroadenedPeaks
 from scipy import signal
 import numpy as np
 
@@ -43,20 +42,16 @@ import numpy as np
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-ReferenceSpectrumGroup = 'referenceSpectrumGroup'
-TargetSpectrumGroup = 'targetSpectrumGroup'
-MinimumDistance = 'minimumDistance'
-DefaultMinimumDistance = 0.01
-SearchMode = 'searchMode'
-ReferencePeakList = 'referencePeakList'
-SearchModeOptions = {'LineBroadening':findBroadenedPeaks, 'IntesityChanged': None}
-MinimumEfficiency = 'minimalEfficiency'
+OffResonanceSpectrumGroup = 'OffResonanceSpectrumGroup'
+OnResonanceSpectrumGroup = 'OnResonanceSpectrumGroup'
 
-DefaultEfficiency = 10
-ReferenceSpectrumGroupName = 'References'
-DefaultReferencePeakList =  0
+OnResonance = 'OnResonance'
+OffResonance = 'OffResonance'
 
-PipeName = 'Hit Finder'
+newSTDSpectrumGroupName = 'newSTDSpectrumGroupName'
+DefaultSTDSGname = 'STD'
+
+PipeName = 'STD Creator'
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -74,39 +69,27 @@ PipeName = 'Hit Finder'
 
 
 
-class HitFinderGuiPipe(GuiPipe):
+class STDCreatorGuiPipe(GuiPipe):
 
   preferredPipe = True
   pipeName = PipeName
 
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
-    super(HitFinderGuiPipe, self)
+    super(STDCreatorGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
     row = 0
-    self.referenceSpectrumLabel = Label(self.pipeFrame, 'Reference Spectrum Group',  grid=(row,0))
-    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
+    self.offResonanceLabel = Label(self.pipeFrame, OffResonance+' Spectrum Group',  grid=(row,0))
+    setattr(self, OffResonanceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
 
     row += 1
-    self.targetSpectrumLabel = Label(self.pipeFrame, 'Target Spectrum Group', grid=(row, 0))
-    setattr(self, TargetSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
+    self.targetSpectrumLabel = Label(self.pipeFrame, OnResonance+' Spectrum Group', grid=(row, 0))
+    setattr(self, OnResonanceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
 
     row += 1
-    self.peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
-    setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, texts=[str(n) for n in range(5)], grid=(row, 1)))
-
-    row += 1
-    self.searchModeLabel = Label(self.pipeFrame, 'Search Mode', grid=(row, 0))
-    setattr(self, SearchMode, PulldownList(self.pipeFrame, texts=list(SearchModeOptions.keys()), grid=(row, 1)))
-
-    row += 1
-    self.searchModeLabel = Label(self.pipeFrame, 'Minimal Default Efficiency' , grid=(row, 0))
-    setattr(self, MinimumEfficiency, DoubleSpinbox(self.pipeFrame, value=DefaultEfficiency, grid=(row, 1), hAlign='l'))
-
-    row += 1
-    self.minimumDistanceLabel = Label(self.pipeFrame, text='Match peaks within (ppm)',  grid=(row, 0))
-    setattr(self, MinimumDistance, LineEdit(self.pipeFrame, text=str(DefaultMinimumDistance), textAligment='l', grid=(row, 1), hAlign='l'))
+    self.newSTDSpectrumGroupLabel = Label(self.pipeFrame, 'New STD Spectrum Group Name', grid=(row, 0))
+    setattr(self, newSTDSpectrumGroupName, LineEdit(self.pipeFrame, text=DefaultSTDSGname, textAligment='l', grid=(row, 1)))
 
     self._updateWidgets()
 
@@ -117,13 +100,15 @@ class HitFinderGuiPipe(GuiPipe):
   def _setDataPullDowns(self):
     spectrumGroups = list(self.spectrumGroups)
     if len(spectrumGroups)>0:
-      _getWidgetByAtt(self, ReferenceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
-      _getWidgetByAtt(self, TargetSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
+      _getWidgetByAtt(self, OffResonanceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
+      _getWidgetByAtt(self, OnResonanceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
 
       # trying to select reference spectrum group in the correct pulldown by matching name
       for sg in spectrumGroups:
-        if ReferenceSpectrumGroupName in sg.name:
-          _getWidgetByAtt(self, ReferenceSpectrumGroup).select(sg)
+        if OnResonance in sg.name:
+          _getWidgetByAtt(self, OnResonanceSpectrumGroup).select(sg)
+        elif OffResonance in sg.name:
+          _getWidgetByAtt(self, OffResonanceSpectrumGroup).select(sg)
 
 
 
@@ -140,29 +125,17 @@ class HitFinderGuiPipe(GuiPipe):
 
 
 
-class HitFinder(SpectraPipe):
+class STDCreator(SpectraPipe):
 
-  guiPipe = HitFinderGuiPipe
+  guiPipe = STDCreatorGuiPipe
   pipeName = PipeName
 
   _kwargs  =   {
-               ReferenceSpectrumGroup: 'spectrumGroup.pid',
-               TargetSpectrumGroup:    'spectrumGroup.pid',
-               SearchMode:              list(SearchModeOptions.keys())[0],
-               MinimumDistance:         DefaultMinimumDistance,
-               MinimumEfficiency:       DefaultEfficiency,
-               ReferencePeakList:       DefaultReferencePeakList,
+                OffResonanceSpectrumGroup : 'OffResonanceSpectrumGroup.pid',
+                OnResonanceSpectrumGroup : 'OnResonanceSpectrumGroup.pid',
+                newSTDSpectrumGroupName:   DefaultSTDSGname,
                }
 
-  def _addNewHit(self, spectrum, hits):
-    spectrum.newSpectrumHit(substanceName = spectrum.name)
-    npl = spectrum.newPeakList(title = 'Hits', isSimulated=True, comment='PeakList containing peak hits')
-    for hit in hits:
-      if hit is not None:
-        referencePeak , targetPeak, position = hit
-        referencePeak.copyTo(npl)
-        referencePeak.annotation = 'hit'
-        targetPeak.annotation = 'hit'
 
   def _getSpectrumGroup(self, pid):
     return self.project.getByPid(pid)
@@ -172,29 +145,29 @@ class HitFinder(SpectraPipe):
     :param spectra: inputData
     :return: aligned spectra
     '''
-
-    referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
-    targetSpectrumGroup = self._getSpectrumGroup(self._kwargs[TargetSpectrumGroup])
-    searchMode = self._kwargs[SearchMode]
-    minimumDistance = float(self._kwargs[MinimumDistance])
-    minimumEfficiency = float(self._kwargs[MinimumEfficiency])
-    nPeakList = int(self._kwargs[ReferencePeakList])
-
-    if referenceSpectrumGroup and targetSpectrumGroup is not None:
-      if len(referenceSpectrumGroup.spectra) == len(targetSpectrumGroup.spectra):
-        for referenceSpectrum, targetSpectrum in zip(referenceSpectrumGroup.spectra, targetSpectrumGroup.spectra):
-            print('Start')
-            hits = findBroadenedPeaks(referenceSpectrum, targetSpectrum, minimalDiff=0.05, limitRange=minimumDistance,
-                                      peakListIndex=nPeakList)
-
-            if len(hits)>0:
-              print(referenceSpectrum, hits)
-              self._addNewHit(referenceSpectrum, hits)
-
-
+    #
+    # referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
+    # targetSpectrumGroup = self._getSpectrumGroup(self._kwargs[TargetSpectrumGroup])
+    # searchMode = self._kwargs[SearchMode]
+    # minimumDistance = float(self._kwargs[MinimumDistance])
+    # minimumEfficiency = float(self._kwargs[MinimumEfficiency])
+    # nPeakList = int(self._kwargs[ReferencePeakList])
+    #
+    # if referenceSpectrumGroup and targetSpectrumGroup is not None:
+    #   if len(referenceSpectrumGroup.spectra) == len(targetSpectrumGroup.spectra):
+    #     for referenceSpectrum, targetSpectrum in zip(referenceSpectrumGroup.spectra, targetSpectrumGroup.spectra):
+    #         print('Start')
+    #         hits = findBroadenedPeaks(referenceSpectrum, targetSpectrum, minimalDiff=0.05, limitRange=minimumDistance,
+    #                                   peakListIndex=nPeakList)
+    #
+    #         if len(hits)>0:
+    #           print(referenceSpectrum, hits)
+    #           self._addNewHit(referenceSpectrum, hits)
+    #
+    #
 
     return spectra
 
-HitFinder.register() # Registers the pipe in the pipeline
+STDCreator.register() # Registers the pipe in the pipeline
 
 
