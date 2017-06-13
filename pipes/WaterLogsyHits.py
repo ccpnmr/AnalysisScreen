@@ -47,15 +47,14 @@ import numpy as np
 
 ## Widget variables and/or _kwargs keys
 ReferenceSpectrumGroup = 'referenceSpectrumGroup'
-STDSpectrumGroup = 'STDSpectrumGroup'
+WaterLogsySpectrumGroup = 'WaterLogsySpectrumGroup'
 
 MinimumDistance = 'minimumDistance'
 ReferencePeakList = 'referencePeakList'
 MinimumEfficiency = 'minimalEfficiency'
 CalculateEfficiency = 'calculateEfficiency'
 ReferenceSpectrumGroupName = 'References'
-OffResonanceSpectrumGroup = 'OffResonanceSpectrumGroup'
-OnResonanceSpectrumGroup = 'OnResonanceSpectrumGroup'
+Mode = ['','','']
 
 ## defaults
 DefaultEfficiency = 10
@@ -63,7 +62,7 @@ DefaultReferencePeakList =  0
 DefaultMinimumDistance = 0.01
 
 ## PipeName
-PipeName = 'STD Hits'
+PipeName = 'WaterLogsy Hits'
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -81,14 +80,14 @@ PipeName = 'STD Hits'
 
 
 
-class STDHitFinderGuiPipe(GuiPipe):
+class WaterLogsyHitFinderGuiPipe(GuiPipe):
 
   preferredPipe = True
   pipeName = PipeName
 
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
-    super(STDHitFinderGuiPipe, self)
+    super(WaterLogsyHitFinderGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
     row = 0
@@ -96,8 +95,8 @@ class STDHitFinderGuiPipe(GuiPipe):
     setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
 
     row += 1
-    self.targetSpectrumLabel = Label(self.pipeFrame, 'STD Spectrum Group', grid=(row, 0))
-    setattr(self, STDSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
+    self.targetSpectrumLabel = Label(self.pipeFrame, 'WaterLogsy Spectrum Group', grid=(row, 0))
+    setattr(self, WaterLogsySpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
 
     row += 1
     self.peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
@@ -108,26 +107,6 @@ class STDHitFinderGuiPipe(GuiPipe):
     setattr(self, MinimumDistance,
             LineEdit(self.pipeFrame, text=str(DefaultMinimumDistance), textAligment='l', grid=(row, 1), hAlign='l'))
 
-    row += 1
-    self.efficiencyLabel = Label(self.pipeFrame, 'Calculate efficiency', grid=(row, 0))
-    setattr(self, CalculateEfficiency, CheckBox(self.pipeFrame, checked=False, callback=self._manageEfficiencyWidgets,
-                                                grid=(row, 1), hAlign='l'))
-
-
-    row += 1
-    self.offResonanceLabel = Label(self.pipeFrame, 'Off Resonance Spectrum Group', grid=(row, 0))
-    setattr(self, OffResonanceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
-
-    row += 1
-    self.targetSpectrumLabel = Label(self.pipeFrame, 'On Resonance Spectrum Group', grid=(row, 0))
-    setattr(self, OnResonanceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
-
-    row += 1
-    self.minimalEfficiencyLabel = Label(self.pipeFrame, 'Minimal  Efficiency (%)' , grid=(row, 0))
-    setattr(self, MinimumEfficiency, DoubleSpinbox(self.pipeFrame, value=DefaultEfficiency, grid=(row, 1), hAlign='l'))
-
-    _getWidgetByAtt(self, CalculateEfficiency).setEnabled(False)
-    self._hideEfficiencyWidgets()
     self._updateInputDataWidgets()
 
   def _updateInputDataWidgets(self):
@@ -138,7 +117,7 @@ class STDHitFinderGuiPipe(GuiPipe):
     spectrumGroups = list(self.spectrumGroups)
     if len(spectrumGroups)>0:
       _getWidgetByAtt(self, ReferenceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
-      _getWidgetByAtt(self, STDSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
+      _getWidgetByAtt(self, WaterLogsySpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
 
       # trying to select reference spectrum group in the correct pulldown by matching name
       for sg in spectrumGroups:
@@ -146,30 +125,7 @@ class STDHitFinderGuiPipe(GuiPipe):
           _getWidgetByAtt(self, ReferenceSpectrumGroup).select(sg)
     else:
       _getWidgetByAtt(self, ReferenceSpectrumGroup).clear()
-      _getWidgetByAtt(self, STDSpectrumGroup).clear()
-
-  def _hideEfficiencyWidgets(self):
-    self.offResonanceLabel.hide()
-    self.targetSpectrumLabel.hide()
-    self.minimalEfficiencyLabel.hide()
-    _getWidgetByAtt(self, OffResonanceSpectrumGroup).hide()
-    _getWidgetByAtt(self, OnResonanceSpectrumGroup).hide()
-    _getWidgetByAtt(self, MinimumEfficiency).hide()
-
-  def _showEfficiencyWidgets(self):
-    self.offResonanceLabel.show()
-    self.targetSpectrumLabel.show()
-    self.minimalEfficiencyLabel.show()
-    _getWidgetByAtt(self, OffResonanceSpectrumGroup).show()
-    _getWidgetByAtt(self, OnResonanceSpectrumGroup).show()
-    _getWidgetByAtt(self, MinimumEfficiency).show()
-
-  def _manageEfficiencyWidgets(self):
-    checkbox = _getWidgetByAtt(self, CalculateEfficiency)
-    if checkbox.isChecked():
-      self._showEfficiencyWidgets()
-    else:
-      self._hideEfficiencyWidgets()
+      _getWidgetByAtt(self, WaterLogsySpectrumGroup).clear()
 
 
 
@@ -184,22 +140,21 @@ class STDHitFinderGuiPipe(GuiPipe):
 
 
 
-class STDHitFinder(SpectraPipe):
+class WaterLogsyHitFinderPipe(SpectraPipe):
 
-  guiPipe = STDHitFinderGuiPipe
+  guiPipe = WaterLogsyHitFinderGuiPipe
   pipeName = PipeName
 
   _kwargs  =   {
                 ReferenceSpectrumGroup: 'spectrumGroup.pid',
-                STDSpectrumGroup:       'spectrumGroup.pid',
-                OffResonanceSpectrumGroup: 'OffResonanceSpectrumGroup.pid',
-                OnResonanceSpectrumGroup: 'OnResonanceSpectrumGroup.pid',
+                WaterLogsySpectrumGroup:       'spectrumGroup.pid',
                 MinimumDistance:         DefaultMinimumDistance,
                 MinimumEfficiency:       DefaultEfficiency,
                 ReferencePeakList:       DefaultReferencePeakList,
                }
 
   def _addNewHit(self, spectrum, hits):
+    # FIXME hack TODO better
     spectrum.newSpectrumHit(substanceName = spectrum.name)
     npl = spectrum.newPeakList(title = 'Hits', isSimulated=True, comment='PeakList containing peak hits')
     for lst in hits:
@@ -223,21 +178,20 @@ class STDHitFinder(SpectraPipe):
     '''
 
     referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
-    stdSpectrumGroup = self._getSpectrumGroup(self._kwargs[STDSpectrumGroup])
+    waterLogsySpectrumGroup = self._getSpectrumGroup(self._kwargs[WaterLogsySpectrumGroup])
     minimumDistance = float(self._kwargs[MinimumDistance])
     minimumEfficiency = float(self._kwargs[MinimumEfficiency])
     nPeakList = int(self._kwargs[ReferencePeakList])
 
-    if referenceSpectrumGroup and stdSpectrumGroup is not None:
-      for stdSpectrum in stdSpectrumGroup.spectra:
-        if stdSpectrum:
-          hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=referenceSpectrumGroup.spectra, limitRange=minimumDistance)
+    if referenceSpectrumGroup and waterLogsySpectrumGroup is not None:
+      for wLogsySpectrum in waterLogsySpectrumGroup.spectra:
+        if wLogsySpectrum:
 
           if len(hits)>0:
-            self._addNewHit(stdSpectrum, hits)
+            self._addNewHit(wLogsySpectrum, hits)
 
     return spectra
 
-STDHitFinder.register() # Registers the pipe in the pipeline
+WaterLogsyHitFinderPipe.register() # Registers the pipe in the pipeline
 
 
