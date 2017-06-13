@@ -33,9 +33,8 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from scipy import signal
-import numpy as np
-
+from ccpn.AnalysisScreen.lib.experimentAnalysis.STD import spectrumDifference
+from ccpn.pipes.lib._new1Dspectrum import _create1DSpectrum
 
 ########################################################################################################################
 ###   Attributes:
@@ -48,7 +47,7 @@ OnResonanceSpectrumGroup = 'OnResonanceSpectrumGroup'
 OnResonance = 'OnResonance'
 OffResonance = 'OffResonance'
 
-newSTDSpectrumGroupName = 'newSTDSpectrumGroupName'
+NewSTDSpectrumGroupName = 'newSTDSpectrumGroupName'
 DefaultSTDSGname = 'STD'
 
 PipeName = 'STD Creator'
@@ -56,7 +55,6 @@ PipeName = 'STD Creator'
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
-
 
 
 
@@ -89,7 +87,7 @@ class STDCreatorGuiPipe(GuiPipe):
 
     row += 1
     self.newSTDSpectrumGroupLabel = Label(self.pipeFrame, 'New STD Spectrum Group Name', grid=(row, 0))
-    setattr(self, newSTDSpectrumGroupName, LineEdit(self.pipeFrame, text=DefaultSTDSGname, textAligment='l', grid=(row, 1)))
+    setattr(self, NewSTDSpectrumGroupName, LineEdit(self.pipeFrame, text=DefaultSTDSGname, textAligment='l', grid=(row, 1)))
 
     self._updateWidgets()
 
@@ -133,38 +131,42 @@ class STDCreator(SpectraPipe):
   _kwargs  =   {
                 OffResonanceSpectrumGroup : 'OffResonanceSpectrumGroup.pid',
                 OnResonanceSpectrumGroup : 'OnResonanceSpectrumGroup.pid',
-                newSTDSpectrumGroupName:   DefaultSTDSGname,
+                NewSTDSpectrumGroupName:   DefaultSTDSGname,
                }
 
 
-  def _getSpectrumGroup(self, pid):
-    return self.project.getByPid(pid)
+
+  def _createSTDs(self, offResonanceSpectrumGroup, onResonanceSpectrumGroup):
+    spectraSTD = []
+    if offResonanceSpectrumGroup and onResonanceSpectrumGroup is not None:
+      if len(offResonanceSpectrumGroup.spectra) == len(onResonanceSpectrumGroup.spectra):
+        for offResonanceSpectrum, onResonanceSpectrum in zip(offResonanceSpectrumGroup.spectra, onResonanceSpectrumGroup.spectra):
+          stdIntensities = spectrumDifference(offResonanceSpectrum, onResonanceSpectrum)
+          stdPositions = offResonanceSpectrum.positions
+          std = _create1DSpectrum(self.project, offResonanceSpectrum.name+'_STD', stdIntensities, stdPositions, 'STD.H')
+          spectraSTD.append(std)
+    return spectraSTD
+
+  def _createNewSTDspectrumGroup(self, name, stdSpectra):
+    if not self.project.getByPid('SG:'+name):
+      self.project.newSpectrumGroup(name = name, spectra = stdSpectra)
+    else:
+      self.project.newSpectrumGroup(name=name+'_new', spectra=stdSpectra)
 
   def runPipe(self, spectra):
     '''
     :param spectra: inputData
     :return: aligned spectra
     '''
-    #
-    # referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
-    # targetSpectrumGroup = self._getSpectrumGroup(self._kwargs[TargetSpectrumGroup])
-    # searchMode = self._kwargs[SearchMode]
-    # minimumDistance = float(self._kwargs[MinimumDistance])
-    # minimumEfficiency = float(self._kwargs[MinimumEfficiency])
-    # nPeakList = int(self._kwargs[ReferencePeakList])
-    #
-    # if referenceSpectrumGroup and targetSpectrumGroup is not None:
-    #   if len(referenceSpectrumGroup.spectra) == len(targetSpectrumGroup.spectra):
-    #     for referenceSpectrum, targetSpectrum in zip(referenceSpectrumGroup.spectra, targetSpectrumGroup.spectra):
-    #         print('Start')
-    #         hits = findBroadenedPeaks(referenceSpectrum, targetSpectrum, minimalDiff=0.05, limitRange=minimumDistance,
-    #                                   peakListIndex=nPeakList)
-    #
-    #         if len(hits)>0:
-    #           print(referenceSpectrum, hits)
-    #           self._addNewHit(referenceSpectrum, hits)
-    #
-    #
+
+    offResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OffResonanceSpectrumGroup])
+    onResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OnResonanceSpectrumGroup])
+    newSTDSpectrumGroupName = self._kwargs[NewSTDSpectrumGroupName]
+
+    stds = self._createSTDs(offResonanceSpectrumGroup, onResonanceSpectrumGroup)
+    if len(stds)==len(offResonanceSpectrumGroup.spectra):
+      self._createNewSTDspectrumGroup(name=newSTDSpectrumGroupName, stdSpectra= stds)
+
 
     return spectra
 

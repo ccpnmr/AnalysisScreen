@@ -164,8 +164,6 @@ class HitFinder(SpectraPipe):
         referencePeak.annotation = 'hit'
         targetPeak.annotation = 'hit'
 
-  def _getSpectrumGroup(self, pid):
-    return self.project.getByPid(pid)
 
   def runPipe(self, spectra):
     '''
