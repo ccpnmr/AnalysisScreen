@@ -89,9 +89,9 @@ class STDCreatorGuiPipe(GuiPipe):
     self.newSTDSpectrumGroupLabel = Label(self.pipeFrame, 'New STD Spectrum Group Name', grid=(row, 0))
     setattr(self, NewSTDSpectrumGroupName, LineEdit(self.pipeFrame, text=DefaultSTDSGname, textAligment='l', grid=(row, 1)))
 
-    self._updateWidgets()
+    self._updateInputDataWidgets()
 
-  def _updateWidgets(self):
+  def _updateInputDataWidgets(self):
     self._setDataPullDowns()
 
 
@@ -107,6 +107,10 @@ class STDCreatorGuiPipe(GuiPipe):
           _getWidgetByAtt(self, OnResonanceSpectrumGroup).select(sg)
         elif OffResonance in sg.name:
           _getWidgetByAtt(self, OffResonanceSpectrumGroup).select(sg)
+
+    else:
+      _getWidgetByAtt(self, OffResonanceSpectrumGroup).clear()
+      _getWidgetByAtt(self, OnResonanceSpectrumGroup).clear()
 
 
 

@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 import numpy as np
 from ccpn.AnalysisScreen.lib.experimentAnalysis.MatchPositions import matchPeaks
+import decimal
 
 def spectrumDifference(spectrumA, spectrumB):
   '''
@@ -48,10 +49,21 @@ def spectrumDifference(spectrumA, spectrumB):
     return np.array([])
 
 
+def efficiency(a, b):
+  '''
+  Calculetes the efficiencies between two arrays.
+  EG STD efficiensy:
 
-def find_STD_Hits(stdSpectrum, referenceSpectra:list, isMixture=False,
+  :param a: off resonance array or peak intensity
+  :param b: on resonance array or peak intensity
+  :return:  efficiency in percentage
+  '''
+
+  return (abs(a - b) / a) * 100
+
+
+def _find_STD_Hits(stdSpectrum, referenceSpectra: list, isMixture=False,
                   limitRange=0.01, minEfficiency=None, maxEfficiency=None, excludeRegions=None):
-
   hits = []
   if referenceSpectra:
     for referenceSpectrum in referenceSpectra:
@@ -59,3 +71,30 @@ def find_STD_Hits(stdSpectrum, referenceSpectra:list, isMixture=False,
       hits.append(matches)
 
   return hits
+
+
+def _calculatePeakEffiency(hitSTDPeak, onResonanceSpectrum, offResonanceSpectrum, limitRange=0.0):
+  ''' matchs the hit peak to the on and off Resonance and determines the efficiency change'''
+  if not onResonanceSpectrum.peakLists[0].peaks and not offResonanceSpectrum.peakLists[0].peaks: return
+
+
+def _stdEfficiency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, hitPositions, minDistance):
+  '''
+
+  :param spectrumOffResonancePeaks:
+  :param spectrumOnResonancePeaks:
+  :param matchedPositions: list of hit positions
+  :param minDistance:
+  :return:
+  '''
+  efficiency = []
+  for position in hitPositions:
+    for onResPeak in spectrumOnResonancePeaks:
+      for offResPeak in spectrumOffResonancePeaks:
+        if abs(offResPeak.position[0] - onResPeak.position[0]) <= float(minDistance) and offResPeak.position[
+          0] == position:
+          fullValue = ((abs(offResPeak.height - onResPeak.height)) / offResPeak.height) * 100
+          value = decimal.Decimal(fullValue).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN)
+          efficiency.append(value)
+
+  return efficiency
