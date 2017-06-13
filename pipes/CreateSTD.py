@@ -78,12 +78,12 @@ class STDCreatorGuiPipe(GuiPipe):
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
     row = 0
-    self.offResonanceLabel = Label(self.pipeFrame, 'Off Resonance Spectrum Group',  grid=(row,0))
-    setattr(self, OffResonanceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
+    self.offResonanceLabel = Label(self.pipeFrame, 'Off Resonance Spectrum Group', grid=(row,0))
+    setattr(self, OffResonanceSpectrumGroup, PulldownList(self.pipeFrame,  grid=(row, 1)))
 
     row += 1
     self.targetSpectrumLabel = Label(self.pipeFrame, 'On Resonance Spectrum Group', grid=(row, 0))
-    setattr(self, OnResonanceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
+    setattr(self, OnResonanceSpectrumGroup, PulldownList(self.pipeFrame,  grid=(row, 1)))
 
     row += 1
     self.newSTDSpectrumGroupLabel = Label(self.pipeFrame, 'New STD Spectrum Group Name', grid=(row, 0))
@@ -98,8 +98,9 @@ class STDCreatorGuiPipe(GuiPipe):
   def _setDataPullDowns(self):
     spectrumGroups = list(self.spectrumGroups)
     if len(spectrumGroups)>0:
-      _getWidgetByAtt(self, OffResonanceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
-      _getWidgetByAtt(self, OnResonanceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
+      _getWidgetByAtt(self, OffResonanceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups,
+                                                              )
+      _getWidgetByAtt(self, OnResonanceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups,)
 
       # trying to select reference spectrum group in the correct pulldown by matching name
       for sg in spectrumGroups:
@@ -109,8 +110,8 @@ class STDCreatorGuiPipe(GuiPipe):
           _getWidgetByAtt(self, OffResonanceSpectrumGroup).select(sg)
 
     else:
-      _getWidgetByAtt(self, OffResonanceSpectrumGroup).clear()
-      _getWidgetByAtt(self, OnResonanceSpectrumGroup).clear()
+      _getWidgetByAtt(self, OffResonanceSpectrumGroup)._clear()
+      _getWidgetByAtt(self, OnResonanceSpectrumGroup)._clear()
 
 
 

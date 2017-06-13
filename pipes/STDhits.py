@@ -93,7 +93,7 @@ class STDHitFinderGuiPipe(GuiPipe):
     self.parent = parent
     row = 0
     self.referenceSpectrumLabel = Label(self.pipeFrame, 'Reference Spectrum Group',  grid=(row,0))
-    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
+    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame,  grid=(row, 1)))
 
     row += 1
     self.targetSpectrumLabel = Label(self.pipeFrame, 'STD Spectrum Group', grid=(row, 0))
@@ -145,8 +145,8 @@ class STDHitFinderGuiPipe(GuiPipe):
         if ReferenceSpectrumGroupName in sg.name:
           _getWidgetByAtt(self, ReferenceSpectrumGroup).select(sg)
     else:
-      _getWidgetByAtt(self, ReferenceSpectrumGroup).clear()
-      _getWidgetByAtt(self, STDSpectrumGroup).clear()
+      _getWidgetByAtt(self, ReferenceSpectrumGroup)._clear()
+      _getWidgetByAtt(self, STDSpectrumGroup)._clear()
 
   def _hideEfficiencyWidgets(self):
     self.offResonanceLabel.hide()
