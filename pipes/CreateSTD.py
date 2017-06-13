@@ -44,8 +44,8 @@ from ccpn.pipes.lib._new1Dspectrum import _create1DSpectrum
 OffResonanceSpectrumGroup = 'OffResonanceSpectrumGroup'
 OnResonanceSpectrumGroup = 'OnResonanceSpectrumGroup'
 
-OnResonance = 'OnResonance'
-OffResonance = 'OffResonance'
+OnResonance = 'On'
+OffResonance = 'Off'
 
 NewSTDSpectrumGroupName = 'newSTDSpectrumGroupName'
 DefaultSTDSGname = 'STD'
@@ -78,11 +78,11 @@ class STDCreatorGuiPipe(GuiPipe):
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
     row = 0
-    self.offResonanceLabel = Label(self.pipeFrame, OffResonance+' Spectrum Group',  grid=(row,0))
+    self.offResonanceLabel = Label(self.pipeFrame, 'Off Resonance Spectrum Group',  grid=(row,0))
     setattr(self, OffResonanceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
 
     row += 1
-    self.targetSpectrumLabel = Label(self.pipeFrame, OnResonance+' Spectrum Group', grid=(row, 0))
+    self.targetSpectrumLabel = Label(self.pipeFrame, 'On Resonance Spectrum Group', grid=(row, 0))
     setattr(self, OnResonanceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
 
     row += 1
@@ -148,10 +148,14 @@ class STDCreator(SpectraPipe):
     return spectraSTD
 
   def _createNewSTDspectrumGroup(self, name, stdSpectra):
+    newSTDspectrumGroup = None
     if not self.project.getByPid('SG:'+name):
-      self.project.newSpectrumGroup(name = name, spectra = stdSpectra)
+      newSTDspectrumGroup = self.project.newSpectrumGroup(name = name, spectra = stdSpectra)
     else:
-      self.project.newSpectrumGroup(name=name+'_new', spectra=stdSpectra)
+      newSTDspectrumGroup = self.project.newSpectrumGroup(name=name+'_new', spectra=stdSpectra)
+
+    if newSTDspectrumGroup is not None:
+      return newSTDspectrumGroup
 
   def runPipe(self, spectra):
     '''
@@ -165,10 +169,13 @@ class STDCreator(SpectraPipe):
 
     stds = self._createSTDs(offResonanceSpectrumGroup, onResonanceSpectrumGroup)
     if len(stds)==len(offResonanceSpectrumGroup.spectra):
-      self._createNewSTDspectrumGroup(name=newSTDSpectrumGroupName, stdSpectra= stds)
+      newSTDspectrumGroup = self._createNewSTDspectrumGroup(name=newSTDSpectrumGroupName, stdSpectra= stds)
+      self.spectrumGroups.update([newSTDspectrumGroup])
 
+      listsOfSpectra =  [onResonanceSpectrumGroup.spectra, offResonanceSpectrumGroup.spectra, newSTDspectrumGroup.spectra]
+      spectra = [spectrum for spectra in listsOfSpectra for spectrum in spectra]
 
-    return spectra
+    return set(spectra)
 
 STDCreator.register() # Registers the pipe in the pipeline
 
