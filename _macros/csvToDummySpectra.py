@@ -73,9 +73,12 @@ _createDummies(spectra,)
 
 #  all in
 import pandas as pd
-filePaths = ['/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component1_1H_Yes_Target.csv',
-             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component2_1H_Yes_Target.csv',
-             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component3_1H_Yes_Target.csv']
+filePaths = ['/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component_1_WL_No_Target.csv',
+             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component_2_WL_No_Target.csv',
+             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component_3_WL_No_Target.csv',
+             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component_1_WL_Yes_Target.csv',
+             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component_2_WL_Yes_Target.csv',
+             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component_3_WL_Yes_Target.csv']
 spectra = []
 for path in filePaths:
     fileName = path.split('/')[-1].split('.')[0]
@@ -92,11 +95,21 @@ from ccpn.util.Hdf5 import convertDataToHdf5
 a = project.spectra[0]
 b = project.spectra[1]
 c = project.spectra[2]
-path = '/Users/luca/AnalysisV3/data/testProjects/AnalysisScreen_Demo1/demoLineBroadening/'
+d = project.spectra[3]
+f = project.spectra[4]
+g = project.spectra[5]
+
+path = '/Users/luca/AnalysisV3/data/testProjects/AnalysisScreen_Demo1/demoWaterLogsy/'
 a_fullPath = str(path)+str(a.name)+'.hdf5'
 b_fullPath = str(path)+str(b.name)+'.hdf5'
 c_fullPath = str(path)+str(c.name)+'.hdf5'
+d_fullPath = str(path)+str(d.name)+'.hdf5'
+f_fullPath = str(path)+str(f.name)+'.hdf5'
+g_fullPath = str(path)+str(g.name)+'.hdf5'
 
 convertDataToHdf5(a, a_fullPath)
 convertDataToHdf5(b, b_fullPath)
 convertDataToHdf5(c, c_fullPath)
+convertDataToHdf5(d, d_fullPath)
+convertDataToHdf5(f, f_fullPath)
+convertDataToHdf5(g, g_fullPath)

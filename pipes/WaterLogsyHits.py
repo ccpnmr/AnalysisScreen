@@ -95,7 +95,11 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
     super(WaterLogsyHitFinderGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
+
     row = 0
+    self.modeLabel = Label(self.pipeFrame, 'Mode', grid=(row, 0))
+    setattr(self, ModeHit, PulldownList(self.pipeFrame, texts=Mode, grid=(row, 1)))
+
     self.referenceSpectrumLabel = Label(self.pipeFrame, 'Reference Spectrum Group',  grid=(row,0))
     setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame,  headerText=PulldownHeaderText, headerEnabled=True, grid=(row, 1)))
 
@@ -115,6 +119,10 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
     self.minimumDistanceLabel = Label(self.pipeFrame, text='Match peaks within (ppm)', grid=(row, 0))
     setattr(self, MinimumDistance,
             LineEdit(self.pipeFrame, text=str(DefaultMinimumDistance), textAligment='l', grid=(row, 1), hAlign='l'))
+
+    row += 1
+    self.minimalEfficiencyLabel = Label(self.pipeFrame, 'Minimal  Efficiency (%)', grid=(row, 0))
+    setattr(self, MinimumEfficiency, DoubleSpinbox(self.pipeFrame, value=DefaultEfficiency, grid=(row, 1), hAlign='l'))
 
     row += 1
     self.modeLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
@@ -195,18 +203,22 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
     '''
 
     referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
-    waterLogsySpectrumGroup = self._getSpectrumGroup(self._kwargs[WaterLogsySpectrumGroup])
+    wLcontrolSpectrumGroup = self._getSpectrumGroup(self._kwargs[WLcontrolSpectrumGroup])
+    wLtargetSpectrumGroup = self._getSpectrumGroup(self._kwargs[WLcontrolSpectrumGroup])
+
     minimumDistance = float(self._kwargs[MinimumDistance])
     minimumEfficiency = float(self._kwargs[MinimumEfficiency])
     nPeakList = int(self._kwargs[ReferencePeakList])
 
-    if referenceSpectrumGroup and waterLogsySpectrumGroup is not None:
-      for wLogsySpectrum in waterLogsySpectrumGroup.spectra:
-        if wLogsySpectrum:
-          hits = findWaterLogsyHits(wLTarget=waterLogsySpectrumGroup, references=referenceSpectrumGroup, limitRange=minimumDistance)
-          if len(hits)>0:
-            print(hits)
-            # self._addNewHit(wLogsySpectrum, hits)
+    mode = self._kwargs[ModeHit]
+
+    if referenceSpectrumGroup and wLtargetSpectrumGroup is not None:
+
+      for targetSpectrum, controlSpectrum in zip(wLtargetSpectrumGroup.spectra, referenceSpectrumGroup.spectra):
+        hits = findWaterLogsyHits(wLTarget=targetSpectrum, wLControl=controlSpectrum,mode=mode, limitRange=minimumDistance)
+        if len(hits)>0:
+          print(hits)
+              # self._addNewHit(wLogsySpectrum, hits)
 
     return spectra
 

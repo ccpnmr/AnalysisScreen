@@ -23,7 +23,10 @@ __date__ = "$Date: 2017-02-16 10:28:42 +0000 (Sun, May 28, 2017) $"
 # Start of code
 #=========================================================================================
 
-
+SignChanged = 'SignChanged'
+IntensityChanged = 'intensityChanged'
+PositiveOnly = 'positiveOnly'
+missingPeak = 'MissingPeak'
 
 import numpy as np
 from ccpn.AnalysisScreen.lib.experimentAnalysis import MatchPositions as mp
@@ -38,7 +41,7 @@ def __positiveHits(wlT_Peaks, wlT_PeakPos_filtered):
     if pa.intensitySignChanged(-1, wlPeak.height):
       if wlPeak.position[0] in wlT_PeakPos_filtered:
         hits.append({'wLControlPeak': None, 'TargetPeak': wlPeak,
-                     'Pos': wlPeak.position[0], 'HitType': 'PositivePeak'})
+                     'Pos': wlPeak.position[0], 'HitType': PositiveOnly})
   return hits
 
 
@@ -100,10 +103,10 @@ def __findHitsByMissingTargetPeaks(wLControl, wLTarget, matchedControl, peakList
 
 def __findHitsByIntensityChange(wLControlPeak, TargetPeak):
   hits = []
-  intensityDifferences = pa.getIntensiyChange(wLControlPeak.intensity, TargetPeak.intensity)
+  intensityDifferences = pa.getIntensiyChange(wLControlPeak.height, TargetPeak.height)
   if abs(intensityDifferences) > 0.0:
     hits.append({'wLControlPeak': wLControlPeak, 'TargetPeak': TargetPeak,
-                 'Pos': TargetPeak.position[0], 'HitType': 'intensityChanged'})
+                 'Pos': TargetPeak.position[0], 'HitType': IntensityChanged})
 
   return hits
 
@@ -114,20 +117,20 @@ def __findHitsByMode(matches, matchedControl, wlT_PeakPos_filtered, mode):
     wLControlPeak, TargetPeak, pos = match
     matchedControl.append(wLControlPeak)
 
-    if pa.intensitySignChanged(wLControlPeak.intensity, TargetPeak.intensity):
+    if pa.intensitySignChanged(wLControlPeak.height, TargetPeak.height):
       if TargetPeak.position[0] in wlT_PeakPos_filtered:
-        if mode == 'signChanged':
+        if mode == SignChanged:
           hits.append({'wLControlPeak': wLControlPeak, 'TargetPeak': TargetPeak,
-                       'Pos': TargetPeak.position[0], 'HitType': 'SignChanged'})
+                       'Pos': TargetPeak.position[0], 'HitType': SignChanged})
         else:
-          if mode == 'intensityChanged':
-            intensityDifferences = pa.getIntensiyChange(wLControlPeak.intensity, TargetPeak.intensity)
+          if mode == IntensityChanged:
+            intensityDifferences = pa.getIntensiyChange(wLControlPeak.height, TargetPeak.height)
             if abs(intensityDifferences) > 0.0:
               hits.append({'wLControlPeak': wLControlPeak, 'TargetPeak': TargetPeak,
-                           'Pos': TargetPeak.position[0], 'HitType': 'intensityChanged'})
+                           'Pos': TargetPeak.position[0], 'HitType': IntensityChanged})
 
-    if mode == 'positiveOnly':
-      if pa.isPositive(TargetPeak.intensity):
+    if mode == PositiveOnly:
+      if pa.isPositive(TargetPeak.height):
         hits.append({'wLControlPeak': wLControlPeak, 'TargetPeak': TargetPeak,
                      'Pos': TargetPeak.position[0], 'HitType': 'positivePeaks'})
   return hits
@@ -149,7 +152,7 @@ def __addMissingHits(hits, wLControl, wLTarget, matchedControl):
   return hits
 
 
-def findWaterLogsyHits(wLTarget, wLControl=None, references=None, mode='intensityChanged', isMixture=False,
+def findWaterLogsyHits(wLTarget, wLControl=None, references=None, mode=IntensityChanged, isMixture=False,
                        limitRange=0.0, excludeRegions=None):
   '''
   wLTarget: obj spectrum.   wl spectrum with target
@@ -170,7 +173,7 @@ def findWaterLogsyHits(wLTarget, wLControl=None, references=None, mode='intensit
   excludeRegions: region of spectrum to exclude. Format: list of lists E.G. [['start','stop'],  '...', ['start','stop']]
 
 
-  peakHit in the format {'wLControlPeak': obj, 'TargetPeak': obj,'Pos': float, 'HitType': str(one of: 'positivePeak', 'intensityChanged', 'missingPeak'}
+  peakHit in the format {'wLControlPeak': obj, 'TargetPeak': obj,'Pos': float, 'HitType': str(one of: PositiveOnly, IntensityChanged, 'missingPeak'}
 
   return hits:
   if only wlTarget: return -->  list[peakHit, ...]
