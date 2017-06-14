@@ -26,7 +26,9 @@ __date__ = "$Date: 2017-02-16 10:28:42 +0000 (Sun, May 28, 2017) $"
 SignChanged = 'SignChanged'
 IntensityChanged = 'intensityChanged'
 PositiveOnly = 'positiveOnly'
-missingPeak = 'MissingPeak'
+MissingPeak = 'MissingPeak'
+
+MODES = [IntensityChanged, PositiveOnly, SignChanged]
 
 import numpy as np
 from ccpn.AnalysisScreen.lib.experimentAnalysis import MatchPositions as mp
@@ -165,7 +167,7 @@ def findWaterLogsyHits(wLTarget, wLControl=None, references=None, mode=Intensity
             - intensityChanged (detects the intensity changes of peaks from wlControl to wlTarget.
                               Unavailable without wLControl )
 
-            - positiveOnly (detects only if the intensity peaks of wlControl are positive. Used if there is no wlControl.
+            - positiveOnly (detects only if the intensity peaks of wlTarget are positive. Used if there is no wlControl.
                        NB this can give false positive hits in case of aggregation of ligands)
 
 

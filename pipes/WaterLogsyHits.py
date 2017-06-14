@@ -30,11 +30,11 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.Icon import Icon
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from ccpn.AnalysisScreen.lib.experimentAnalysis.WaterLogsy import findWaterLogsyHits
+from ccpn.AnalysisScreen.lib.experimentAnalysis import WaterLogsy as wl
 from scipy import signal
 import numpy as np
 
@@ -57,7 +57,7 @@ CalculateEfficiency = 'calculateEfficiency'
 ReferenceSpectrumGroupName = 'References'
 ModeHit = 'modeHit'
 
-Mode = ['SignChanged','IntensityChanged','PositiveOnly']
+# MODES = [IntensityChanged, PositiveOnly, MissingPeak]
 
 ## defaults
 DefaultEfficiency = 10
@@ -95,30 +95,32 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
     super(WaterLogsyHitFinderGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
+    self.warningIcon = Icon('icons/warning')
 
     row = 0
     self.modeLabel = Label(self.pipeFrame, 'Mode', grid=(row, 0))
-    setattr(self, ModeHit, PulldownList(self.pipeFrame, texts=Mode, grid=(row, 1)))
-
+    setattr(self, ModeHit, PulldownList(self.pipeFrame, texts=wl.MODES, grid=(row, 1)))
+    _getWidgetByAtt(self, ModeHit).activated[str].connect(self._modeCallback)
+    row += 1
     self.referenceSpectrumLabel = Label(self.pipeFrame, 'Reference Spectrum Group',  grid=(row,0))
-    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame,  headerText=PulldownHeaderText, headerEnabled=True, grid=(row, 1)))
+    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame, headerText=PulldownHeaderText, headerEnabled=True,
+                                                       headerIcon=self.warningIcon,grid=(row, 1)))
 
     row += 1
     self.targetSpectrumLabel = Label(self.pipeFrame, 'WL Control Spectrum Group', grid=(row, 0))
-    setattr(self, WLcontrolSpectrumGroup, PulldownList(self.pipeFrame,  headerText=PulldownHeaderText, headerEnabled=True, grid=(row, 1)))
+    setattr(self, WLcontrolSpectrumGroup, PulldownList(self.pipeFrame,  headerText=PulldownHeaderText,headerEnabled=True,
+                                                       headerIcon=self.warningIcon, grid=(row, 1)))
 
     row += 1
     self.targetSpectrumLabel = Label(self.pipeFrame, 'WL Target Spectrum Group', grid=(row, 0))
-    setattr(self, WLtargetSpectrumGroup, PulldownList(self.pipeFrame,   grid=(row, 1)))
+    setattr(self, WLtargetSpectrumGroup, PulldownList(self.pipeFrame, headerText=PulldownHeaderText, headerEnabled=True,
+                                                      headerIcon=self.warningIcon,  grid=(row, 1)))
 
-    row += 1
-    self.modeLabel = Label(self.pipeFrame, 'Mode', grid=(row, 0))
-    setattr(self, ModeHit, PulldownList(self.pipeFrame, texts=Mode, grid=(row, 1)))
 
     row += 1
     self.minimumDistanceLabel = Label(self.pipeFrame, text='Match peaks within (ppm)', grid=(row, 0))
-    setattr(self, MinimumDistance,
-            LineEdit(self.pipeFrame, text=str(DefaultMinimumDistance), textAligment='l', grid=(row, 1), hAlign='l'))
+    setattr(self, MinimumDistance, LineEdit(self.pipeFrame, text=str(DefaultMinimumDistance),
+                                            textAligment='l', grid=(row, 1), hAlign='l'))
 
     row += 1
     self.minimalEfficiencyLabel = Label(self.pipeFrame, 'Minimal  Efficiency (%)', grid=(row, 0))
@@ -131,30 +133,19 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
     self._updateInputDataWidgets()
 
   def _updateInputDataWidgets(self):
-    self._setDataPullDowns()
+    self._setSpectrumGroupPullDowns(widgetVariables = [ReferenceSpectrumGroup, WLcontrolSpectrumGroup, WLtargetSpectrumGroup],
+                                    headerText=PulldownHeaderText, headerEnabled=False, headerIcon=self.warningIcon)
 
 
-  def _setDataPullDowns(self):
-    spectrumGroups = list(self.spectrumGroups)
-    if len(spectrumGroups)>0:
-      _getWidgetByAtt(self, ReferenceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups,
-                                                    headerText = PulldownHeaderText, headerEnabled = True,)
-      _getWidgetByAtt(self, WLcontrolSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups,
-                                                    headerText = PulldownHeaderText, headerEnabled = True,)
-      _getWidgetByAtt(self, WLtargetSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups,
-                                                    headerText = PulldownHeaderText, headerEnabled = True,)
 
-      # trying to select reference spectrum group in the correct pulldown by matching name
-      for sg in spectrumGroups:
-        if ReferenceSpectrumGroupName in sg.name:
-          _getWidgetByAtt(self, ReferenceSpectrumGroup).select(sg)
-    else:
-      _getWidgetByAtt(self, ReferenceSpectrumGroup)._clear()
+
+  def _modeCallback(self, selected):
+    'manages the spectrumgroups pullDown'
+    if selected == wl.PositiveOnly:
+      _getWidgetByAtt(self, WLcontrolSpectrumGroup).setEnabled(False)
       _getWidgetByAtt(self, WLcontrolSpectrumGroup)._clear()
-      _getWidgetByAtt(self, WLtargetSpectrumGroup)._clear()
-
-
-
+    elif selected == wl.IntensityChanged or selected == wl.SignChanged:
+      _getWidgetByAtt(self, WLcontrolSpectrumGroup).setEnabled(True)
 
 
 ########################################################################################################################
@@ -171,7 +162,7 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
 
   _kwargs  =   {
                 ReferenceSpectrumGroup: 'spectrumGroup.pid',
-                WLtargetSpectrumGroup:       'spectrumGroup.pid',
+                WLtargetSpectrumGroup:  'spectrumGroup.pid',
                 WLcontrolSpectrumGroup: 'spectrumGroup.pid',
                 MinimumDistance:         DefaultMinimumDistance,
                 MinimumEfficiency:       DefaultEfficiency,
@@ -215,7 +206,7 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
     if referenceSpectrumGroup and wLtargetSpectrumGroup is not None:
 
       for targetSpectrum, controlSpectrum in zip(wLtargetSpectrumGroup.spectra, referenceSpectrumGroup.spectra):
-        hits = findWaterLogsyHits(wLTarget=targetSpectrum, wLControl=controlSpectrum,mode=mode, limitRange=minimumDistance)
+        hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, wLControl=controlSpectrum, mode=mode, limitRange=minimumDistance)
         if len(hits)>0:
           print(hits)
               # self._addNewHit(wLogsySpectrum, hits)
