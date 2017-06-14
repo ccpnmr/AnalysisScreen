@@ -64,7 +64,7 @@ DefaultEfficiency = 10
 DefaultReferencePeakList =  0
 DefaultMinimumDistance = 0.01
 
-PulldownHeaderText='-- None --'
+PulldownSGHeaderText ='-- Select SG --'
 
 ## PipeName
 PipeName = 'WaterLogsy Hits'
@@ -95,7 +95,7 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
     super(WaterLogsyHitFinderGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
-    self.warningIcon = Icon('icons/warning')
+
 
     row = 0
     self.modeLabel = Label(self.pipeFrame, 'Mode', grid=(row, 0))
@@ -103,18 +103,18 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
     _getWidgetByAtt(self, ModeHit).activated[str].connect(self._modeCallback)
     row += 1
     self.referenceSpectrumLabel = Label(self.pipeFrame, 'Reference Spectrum Group',  grid=(row,0))
-    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame, headerText=PulldownHeaderText, headerEnabled=True,
-                                                       headerIcon=self.warningIcon,grid=(row, 1)))
+    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
+                                                       headerIcon=self._warningIcon,grid=(row, 1)))
 
     row += 1
     self.targetSpectrumLabel = Label(self.pipeFrame, 'WL Control Spectrum Group', grid=(row, 0))
-    setattr(self, WLcontrolSpectrumGroup, PulldownList(self.pipeFrame,  headerText=PulldownHeaderText,headerEnabled=True,
-                                                       headerIcon=self.warningIcon, grid=(row, 1)))
+    setattr(self, WLcontrolSpectrumGroup, PulldownList(self.pipeFrame,  headerText=self._pulldownSGHeaderText,
+                                                       headerIcon=self._warningIcon, grid=(row, 1)))
 
     row += 1
     self.targetSpectrumLabel = Label(self.pipeFrame, 'WL Target Spectrum Group', grid=(row, 0))
-    setattr(self, WLtargetSpectrumGroup, PulldownList(self.pipeFrame, headerText=PulldownHeaderText, headerEnabled=True,
-                                                      headerIcon=self.warningIcon,  grid=(row, 1)))
+    setattr(self, WLtargetSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
+                                                      headerIcon=self._warningIcon,  grid=(row, 1)))
 
 
     row += 1
@@ -134,7 +134,7 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
 
   def _updateInputDataWidgets(self):
     self._setSpectrumGroupPullDowns(widgetVariables = [ReferenceSpectrumGroup, WLcontrolSpectrumGroup, WLtargetSpectrumGroup],
-                                    headerText=PulldownHeaderText, headerEnabled=False, headerIcon=self.warningIcon)
+                                    headerText=self._pulldownSGHeaderText, headerIcon=self._warningIcon)
 
 
 

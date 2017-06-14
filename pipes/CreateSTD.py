@@ -79,15 +79,17 @@ class STDCreatorGuiPipe(GuiPipe):
     self.parent = parent
     row = 0
     self.offResonanceLabel = Label(self.pipeFrame, 'Off Resonance Spectrum Group', grid=(row,0))
-    setattr(self, OffResonanceSpectrumGroup, PulldownList(self.pipeFrame,  grid=(row, 1)))
+    setattr(self, OffResonanceSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
+                                                       headerIcon=self._warningIcon, grid=(row, 1)), )
 
     row += 1
     self.targetSpectrumLabel = Label(self.pipeFrame, 'On Resonance Spectrum Group', grid=(row, 0))
-    setattr(self, OnResonanceSpectrumGroup, PulldownList(self.pipeFrame,  grid=(row, 1)))
+    setattr(self, OnResonanceSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
+                                                       headerIcon=self._warningIcon, grid=(row, 1)))
 
     row += 1
     self.newSTDSpectrumGroupLabel = Label(self.pipeFrame, 'New STD Spectrum Group Name', grid=(row, 0))
-    setattr(self, NewSTDSpectrumGroupName, LineEdit(self.pipeFrame, text=DefaultSTDSGname, textAligment='l', grid=(row, 1)))
+    setattr(self, NewSTDSpectrumGroupName, LineEdit(self.pipeFrame, text=DefaultSTDSGname, textAligment='l', hAlign='l', grid=(row, 1)))
 
     self._updateInputDataWidgets()
 
@@ -96,23 +98,8 @@ class STDCreatorGuiPipe(GuiPipe):
 
 
   def _setDataPullDowns(self):
-    spectrumGroups = list(self.spectrumGroups)
-    if len(spectrumGroups)>0:
-      _getWidgetByAtt(self, OffResonanceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups,
-                                                              )
-      _getWidgetByAtt(self, OnResonanceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups,)
-
-      # trying to select reference spectrum group in the correct pulldown by matching name
-      for sg in spectrumGroups:
-        if OnResonance in sg.name:
-          _getWidgetByAtt(self, OnResonanceSpectrumGroup).select(sg)
-        elif OffResonance in sg.name:
-          _getWidgetByAtt(self, OffResonanceSpectrumGroup).select(sg)
-
-    else:
-      _getWidgetByAtt(self, OffResonanceSpectrumGroup)._clear()
-      _getWidgetByAtt(self, OnResonanceSpectrumGroup)._clear()
-
+    self._setSpectrumGroupPullDowns(widgetVariables=[OffResonanceSpectrumGroup, OnResonanceSpectrumGroup],
+                                    headerText=self._pulldownSGHeaderText, headerIcon=self._warningIcon,)
 
 
 

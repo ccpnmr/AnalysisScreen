@@ -93,11 +93,13 @@ class STDHitFinderGuiPipe(GuiPipe):
     self.parent = parent
     row = 0
     self.referenceSpectrumLabel = Label(self.pipeFrame, 'Reference Spectrum Group',  grid=(row,0))
-    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame,  grid=(row, 1)))
+    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
+                                                       headerIcon=self._warningIcon, grid=(row, 1)))
 
     row += 1
     self.targetSpectrumLabel = Label(self.pipeFrame, 'STD Spectrum Group', grid=(row, 0))
-    setattr(self, STDSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
+    setattr(self, STDSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
+                                                       headerIcon=self._warningIcon,grid=(row, 1)))
 
     row += 1
     self.peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
@@ -116,11 +118,13 @@ class STDHitFinderGuiPipe(GuiPipe):
 
     row += 1
     self.offResonanceLabel = Label(self.pipeFrame, 'Off Resonance Spectrum Group', grid=(row, 0))
-    setattr(self, OffResonanceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
+    setattr(self, OffResonanceSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
+                                                       headerIcon=self._warningIcon,grid=(row, 1)))
 
     row += 1
     self.targetSpectrumLabel = Label(self.pipeFrame, 'On Resonance Spectrum Group', grid=(row, 0))
-    setattr(self, OnResonanceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
+    setattr(self, OnResonanceSpectrumGroup, PulldownList(self.pipeFrame,headerText=self._pulldownSGHeaderText,
+                                                       headerIcon=self._warningIcon, grid=(row, 1)))
 
     row += 1
     self.minimalEfficiencyLabel = Label(self.pipeFrame, 'Minimal  Efficiency (%)' , grid=(row, 0))
@@ -135,18 +139,8 @@ class STDHitFinderGuiPipe(GuiPipe):
 
 
   def _setDataPullDowns(self):
-    spectrumGroups = list(self.spectrumGroups)
-    if len(spectrumGroups)>0:
-      _getWidgetByAtt(self, ReferenceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
-      _getWidgetByAtt(self, STDSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
-
-      # trying to select reference spectrum group in the correct pulldown by matching name
-      for sg in spectrumGroups:
-        if ReferenceSpectrumGroupName in sg.name:
-          _getWidgetByAtt(self, ReferenceSpectrumGroup).select(sg)
-    else:
-      _getWidgetByAtt(self, ReferenceSpectrumGroup)._clear()
-      _getWidgetByAtt(self, STDSpectrumGroup)._clear()
+    widgetVariables = [ReferenceSpectrumGroup, STDSpectrumGroup, OffResonanceSpectrumGroup, OnResonanceSpectrumGroup]
+    self._setSpectrumGroupPullDowns(widgetVariables=widgetVariables, headerText=self._pulldownSGHeaderText, headerIcon=self._warningIcon)
 
   def _hideEfficiencyWidgets(self):
     self.offResonanceLabel.hide()
