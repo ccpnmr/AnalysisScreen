@@ -116,19 +116,20 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
     setattr(self, WLtargetSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
                                                       headerIcon=self._warningIcon,  grid=(row, 1)))
 
+    row += 1
+    self.modeLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
+    setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, texts=[str(n) for n in range(5)], grid=(row, 1)))
 
     row += 1
     self.minimumDistanceLabel = Label(self.pipeFrame, text='Match peaks within (ppm)', grid=(row, 0))
-    setattr(self, MinimumDistance, LineEdit(self.pipeFrame, text=str(DefaultMinimumDistance),
-                                            textAligment='l', grid=(row, 1), hAlign='l'))
+    setattr(self, MinimumDistance, DoubleSpinbox(self.pipeFrame, value=DefaultMinimumDistance,
+                                                 step = DefaultMinimumDistance, grid=(row, 1), min=0.01, hAlign='l'))
 
     row += 1
     self.minimalEfficiencyLabel = Label(self.pipeFrame, 'Minimal  Efficiency (%)', grid=(row, 0))
     setattr(self, MinimumEfficiency, DoubleSpinbox(self.pipeFrame, value=DefaultEfficiency, grid=(row, 1), hAlign='l'))
 
-    row += 1
-    self.modeLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
-    setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, texts=[str(n) for n in range(5)], grid=(row, 1)))
+
 
     self._updateInputDataWidgets()
 

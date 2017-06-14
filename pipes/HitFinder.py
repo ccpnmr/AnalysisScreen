@@ -106,7 +106,8 @@ class HitFinderGuiPipe(GuiPipe):
 
     row += 1
     self.minimumDistanceLabel = Label(self.pipeFrame, text='Match peaks within (ppm)',  grid=(row, 0))
-    setattr(self, MinimumDistance, LineEdit(self.pipeFrame, text=str(DefaultMinimumDistance), textAligment='l', grid=(row, 1), hAlign='l'))
+    setattr(self, MinimumDistance, DoubleSpinbox(self.pipeFrame, value=DefaultMinimumDistance,
+                                                 step=DefaultMinimumDistance, min=0.01, grid=(row, 1), hAlign='l'))
 
     self._updateWidgets()
 
