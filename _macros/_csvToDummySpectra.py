@@ -1,4 +1,8 @@
 
+############## ========= PRIVATE ========= #########################
+
+
+
 import numpy as np
 import pandas as pd
 import glob
@@ -73,12 +77,14 @@ _createDummies(spectra,)
 
 #  all in
 import pandas as pd
-filePaths = ['/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component_1_WL_No_Target.csv',
-             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component_2_WL_No_Target.csv',
-             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component_3_WL_No_Target.csv',
-             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component_1_WL_Yes_Target.csv',
-             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component_2_WL_Yes_Target.csv',
-             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component_3_WL_Yes_Target.csv']
+filePaths = ['/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component1_On_Resonance_No_Target.csv',
+             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component2_On_Resonance_No_Target.csv',
+             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component3_On_Resonance_No_Target.csv',
+
+
+             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component1_Off_Resonance_No_Target.csv',
+             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component2_Off_Resonance_No_Target.csv',
+             '/Users/luca/PycharmProjects/LucaCodes/screening1/data/demoDataset1/component3_Off_Resonance_No_Target.csv']
 spectra = []
 for path in filePaths:
     fileName = path.split('/')[-1].split('.')[0]
@@ -99,7 +105,7 @@ d = project.spectra[3]
 f = project.spectra[4]
 g = project.spectra[5]
 
-path = '/Users/luca/AnalysisV3/data/testProjects/AnalysisScreen_Demo1/demoWaterLogsy/'
+path = '/Users/luca/AnalysisV3/data/testProjects/AnalysisScreen_Demo1/demoSTDspectra/'
 a_fullPath = str(path)+str(a.name)+'.hdf5'
 b_fullPath = str(path)+str(b.name)+'.hdf5'
 c_fullPath = str(path)+str(c.name)+'.hdf5'
