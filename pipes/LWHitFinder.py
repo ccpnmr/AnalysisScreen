@@ -44,6 +44,8 @@ import numpy as np
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
+
+## Widget variables and/or _kwargs keys
 ReferenceSpectrumGroup = 'Reference_SpectrumGroup'
 TargetSpectrumGroup = 'Target_SpectrumGroup'
 ControlSpectrumGroup = 'Control_SpectrumGroup'
@@ -58,22 +60,18 @@ DefaultMinimalLW = 0.05
 DefaultReferencePeakList = 0
 DefaultMinimumDistance = 0.01
 
+## PipeName
 PipeName = 'LW Broadening Hit Finder'
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
-
-
-
-
+## See AnalysisScreen Lib
 
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
-
-
 
 
 class LWHitFinderGuiPipe(GuiPipe):

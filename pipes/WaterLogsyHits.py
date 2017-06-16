@@ -58,13 +58,10 @@ RefPL = 'Reference_PeakList'
 MinEfficiency = 'Minimal_Efficiency'
 ModeHit = 'Finding_Mode'
 
-
-
 ## defaults
 DefaultEfficiency = 10
 DefaultReferencePeakList =  0
 DefaultMinDist = 0.01
-
 
 ## PipeName
 PipeName = 'WaterLogsy Hits'
@@ -73,16 +70,11 @@ PipeName = 'WaterLogsy Hits'
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
-
-
-
-
+## See AnalysisScreen Lib
 
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
-
-
 
 
 class WaterLogsyHitFinderGuiPipe(GuiPipe):
@@ -97,6 +89,10 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
     self.parent = parent
 
     row = 0
+    self.modeLabel = Label(self.pipeFrame, ModeHit, grid=(row, 0))
+    setattr(self, ModeHit, PulldownList(self.pipeFrame, texts=wl.MODES, callback=self._modeCallback, grid=(row, 1)))
+
+    row += 1
     hw._addSGpulldowns(self, row, SGVarNames)
 
     row += len(SGVarNames)
@@ -107,8 +103,6 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
   def _updateInputDataWidgets(self):
     self._setSpectrumGroupPullDowns(SGVarNames)
     self._setMaxValueRefPeakList(RefPL)
-
-
 
 
   def _modeCallback(self, selected):

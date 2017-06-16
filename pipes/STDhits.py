@@ -56,11 +56,11 @@ MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'
 RefPL = 'Reference_PeakList'
 MinEfficiency = 'Minimal_Efficiency'
 
-
 ## defaults
 DefaultEfficiency = 10
 DefaultMinDist = 0.01
 DefaultReferencePeakList = 0
+
 ## PipeName
 PipeName = 'STD Hits'
 
@@ -68,10 +68,7 @@ PipeName = 'STD Hits'
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
-
-
-
-
+## See AnalysisScreen Lib
 
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
