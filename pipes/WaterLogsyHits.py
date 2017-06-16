@@ -30,7 +30,9 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
+
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
@@ -46,25 +48,23 @@ import numpy as np
 
 
 ## Widget variables and/or _kwargs keys
-ReferenceSpectrumGroup = 'referenceSpectrumGroup'
-WLcontrolSpectrumGroup = 'wlControlSpectrumGroup'
-WLtargetSpectrumGroup = 'wlTargetSpectrumGroup'
+ReferenceSpectrumGroup = 'Reference_SpectrumGroup'
+TargetSpectrumGroup    = 'WL_Target_SpectrumGroup'
+ControlSpectrumGroup   = 'WL_Control_SpectrumGroup'
+SGVarNames = [ReferenceSpectrumGroup, ControlSpectrumGroup, TargetSpectrumGroup]
 
-MinimumDistance = 'minimumDistance'
-ReferencePeakList = 'referencePeakList'
-MinimumEfficiency = 'minimalEfficiency'
-CalculateEfficiency = 'calculateEfficiency'
-ReferenceSpectrumGroupName = 'References'
-ModeHit = 'modeHit'
+MatchPeaksWithin  =  'Match_Peaks_Within_(ppm)'
+RefPL = 'Reference_PeakList'
+MinEfficiency = 'Minimal_Efficiency'
+ModeHit = 'Finding_Mode'
 
-# MODES = [IntensityChanged, PositiveOnly, MissingPeak]
+
 
 ## defaults
 DefaultEfficiency = 10
 DefaultReferencePeakList =  0
-DefaultMinimumDistance = 0.01
+DefaultMinDist = 0.01
 
-PulldownSGHeaderText ='-- Select SG --'
 
 ## PipeName
 PipeName = 'WaterLogsy Hits'
@@ -96,46 +96,17 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
 
-
     row = 0
-    self.modeLabel = Label(self.pipeFrame, 'Mode', grid=(row, 0))
-    setattr(self, ModeHit, PulldownList(self.pipeFrame, texts=wl.MODES, grid=(row, 1)))
-    _getWidgetByAtt(self, ModeHit).activated[str].connect(self._modeCallback)
-    row += 1
-    self.referenceSpectrumLabel = Label(self.pipeFrame, 'Reference Spectrum Group',  grid=(row,0))
-    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
-                                                       headerIcon=self._warningIcon,grid=(row, 1)))
+    hw._addSGpulldowns(self, row, SGVarNames)
 
-    row += 1
-    self.targetSpectrumLabel = Label(self.pipeFrame, 'WL Control Spectrum Group', grid=(row, 0))
-    setattr(self, WLcontrolSpectrumGroup, PulldownList(self.pipeFrame,  headerText=self._pulldownSGHeaderText,
-                                                       headerIcon=self._warningIcon, grid=(row, 1)))
-
-    row += 1
-    self.targetSpectrumLabel = Label(self.pipeFrame, 'WL Target Spectrum Group', grid=(row, 0))
-    setattr(self, WLtargetSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
-                                                      headerIcon=self._warningIcon,  grid=(row, 1)))
-
-    row += 1
-    self.modeLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
-    setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, texts=[str(n) for n in range(5)], grid=(row, 1)))
-
-    row += 1
-    self.minimumDistanceLabel = Label(self.pipeFrame, text='Match peaks within (ppm)', grid=(row, 0))
-    setattr(self, MinimumDistance, DoubleSpinbox(self.pipeFrame, value=DefaultMinimumDistance,
-                                                 step = DefaultMinimumDistance, grid=(row, 1), min=0.01, hAlign='l'))
-
-    row += 1
-    self.minimalEfficiencyLabel = Label(self.pipeFrame, 'Minimal  Efficiency (%)', grid=(row, 0))
-    setattr(self, MinimumEfficiency, DoubleSpinbox(self.pipeFrame, value=DefaultEfficiency, grid=(row, 1), hAlign='l'))
-
-
+    row += len(SGVarNames)
+    hw._addCommonHitFinderWidgets(self, row, RefPL, MatchPeaksWithin, DefaultMinDist, MinEfficiency, DefaultEfficiency)
 
     self._updateInputDataWidgets()
 
   def _updateInputDataWidgets(self):
-    self._setSpectrumGroupPullDowns(widgetVariables = [ReferenceSpectrumGroup, WLcontrolSpectrumGroup, WLtargetSpectrumGroup],
-                                    headerText=self._pulldownSGHeaderText, headerIcon=self._warningIcon)
+    self._setSpectrumGroupPullDowns(SGVarNames)
+    self._setMaxValueRefPeakList(RefPL)
 
 
 
@@ -143,10 +114,10 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
   def _modeCallback(self, selected):
     'manages the spectrumgroups pullDown'
     if selected == wl.PositiveOnly:
-      _getWidgetByAtt(self, WLcontrolSpectrumGroup).setEnabled(False)
-      _getWidgetByAtt(self, WLcontrolSpectrumGroup)._clear()
+      _getWidgetByAtt(self, ControlSpectrumGroup).setEnabled(False)
+      _getWidgetByAtt(self, ControlSpectrumGroup)._clear()
     elif selected == wl.IntensityChanged or selected == wl.SignChanged:
-      _getWidgetByAtt(self, WLcontrolSpectrumGroup).setEnabled(True)
+      _getWidgetByAtt(self, ControlSpectrumGroup).setEnabled(True)
 
 
 ########################################################################################################################
@@ -162,12 +133,12 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
   pipeName = PipeName
 
   _kwargs  =   {
-                ReferenceSpectrumGroup: 'spectrumGroup.pid',
-                WLtargetSpectrumGroup:  'spectrumGroup.pid',
-                WLcontrolSpectrumGroup: 'spectrumGroup.pid',
-                MinimumDistance:         DefaultMinimumDistance,
-                MinimumEfficiency:       DefaultEfficiency,
-                ReferencePeakList:       DefaultReferencePeakList,
+                ReferenceSpectrumGroup:  'spectrumGroup.pid',
+                TargetSpectrumGroup:     'spectrumGroup.pid',
+                ControlSpectrumGroup:    'spectrumGroup.pid',
+                MatchPeaksWithin:        DefaultMinDist,
+                MinEfficiency:           MinEfficiency,
+                RefPL:                   DefaultReferencePeakList,
                }
 
   def _addNewHit(self, spectrum, hits):
@@ -195,12 +166,12 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
     '''
 
     referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
-    wLcontrolSpectrumGroup = self._getSpectrumGroup(self._kwargs[WLcontrolSpectrumGroup])
-    wLtargetSpectrumGroup = self._getSpectrumGroup(self._kwargs[WLcontrolSpectrumGroup])
+    wLcontrolSpectrumGroup = self._getSpectrumGroup(self._kwargs[ControlSpectrumGroup])
+    wLtargetSpectrumGroup = self._getSpectrumGroup(self._kwargs[TargetSpectrumGroup])
 
-    minimumDistance = float(self._kwargs[MinimumDistance])
-    minimumEfficiency = float(self._kwargs[MinimumEfficiency])
-    nPeakList = int(self._kwargs[ReferencePeakList])
+    minimumDistance = float(self._kwargs[MatchPeaksWithin])
+    minimumEfficiency = float(self._kwargs[MinEfficiency])
+    nPeakList = int(self._kwargs[RefPL])
 
     mode = self._kwargs[ModeHit]
 

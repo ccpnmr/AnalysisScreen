@@ -158,7 +158,7 @@ class ShowScreeningHits(CcpnModule):
     columns = [Column('Sample', lambda hit:str(hit.sample.name)),
                Column('Hit Name', lambda hit:str(hit.substanceName)),
                Column('Confirmed', lambda hit:str(hit.comment), setEditValue=lambda hit, value: self._testEditor(hit, value)),
-               Column('DefaultEfficiency', lambda hit:str(hit.meritCode), setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
+               Column('MinEfficiency', lambda hit:str(hit.meritCode), setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
 
     self.hitTable = ObjectTable(self, columns, actionCallback=self._hitTableCallback, selectionCallback=self._showAllOnTableSelection, objects=[])
     self.hitTableGroupVLayout.addWidget(self.hitTable)

@@ -28,8 +28,9 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
@@ -46,19 +47,16 @@ import numpy as np
 ReferenceSpectrumGroup = 'Reference_SpectrumGroup'
 TargetSpectrumGroup = 'Target_SpectrumGroup'
 ControlSpectrumGroup = 'Control_SpectrumGroup'
+SGVarNames = [ReferenceSpectrumGroup, ControlSpectrumGroup, TargetSpectrumGroup]
 
-VarNames = [ReferenceSpectrumGroup, ControlSpectrumGroup, TargetSpectrumGroup]
+MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'
+ReferencePeakList = 'Reference_PeakList'
+MinLWvariation = 'Minimal_LineWidth_Variation'
 
-MinimumDistance = 'minimumDistance'
-DefaultMinimumDistance = 0.01
-SearchMode = 'searchMode'
-ReferencePeakList = 'referencePeakList'
-SearchModeOptions = {'LineBroadening':findBroadenedPeaks, 'IntesityChanged': None}
-MinLWvariation = 'minimalLW'
-
+## defaults
 DefaultMinimalLW = 0.05
-ReferenceSpectrumGroupName = 'References'
-DefaultReferencePeakList =  0
+DefaultReferencePeakList = 0
+DefaultMinimumDistance = 0.01
 
 PipeName = 'LW Broadening Hit Finder'
 
@@ -89,35 +87,17 @@ class LWHitFinderGuiPipe(GuiPipe):
     self.parent = parent
 
     row = 0
-    for varName in VarNames:
-      label = Label(self.pipeFrame, varName , grid=(row, 0))
-      setattr(self, varName, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
-                                            headerIcon=self._warningIcon, grid=(row, 1)))
-      row += 1
-
-    peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
-    setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, texts=[str(n) for n in range(5)], grid=(row, 1)))
-
-    row += 1
-    minimumDistanceLabel = Label(self.pipeFrame, text='Match peaks within (ppm)', grid=(row, 0))
-    setattr(self, MinimumDistance, DoubleSpinbox(self.pipeFrame, value=DefaultMinimumDistance,
-                                                 step=DefaultMinimumDistance, min=0.01, grid=(row, 1), hAlign='l'))
-
-    row += 1
-    mLWLabel = Label(self.pipeFrame, 'Minimal lineWidth variation' , grid=(row, 0))
-    setattr(self, MinLWvariation, DoubleSpinbox(self.pipeFrame, value=DefaultMinimalLW, grid=(row, 1), hAlign='l'))
-
+    hw._addSGpulldowns(self, row, SGVarNames)
+    row += len(SGVarNames)
+    hw._addCommonHitFinderWidgets(self, row, ReferencePeakList, MatchPeaksWithin, DefaultMinimumDistance,
+                                  MinLWvariation, DefaultMinimalLW)
     self._updateWidgets()
 
 
   def _updateWidgets(self):
-    'CCPN internal. Called from gui Pipeline'
-    self._setSpectrumGroupPullDowns(VarNames)
-
-
-
-
-
+    'CCPN internal. Called from gui Pipeline when the input data has changed'
+    self._setSpectrumGroupPullDowns(SGVarNames)
+    self._setMaxValueRefPeakList(ReferencePeakList)
 
 
 
@@ -136,7 +116,7 @@ class LWHitFinder(SpectraPipe):
   _kwargs  =   {
                ReferenceSpectrumGroup: 'spectrumGroup.pid',
                TargetSpectrumGroup:    'spectrumGroup.pid',
-               MinimumDistance:         DefaultMinimumDistance,
+               MatchPeaksWithin:         DefaultMinimumDistance,
                MinLWvariation:          DefaultMinimalLW,
                ReferencePeakList:       DefaultReferencePeakList,
                }
@@ -162,7 +142,7 @@ class LWHitFinder(SpectraPipe):
     referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
     controlSpectrumGroup = self._getSpectrumGroup(self._kwargs[ControlSpectrumGroup])
     targetSpectrumGroup = self._getSpectrumGroup(self._kwargs[TargetSpectrumGroup])
-    minimumDistance = float(self._kwargs[MinimumDistance])
+    minimumDistance = float(self._kwargs[MatchPeaksWithin])
     minLWvariation = float(self._kwargs[MinLWvariation])
     nPeakList = int(self._kwargs[ReferencePeakList])
 

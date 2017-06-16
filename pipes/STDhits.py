@@ -31,6 +31,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
@@ -46,22 +47,20 @@ import numpy as np
 
 
 ## Widget variables and/or _kwargs keys
-ReferenceSpectrumGroup = 'referenceSpectrumGroup'
-STDSpectrumGroup = 'STDSpectrumGroup'
+ReferenceSpectrumGroup = 'Reference_SpectrumGroup'
+STD_Control_SpectrumGroup = 'STD_SpectrumGroup'
+STD_Target_SpectrumGroup = 'STD_SpectrumGroup'
+SGVarNames = [ReferenceSpectrumGroup, STD_Control_SpectrumGroup, STD_Target_SpectrumGroup]
 
-MinimumDistance = 'minimumDistance'
-ReferencePeakList = 'referencePeakList'
-MinimumEfficiency = 'minimalEfficiency'
-CalculateEfficiency = 'calculateEfficiency'
-ReferenceSpectrumGroupName = 'References'
-OffResonanceSpectrumGroup = 'OffResonanceSpectrumGroup'
-OnResonanceSpectrumGroup = 'OnResonanceSpectrumGroup'
+MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'
+RefPL = 'Reference_PeakList'
+MinEfficiency = 'Minimal_Efficiency'
+
 
 ## defaults
 DefaultEfficiency = 10
-DefaultReferencePeakList =  0
-DefaultMinimumDistance = 0.01
-
+DefaultMinDist = 0.01
+DefaultReferencePeakList = 0
 ## PipeName
 PipeName = 'STD Hits'
 
@@ -79,8 +78,6 @@ PipeName = 'STD Hits'
 ########################################################################################################################
 
 
-
-
 class STDHitFinderGuiPipe(GuiPipe):
 
   preferredPipe = True
@@ -91,79 +88,19 @@ class STDHitFinderGuiPipe(GuiPipe):
     super(STDHitFinderGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
+
     row = 0
-    self.referenceSpectrumLabel = Label(self.pipeFrame, 'Reference Spectrum Group',  grid=(row,0))
-    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
-                                                       headerIcon=self._warningIcon, grid=(row, 1)))
+    hw._addSGpulldowns(self, row, SGVarNames)
 
-    row += 1
-    self.targetSpectrumLabel = Label(self.pipeFrame, 'STD Spectrum Group', grid=(row, 0))
-    setattr(self, STDSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
-                                                       headerIcon=self._warningIcon,grid=(row, 1)))
+    row += len(SGVarNames)
+    hw._addCommonHitFinderWidgets(self, row, RefPL, MatchPeaksWithin, DefaultMinDist, MinEfficiency, DefaultEfficiency)
 
-    row += 1
-    self.peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
-    setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, texts=[str(n) for n in range(5)], grid=(row, 1)))
-
-    row += 1
-    self.minimumDistanceLabel = Label(self.pipeFrame, text='Match peaks within (ppm)', grid=(row, 0))
-    setattr(self, MinimumDistance, DoubleSpinbox(self.pipeFrame, value=DefaultMinimumDistance,
-                                                 step=DefaultMinimumDistance, min=0.01, grid=(row, 1), hAlign='l'))
-
-    row += 1
-    self.efficiencyLabel = Label(self.pipeFrame, 'Calculate efficiency', grid=(row, 0))
-    setattr(self, CalculateEfficiency, CheckBox(self.pipeFrame, checked=False, callback=self._manageEfficiencyWidgets,
-                                                grid=(row, 1), hAlign='l'))
-
-
-    row += 1
-    self.offResonanceLabel = Label(self.pipeFrame, 'Off Resonance Spectrum Group', grid=(row, 0))
-    setattr(self, OffResonanceSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
-                                                       headerIcon=self._warningIcon,grid=(row, 1)))
-
-    row += 1
-    self.targetSpectrumLabel = Label(self.pipeFrame, 'On Resonance Spectrum Group', grid=(row, 0))
-    setattr(self, OnResonanceSpectrumGroup, PulldownList(self.pipeFrame,headerText=self._pulldownSGHeaderText,
-                                                       headerIcon=self._warningIcon, grid=(row, 1)))
-
-    row += 1
-    self.minimalEfficiencyLabel = Label(self.pipeFrame, 'Minimal  Efficiency (%)' , grid=(row, 0))
-    setattr(self, MinimumEfficiency, DoubleSpinbox(self.pipeFrame, value=DefaultEfficiency, grid=(row, 1), hAlign='l'))
-
-    _getWidgetByAtt(self, CalculateEfficiency).setEnabled(False)
-    self._hideEfficiencyWidgets()
     self._updateInputDataWidgets()
 
+
   def _updateInputDataWidgets(self):
-    self._setDataPullDowns()
-
-
-  def _setDataPullDowns(self):
-    widgetVariables = [ReferenceSpectrumGroup, STDSpectrumGroup, OffResonanceSpectrumGroup, OnResonanceSpectrumGroup]
-    self._setSpectrumGroupPullDowns(widgetVariables=widgetVariables, headerText=self._pulldownSGHeaderText, headerIcon=self._warningIcon)
-
-  def _hideEfficiencyWidgets(self):
-    self.offResonanceLabel.hide()
-    self.targetSpectrumLabel.hide()
-    self.minimalEfficiencyLabel.hide()
-    _getWidgetByAtt(self, OffResonanceSpectrumGroup).hide()
-    _getWidgetByAtt(self, OnResonanceSpectrumGroup).hide()
-    _getWidgetByAtt(self, MinimumEfficiency).hide()
-
-  def _showEfficiencyWidgets(self):
-    self.offResonanceLabel.show()
-    self.targetSpectrumLabel.show()
-    self.minimalEfficiencyLabel.show()
-    _getWidgetByAtt(self, OffResonanceSpectrumGroup).show()
-    _getWidgetByAtt(self, OnResonanceSpectrumGroup).show()
-    _getWidgetByAtt(self, MinimumEfficiency).show()
-
-  def _manageEfficiencyWidgets(self):
-    checkbox = _getWidgetByAtt(self, CalculateEfficiency)
-    if checkbox.isChecked():
-      self._showEfficiencyWidgets()
-    else:
-      self._hideEfficiencyWidgets()
+    self._setSpectrumGroupPullDowns(SGVarNames)
+    self._setMaxValueRefPeakList(RefPL)
 
 
 
@@ -185,12 +122,12 @@ class STDHitFinder(SpectraPipe):
 
   _kwargs  =   {
                 ReferenceSpectrumGroup: 'spectrumGroup.pid',
-                STDSpectrumGroup:       'spectrumGroup.pid',
-                OffResonanceSpectrumGroup: 'OffResonanceSpectrumGroup.pid',
-                OnResonanceSpectrumGroup: 'OnResonanceSpectrumGroup.pid',
-                MinimumDistance:         DefaultMinimumDistance,
-                MinimumEfficiency:       DefaultEfficiency,
-                ReferencePeakList:       DefaultReferencePeakList,
+                STD_Control_SpectrumGroup:       'spectrumGroup.pid',
+                STD_Target_SpectrumGroup:  'spectrumGroup.pid',
+
+                MatchPeaksWithin:        DefaultMinDist,
+                MinEfficiency:       DefaultEfficiency,
+                RefPL:       DefaultReferencePeakList,
                }
 
   def _addNewHit(self, spectrum, hits):
@@ -217,13 +154,14 @@ class STDHitFinder(SpectraPipe):
     '''
 
     referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
-    stdSpectrumGroup = self._getSpectrumGroup(self._kwargs[STDSpectrumGroup])
-    minimumDistance = float(self._kwargs[MinimumDistance])
-    minimumEfficiency = float(self._kwargs[MinimumEfficiency])
-    nPeakList = int(self._kwargs[ReferencePeakList])
+    stdTargetSpectrumGroup = self._getSpectrumGroup(self._kwargs[STD_Target_SpectrumGroup])
 
-    if referenceSpectrumGroup and stdSpectrumGroup is not None:
-      for stdSpectrum in stdSpectrumGroup.spectra:
+    minimumDistance = float(self._kwargs[MatchPeaksWithin])
+    minimumEfficiency = float(self._kwargs[MinEfficiency])
+    nPeakList = int(self._kwargs[RefPL])
+
+    if referenceSpectrumGroup and stdTargetSpectrumGroup is not None:
+      for stdSpectrum in stdTargetSpectrumGroup.spectra:
         if stdSpectrum:
           hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=referenceSpectrumGroup.spectra, limitRange=minimumDistance)
 
