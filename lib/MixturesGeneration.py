@@ -89,7 +89,7 @@ def _deleteMixtures(currentMixtures):
   for mixture in currentMixtures:
     mixture.delete()
 
-def getCompounds(spectra):
+def _getCompounds(spectra):
   compounds = []
   peakLists = [s.peakLists[0] for s in spectra]
   for peakList in peakLists:
@@ -99,7 +99,7 @@ def getCompounds(spectra):
   return compounds
 
 def _generateMixtures(project, spectra, method, methodParam, mode, n, minDistance):
-  compounds = getCompounds(spectra)
+  compounds = _getCompounds(spectra)
   startTemp, finalTemp, maxSteps, k, coolingMethod, nIterations = list(methodParam.values())
 
   mixturesNumber = _getMixturesNumber(len(spectra), mode, n)
@@ -136,7 +136,7 @@ def _getMixtureFromSample(sample):
   for sampleComponent in sample.sampleComponents:
     spectrum = sampleComponent.substance.referenceSpectra[0]
     spectra.append(spectrum)
-  return {mixtureName:getCompounds(spectra)}
+  return {mixtureName:_getCompounds(spectra)}
 
 def _getMixturesFromVirtualSamples(virtualSamples):
   mixtures = {}

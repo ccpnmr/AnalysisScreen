@@ -27,7 +27,7 @@ from functools import partial
 
 from PyQt4 import QtCore, QtGui
 
-from ccpn.AnalysisScreen.lib.MixturesGeneration import getCompounds, _createSamples
+from ccpn.AnalysisScreen.lib.MixturesGeneration import _getCompounds, _createSamples
 from ccpn.AnalysisScreen.lib.SimulatedAnnealing import calculateOverlapCount,scoreMixture
 from ccpn.AnalysisScreen.gui.modules .MixtureOptimisation import MixtureOptimisation
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -533,7 +533,7 @@ class MixtureAnalysis(CcpnModule):
   def _predictScores(self):  # to do
     ''' Predict scores before to create a different mixture given the left spectra '''
     leftSpectra = self._getListWidgetItems()['leftSpectra']
-    self.leftCompounds = getCompounds(leftSpectra)
+    self.leftCompounds = _getCompounds(leftSpectra)
     leftComponentsScores = self.temporarySampleComponentsScore(self.leftCompounds, self.minimalDistance )
     # self.leftListWidget.clear()
     header = QtGui.QListWidgetItem(
@@ -546,7 +546,7 @@ class MixtureAnalysis(CcpnModule):
       self.leftListWidget.addItem(i)
 
     rightSpectra = self._getListWidgetItems()['rightSpectra']
-    self.rightCompounds = getCompounds(rightSpectra)
+    self.rightCompounds = _getCompounds(rightSpectra)
     rightComponentsScores = self.temporarySampleComponentsScore(self.rightCompounds , self.minimalDistance)
     self.rightListWidget.clear()
 
