@@ -40,13 +40,16 @@ from ccpn.pipes.lib._new1Dspectrum import _create1DSpectrum
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
+## Widget variables and/or _kwargs keys
 OffResonanceSpectrumGroup = 'OffResonanceSpectrumGroup'
 OnResonanceSpectrumGroup = 'OnResonanceSpectrumGroup'
+NewSTDSpectrumGroupName = 'New_STD_SpectrumGroup_Name'
 SGVarNames = [OffResonanceSpectrumGroup, OnResonanceSpectrumGroup]
 
-NewSTDSpectrumGroupName = 'New_STD_SpectrumGroup_Name'
+## defaults
 DefaultSTDname = 'STD_'
 
+## PipeName
 PipeName = 'STD Creator'
 
 ########################################################################################################################
@@ -108,8 +111,6 @@ class STDCreator(SpectraPipe):
                 OnResonanceSpectrumGroup : 'OnResonanceSpectrumGroup.pid',
                 NewSTDSpectrumGroupName:   DefaultSTDname,
                }
-
-
 
 
 
