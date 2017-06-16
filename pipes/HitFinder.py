@@ -56,7 +56,7 @@ DefaultEfficiency = 10
 ReferenceSpectrumGroupName = 'References'
 DefaultReferencePeakList =  0
 
-PipeName = 'Hit Finder'
+PipeName = 'LW Broadening Hit Finder'
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -74,14 +74,14 @@ PipeName = 'Hit Finder'
 
 
 
-class HitFinderGuiPipe(GuiPipe):
+class LWHitFinderGuiPipe(GuiPipe):
 
   preferredPipe = True
   pipeName = PipeName
 
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
-    super(HitFinderGuiPipe, self)
+    super(LWHitFinderGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
     row = 0
@@ -96,12 +96,9 @@ class HitFinderGuiPipe(GuiPipe):
     self.peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
     setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, texts=[str(n) for n in range(5)], grid=(row, 1)))
 
-    row += 1
-    self.searchModeLabel = Label(self.pipeFrame, 'Search Mode', grid=(row, 0))
-    setattr(self, SearchMode, PulldownList(self.pipeFrame, texts=list(SearchModeOptions.keys()), grid=(row, 1)))
 
     row += 1
-    self.searchModeLabel = Label(self.pipeFrame, 'Minimal Default Efficiency' , grid=(row, 0))
+    self.mLabel = Label(self.pipeFrame, 'Minimal Default Efficiency' , grid=(row, 0))
     setattr(self, MinimumEfficiency, DoubleSpinbox(self.pipeFrame, value=DefaultEfficiency, grid=(row, 1), hAlign='l'))
 
     row += 1
@@ -141,9 +138,9 @@ class HitFinderGuiPipe(GuiPipe):
 
 
 
-class HitFinder(SpectraPipe):
+class LWHitFinder(SpectraPipe):
 
-  guiPipe = HitFinderGuiPipe
+  guiPipe = LWHitFinderGuiPipe
   pipeName = PipeName
 
   _kwargs  =   {
@@ -194,6 +191,6 @@ class HitFinder(SpectraPipe):
 
     return spectra
 
-HitFinder.register() # Registers the pipe in the pipeline
+LWHitFinder.register() # Registers the pipe in the pipeline
 
 
