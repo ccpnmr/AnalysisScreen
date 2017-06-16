@@ -119,8 +119,6 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
 ########################################################################################################################
 
 
-
-
 class WaterLogsyHitFinderPipe(SpectraPipe):
 
   guiPipe = WaterLogsyHitFinderGuiPipe
@@ -134,23 +132,6 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
                 MinEfficiency:           MinEfficiency,
                 RefPL:                   DefaultReferencePeakList,
                }
-
-  def _addNewHit(self, spectrum, hits):
-    # FIXME hack TODO better
-    spectrum.newSpectrumHit(substanceName = spectrum.name)
-    npl = spectrum.newPeakList(title = 'Hits', isSimulated=True, comment='PeakList containing peak hits')
-    for lst in hits:
-      if len(lst)>0:
-        for hit in lst:
-          if len(hit)==3:
-            referencePeak , targetPeak, position = hit
-            newPeakFromReference = referencePeak.copyTo(npl)
-            newPeakFromTarget = targetPeak.copyTo(npl)
-
-            newPeakFromReference.annotation = 'Hit'
-            newPeakFromTarget.annotation = 'Hit'
-            newPeakFromReference.comment = 'Hit: Peak From Reference'
-            newPeakFromTarget.comment = 'Hit: Peak From Target'
 
 
   def runPipe(self, spectra):
@@ -175,7 +156,6 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
         hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, wLControl=controlSpectrum, mode=mode, limitRange=minimumDistance)
         if len(hits)>0:
           print(hits)
-              # self._addNewHit(wLogsySpectrum, hits)
 
     return spectra
 

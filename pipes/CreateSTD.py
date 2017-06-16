@@ -26,10 +26,9 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
@@ -43,12 +42,10 @@ from ccpn.pipes.lib._new1Dspectrum import _create1DSpectrum
 
 OffResonanceSpectrumGroup = 'OffResonanceSpectrumGroup'
 OnResonanceSpectrumGroup = 'OnResonanceSpectrumGroup'
+SGVarNames = [OffResonanceSpectrumGroup, OnResonanceSpectrumGroup]
 
-OnResonance = 'On'
-OffResonance = 'Off'
-
-NewSTDSpectrumGroupName = 'newSTDSpectrumGroupName'
-DefaultSTDSGname = 'STD'
+NewSTDSpectrumGroupName = 'New_STD_SpectrumGroup_Name'
+DefaultSTDname = 'STD_'
 
 PipeName = 'STD Creator'
 
@@ -56,15 +53,20 @@ PipeName = 'STD Creator'
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
-
-
-
+def _createSTDs(project, offResonanceSpectrumGroup, onResonanceSpectrumGroup):
+  spectraSTD = []
+  if offResonanceSpectrumGroup and onResonanceSpectrumGroup is not None:
+    if len(offResonanceSpectrumGroup.spectra) == len(onResonanceSpectrumGroup.spectra):
+      for offResSpectrum, onResSpectrum in zip(offResonanceSpectrumGroup.spectra, onResonanceSpectrumGroup.spectra):
+        stdIntensities = spectrumDifference(offResSpectrum, onResSpectrum)
+        stdPositions = offResSpectrum.positions
+        std = _create1DSpectrum(project, DefaultSTDname+offResSpectrum.name, stdIntensities, stdPositions, 'STD.H')
+        spectraSTD.append(std)
+  return spectraSTD
 
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
-
-
 
 
 class STDCreatorGuiPipe(GuiPipe):
@@ -77,42 +79,23 @@ class STDCreatorGuiPipe(GuiPipe):
     super(STDCreatorGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
+
     row = 0
-    self.offResonanceLabel = Label(self.pipeFrame, 'Off Resonance Spectrum Group', grid=(row,0))
-    setattr(self, OffResonanceSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
-                                                       headerIcon=self._warningIcon, grid=(row, 1)), )
+    hw._addSGpulldowns(self, row, SGVarNames)
+    row += len(SGVarNames)
 
-    row += 1
-    self.targetSpectrumLabel = Label(self.pipeFrame, 'On Resonance Spectrum Group', grid=(row, 0))
-    setattr(self, OnResonanceSpectrumGroup, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
-                                                       headerIcon=self._warningIcon, grid=(row, 1)))
-
-    row += 1
-    self.newSTDSpectrumGroupLabel = Label(self.pipeFrame, 'New STD Spectrum Group Name', grid=(row, 0))
-    setattr(self, NewSTDSpectrumGroupName, LineEdit(self.pipeFrame, text=DefaultSTDSGname, textAligment='l', hAlign='l', grid=(row, 1)))
+    self.newSTDSpectrumGroupLabel = Label(self.pipeFrame, NewSTDSpectrumGroupName, grid=(row, 0))
+    setattr(self, NewSTDSpectrumGroupName, LineEdit(self.pipeFrame, text=DefaultSTDname, textAligment='l', hAlign='l', grid=(row, 1)))
 
     self._updateInputDataWidgets()
 
   def _updateInputDataWidgets(self):
-    self._setDataPullDowns()
-
-
-  def _setDataPullDowns(self):
-    self._setSpectrumGroupPullDowns(widgetVariables=[OffResonanceSpectrumGroup, OnResonanceSpectrumGroup],
-                                    headerText=self._pulldownSGHeaderText, headerIcon=self._warningIcon,)
-
-
-
-
-
-
+    self._setSpectrumGroupPullDowns(SGVarNames)
 
 
 ########################################################################################################################
 ##########################################       PIPE      #############################################################
 ########################################################################################################################
-
-
 
 
 class STDCreator(SpectraPipe):
@@ -123,21 +106,12 @@ class STDCreator(SpectraPipe):
   _kwargs  =   {
                 OffResonanceSpectrumGroup : 'OffResonanceSpectrumGroup.pid',
                 OnResonanceSpectrumGroup : 'OnResonanceSpectrumGroup.pid',
-                NewSTDSpectrumGroupName:   DefaultSTDSGname,
+                NewSTDSpectrumGroupName:   DefaultSTDname,
                }
 
 
 
-  def _createSTDs(self, offResonanceSpectrumGroup, onResonanceSpectrumGroup):
-    spectraSTD = []
-    if offResonanceSpectrumGroup and onResonanceSpectrumGroup is not None:
-      if len(offResonanceSpectrumGroup.spectra) == len(onResonanceSpectrumGroup.spectra):
-        for offResonanceSpectrum, onResonanceSpectrum in zip(offResonanceSpectrumGroup.spectra, onResonanceSpectrumGroup.spectra):
-          stdIntensities = spectrumDifference(offResonanceSpectrum, onResonanceSpectrum)
-          stdPositions = offResonanceSpectrum.positions
-          std = _create1DSpectrum(self.project, offResonanceSpectrum.name+'_STD', stdIntensities, stdPositions, 'STD.H')
-          spectraSTD.append(std)
-    return spectraSTD
+
 
   def _createNewSTDspectrumGroup(self, name, stdSpectra):
     newSTDspectrumGroup = None
@@ -159,7 +133,7 @@ class STDCreator(SpectraPipe):
     onResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OnResonanceSpectrumGroup])
     newSTDSpectrumGroupName = self._kwargs[NewSTDSpectrumGroupName]
 
-    stds = self._createSTDs(offResonanceSpectrumGroup, onResonanceSpectrumGroup)
+    stds = _createSTDs(self.project, offResonanceSpectrumGroup, onResonanceSpectrumGroup)
     if len(stds)==len(offResonanceSpectrumGroup.spectra):
       newSTDspectrumGroup = self._createNewSTDspectrumGroup(name=newSTDSpectrumGroupName, stdSpectra= stds)
       self.spectrumGroups.update([newSTDspectrumGroup])
