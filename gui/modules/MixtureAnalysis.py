@@ -29,7 +29,7 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.AnalysisScreen.lib.MixturesGeneration import getCompounds, _createSamples
 from ccpn.AnalysisScreen.lib.SimulatedAnnealing import calculateOverlapCount,scoreMixture
-from ccpn.AnalysisScreen.modules.MixtureOptimisation import MixtureOptimisation
+from ccpn.AnalysisScreen.gui.modules .MixtureOptimisation import MixtureOptimisation
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Button import Button
 

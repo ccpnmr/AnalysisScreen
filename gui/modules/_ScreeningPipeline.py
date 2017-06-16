@@ -31,7 +31,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 
 from ccpn.AnalysisScreen.lib.__Screening import writeBruker, createStdDifferenceSpectrum, matchedPosition
 
-from ccpn.AnalysisScreen.modules.ShowScreeningHits import ShowScreeningHits
+from ccpn.AnalysisScreen.gui.modules .ShowScreeningHits import ShowScreeningHits
 
 import decimal
 from functools import partial

@@ -2,11 +2,11 @@ from ccpn.framework.Framework import Framework
 from ccpn.core.Project import Project
 from ccpn.AnalysisScreen.lib.ScreenLookup import _loadScreenLookupFile
 from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
-from ccpn.AnalysisScreen.popups.MixtureGenerationPopup import MixtureGenerationPopup
-from ccpn.AnalysisScreen.modules import _importScreenModules
-from ccpn.AnalysisScreen.modules.MixtureAnalysis import MixtureAnalysis
-from ccpn.AnalysisScreen.modules.ScreeningSettings import initialiseScreeningPipelineModule
-from ccpn.AnalysisScreen.modules.ShowScreeningHits import ShowScreeningHits
+from ccpn.AnalysisScreen.gui.popups.MixtureGenerationPopup import MixtureGenerationPopup
+from ccpn.AnalysisScreen.gui.modules import _importScreenModules
+from ccpn.AnalysisScreen.gui.modules .MixtureAnalysis import MixtureAnalysis
+from ccpn.AnalysisScreen.gui.modules .ScreeningSettings import initialiseScreeningPipelineModule
+from ccpn.AnalysisScreen.gui.modules .ShowScreeningHits import ShowScreeningHits
 from ccpn.ui.gui.widgets import MessageDialog
 
 applicationName = 'Screen'

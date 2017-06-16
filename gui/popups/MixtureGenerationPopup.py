@@ -24,8 +24,8 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt4 import QtGui
-from ccpn.AnalysisScreen.modules.MixtureAnalysis import MixtureAnalysis
-from ccpn.AnalysisScreen.modules.MixtureOptimisation import SimulatedAnnealingWidgets
+from ccpn.AnalysisScreen.gui.modules .MixtureAnalysis import MixtureAnalysis
+from ccpn.AnalysisScreen.gui.modules .MixtureOptimisation import SimulatedAnnealingWidgets
 from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
 
 from ccpn.AnalysisScreen.lib.MixturesGeneration import _initialiseMixtures

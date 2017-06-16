@@ -43,16 +43,20 @@ import numpy as np
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-ReferenceSpectrumGroup = 'referenceSpectrumGroup'
-TargetSpectrumGroup = 'targetSpectrumGroup'
+ReferenceSpectrumGroup = 'Reference_SpectrumGroup'
+TargetSpectrumGroup = 'Target_SpectrumGroup'
+ControlSpectrumGroup = 'Control_SpectrumGroup'
+
+VarNames = [ReferenceSpectrumGroup, ControlSpectrumGroup, TargetSpectrumGroup]
+
 MinimumDistance = 'minimumDistance'
 DefaultMinimumDistance = 0.01
 SearchMode = 'searchMode'
 ReferencePeakList = 'referencePeakList'
 SearchModeOptions = {'LineBroadening':findBroadenedPeaks, 'IntesityChanged': None}
-MinimumEfficiency = 'minimalEfficiency'
+MinLWvariation = 'minimalLW'
 
-DefaultEfficiency = 10
+DefaultMinimalLW = 0.05
 ReferenceSpectrumGroupName = 'References'
 DefaultReferencePeakList =  0
 
@@ -79,50 +83,36 @@ class LWHitFinderGuiPipe(GuiPipe):
   preferredPipe = True
   pipeName = PipeName
 
-
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
     super(LWHitFinderGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
+
     row = 0
-    self.referenceSpectrumLabel = Label(self.pipeFrame, 'Reference Spectrum Group',  grid=(row,0))
-    setattr(self, ReferenceSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
+    for varName in VarNames:
+      label = Label(self.pipeFrame, varName , grid=(row, 0))
+      setattr(self, varName, PulldownList(self.pipeFrame, headerText=self._pulldownSGHeaderText,
+                                            headerIcon=self._warningIcon, grid=(row, 1)))
+      row += 1
 
-    row += 1
-    self.targetSpectrumLabel = Label(self.pipeFrame, 'Target Spectrum Group', grid=(row, 0))
-    setattr(self, TargetSpectrumGroup, PulldownList(self.pipeFrame, grid=(row, 1)))
-
-    row += 1
-    self.peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
+    peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
     setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, texts=[str(n) for n in range(5)], grid=(row, 1)))
 
-
     row += 1
-    self.mLabel = Label(self.pipeFrame, 'Minimal Default Efficiency' , grid=(row, 0))
-    setattr(self, MinimumEfficiency, DoubleSpinbox(self.pipeFrame, value=DefaultEfficiency, grid=(row, 1), hAlign='l'))
-
-    row += 1
-    self.minimumDistanceLabel = Label(self.pipeFrame, text='Match peaks within (ppm)',  grid=(row, 0))
+    minimumDistanceLabel = Label(self.pipeFrame, text='Match peaks within (ppm)', grid=(row, 0))
     setattr(self, MinimumDistance, DoubleSpinbox(self.pipeFrame, value=DefaultMinimumDistance,
                                                  step=DefaultMinimumDistance, min=0.01, grid=(row, 1), hAlign='l'))
 
+    row += 1
+    mLWLabel = Label(self.pipeFrame, 'Minimal lineWidth variation' , grid=(row, 0))
+    setattr(self, MinLWvariation, DoubleSpinbox(self.pipeFrame, value=DefaultMinimalLW, grid=(row, 1), hAlign='l'))
+
     self._updateWidgets()
 
+
   def _updateWidgets(self):
-    self._setDataPullDowns()
-
-
-  def _setDataPullDowns(self):
-    spectrumGroups = list(self.spectrumGroups)
-    if len(spectrumGroups)>0:
-      _getWidgetByAtt(self, ReferenceSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
-      _getWidgetByAtt(self, TargetSpectrumGroup).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups)
-
-      # trying to select reference spectrum group in the correct pulldown by matching name
-      for sg in spectrumGroups:
-        if ReferenceSpectrumGroupName in sg.name:
-          _getWidgetByAtt(self, ReferenceSpectrumGroup).select(sg)
-
+    'CCPN internal. Called from gui Pipeline'
+    self._setSpectrumGroupPullDowns(VarNames)
 
 
 
@@ -146,9 +136,8 @@ class LWHitFinder(SpectraPipe):
   _kwargs  =   {
                ReferenceSpectrumGroup: 'spectrumGroup.pid',
                TargetSpectrumGroup:    'spectrumGroup.pid',
-               SearchMode:              list(SearchModeOptions.keys())[0],
                MinimumDistance:         DefaultMinimumDistance,
-               MinimumEfficiency:       DefaultEfficiency,
+               MinLWvariation:          DefaultMinimalLW,
                ReferencePeakList:       DefaultReferencePeakList,
                }
 
@@ -169,22 +158,21 @@ class LWHitFinder(SpectraPipe):
     :return: aligned spectra
     '''
 
+
     referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
+    controlSpectrumGroup = self._getSpectrumGroup(self._kwargs[ControlSpectrumGroup])
     targetSpectrumGroup = self._getSpectrumGroup(self._kwargs[TargetSpectrumGroup])
-    searchMode = self._kwargs[SearchMode]
     minimumDistance = float(self._kwargs[MinimumDistance])
-    minimumEfficiency = float(self._kwargs[MinimumEfficiency])
+    minLWvariation = float(self._kwargs[MinLWvariation])
     nPeakList = int(self._kwargs[ReferencePeakList])
 
     if referenceSpectrumGroup and targetSpectrumGroup is not None:
       if len(referenceSpectrumGroup.spectra) == len(targetSpectrumGroup.spectra):
         for referenceSpectrum, targetSpectrum in zip(referenceSpectrumGroup.spectra, targetSpectrumGroup.spectra):
-            print('Start')
-            hits = findBroadenedPeaks(referenceSpectrum, targetSpectrum, minimalDiff=0.05, limitRange=minimumDistance,
+            hits = findBroadenedPeaks(referenceSpectrum, targetSpectrum, minimalDiff=minLWvariation, limitRange=minimumDistance,
                                       peakListIndex=nPeakList)
 
             if len(hits)>0:
-              print(referenceSpectrum, hits)
               self._addNewHit(referenceSpectrum, hits)
 
 
