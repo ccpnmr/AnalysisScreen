@@ -41,8 +41,8 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 
 
 ## Widget variables and/or _kwargs keys
-OffResonanceSpectrumGroup = 'OffResonanceSpectrumGroup'
-OnResonanceSpectrumGroup = 'OnResonanceSpectrumGroup'
+OffResonanceSpectrumGroup = 'Off_Resonance_SpectrumGroup'
+OnResonanceSpectrumGroup = 'On_Resonance_SpectrumGroup'
 SGVarNames = [OffResonanceSpectrumGroup, OnResonanceSpectrumGroup]
 RefPL = 'Reference_PeakList'
 MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'

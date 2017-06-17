@@ -41,8 +41,8 @@ from ccpn.pipes.lib._new1Dspectrum import _create1DSpectrum
 ########################################################################################################################
 
 ## Widget variables and/or _kwargs keys
-OffResonanceSpectrumGroup = 'OffResonanceSpectrumGroup'
-OnResonanceSpectrumGroup = 'OnResonanceSpectrumGroup'
+OffResonanceSpectrumGroup = 'Off_Resonance_SpectrumGroup'
+OnResonanceSpectrumGroup = 'On_Resonance_SpectrumGroup'
 NewSTDSpectrumGroupName = 'New_STD_SpectrumGroup_Name'
 SGVarNames = [OffResonanceSpectrumGroup, OnResonanceSpectrumGroup]
 
