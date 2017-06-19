@@ -88,10 +88,10 @@ class STDEfficiencyGuiPipe(GuiPipe):
     setattr(self, MatchPeaksWithin, DoubleSpinbox(self.pipeFrame, value=DefaultMinDist,
                                                  step=DefaultMinDist, min=0.01, grid=(row, 1)))
 
-    self._updateInputDataWidgets()
+    self._updateWidgets()
 
 
-  def _updateInputDataWidgets(self):
+  def _updateWidgets(self):
     self._setSpectrumGroupPullDowns(SGVarNames)
 
 

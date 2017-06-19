@@ -3,10 +3,8 @@ from ccpn.core.Project import Project
 from ccpn.AnalysisScreen.lib.ScreenLookup import _loadScreenLookupFile
 from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
 from ccpn.AnalysisScreen.gui.popups.MixtureGenerationPopup import MixtureGenerationPopup
-from ccpn.AnalysisScreen.gui.modules import _importScreenModules
-from ccpn.AnalysisScreen.gui.modules .MixtureAnalysis import MixtureAnalysis
-from ccpn.AnalysisScreen.gui.modules .ScreeningSettings import initialiseScreeningPipelineModule
-from ccpn.AnalysisScreen.gui.modules .ShowScreeningHits import ShowScreeningHits
+
+from ccpn.AnalysisScreen.gui.modules._HitAnalyisDevelopment import HitsAnalysis
 from ccpn.ui.gui.widgets import MessageDialog
 
 applicationName = 'Screen'
@@ -80,7 +78,7 @@ class Screen(Framework):
       MessageDialog.showWarning('No Spectrum Hits Found','')
       return
     else:
-      self.showScreeningHits = ShowScreeningHits(mainWindow=self.ui.mainWindow)
+      self.showScreeningHits = HitsAnalysis(mainWindow=self.ui.mainWindow)
       self.ui.mainWindow.moduleArea.addModule(self.showScreeningHits, position, None)
       self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showHitAnalysisModule()")
       self.project._logger.info("application.showHitAnalysisModule()")

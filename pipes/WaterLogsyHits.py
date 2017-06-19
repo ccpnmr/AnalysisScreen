@@ -98,9 +98,9 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
     row += len(SGVarNames)
     hw._addCommonHitFinderWidgets(self, row, RefPL, MatchPeaksWithin, DefaultMinDist, MinEfficiency, DefaultEfficiency)
 
-    self._updateInputDataWidgets()
+    self._updateWidgets()
 
-  def _updateInputDataWidgets(self):
+  def _updateWidgets(self):
     self._setSpectrumGroupPullDowns(SGVarNames)
     self._setMaxValueRefPeakList(RefPL)
 

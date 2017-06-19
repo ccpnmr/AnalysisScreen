@@ -36,9 +36,7 @@ from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.AnalysisScreen.lib.experimentAnalysis.STD import _find_STD_Hits
-from scipy import signal
-import numpy as np
-
+from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit
 
 ########################################################################################################################
 ###   Attributes:
@@ -92,10 +90,10 @@ class STDHitFinderGuiPipe(GuiPipe):
     row += len(SGVarNames)
     hw._addCommonHitFinderWidgets(self, row, RefPL, MatchPeaksWithin, DefaultMinDist, MinEfficiency, DefaultEfficiency)
 
-    self._updateInputDataWidgets()
+    self._updateWidgets()
 
 
-  def _updateInputDataWidgets(self):
+  def _updateWidgets(self):
     self._setSpectrumGroupPullDowns(SGVarNames)
     self._setMaxValueRefPeakList(RefPL)
 
@@ -126,22 +124,6 @@ class STDHitFinder(SpectraPipe):
                 RefPL:                      DefaultReferencePeakList,
                }
 
-  def _addNewHit(self, spectrum, hits):
-    spectrum.newSpectrumHit(substanceName = spectrum.name)
-    npl = spectrum.newPeakList(title = 'Hits', isSimulated=True, comment='PeakList containing peak hits')
-    for lst in hits:
-      if len(lst)>0:
-        for hit in lst:
-          if len(hit)==3:
-            referencePeak , targetPeak, position = hit
-            newPeakFromReference = referencePeak.copyTo(npl)
-            newPeakFromTarget = targetPeak.copyTo(npl)
-
-            newPeakFromReference.annotation = 'Hit'
-            newPeakFromTarget.annotation = 'Hit'
-            newPeakFromReference.comment = 'Hit: Peak From Reference'
-            newPeakFromTarget.comment = 'Hit: Peak From Target'
-
 
   def runPipe(self, spectra):
     '''
@@ -156,13 +138,17 @@ class STDHitFinder(SpectraPipe):
     minimumEfficiency = float(self._kwargs[MinEfficiency])
     nPeakList = int(self._kwargs[RefPL])
 
+    # hits = []
     if referenceSpectrumGroup and stdTargetSpectrumGroup is not None:
       for stdSpectrum in stdTargetSpectrumGroup.spectra:
         if stdSpectrum:
           hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=referenceSpectrumGroup.spectra, limitRange=minimumDistance)
-
+          hits = [i for i in hits if len(hits)>0]
           if len(hits)>0:
-            self._addNewHit(stdSpectrum, hits)
+            print(hits)
+            _addNewHit(stdSpectrum, hits)
+
+            # self._addNewHit(stdSpectrum, hits)
 
     return spectra
 
