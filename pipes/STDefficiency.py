@@ -119,6 +119,8 @@ class STDEfficiencyPipe(SpectraPipe):
     :return:
     '''
 
+    print(NotImplemented)
+
     offResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OffResonanceSpectrumGroup])
     onResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OnResonanceSpectrumGroup])
 

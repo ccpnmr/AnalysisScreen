@@ -48,8 +48,8 @@ import numpy as np
 
 ## Widget variables and/or _kwargs keys
 ReferenceSpectrumGroup = 'Reference_SpectrumGroup'
-STD_Control_SpectrumGroup = 'STD_SpectrumGroup'
-STD_Target_SpectrumGroup = 'STD_SpectrumGroup'
+STD_Control_SpectrumGroup = 'STD_Control_SpectrumGroup'
+STD_Target_SpectrumGroup = 'STD_Target_SpectrumGroup'
 SGVarNames = [ReferenceSpectrumGroup, STD_Control_SpectrumGroup, STD_Target_SpectrumGroup]
 
 MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'
@@ -118,13 +118,12 @@ class STDHitFinder(SpectraPipe):
   pipeName = PipeName
 
   _kwargs  =   {
-                ReferenceSpectrumGroup: 'spectrumGroup.pid',
-                STD_Control_SpectrumGroup:       'spectrumGroup.pid',
-                STD_Target_SpectrumGroup:  'spectrumGroup.pid',
-
-                MatchPeaksWithin:        DefaultMinDist,
-                MinEfficiency:       DefaultEfficiency,
-                RefPL:       DefaultReferencePeakList,
+                ReferenceSpectrumGroup:     'spectrumGroup.pid',
+                STD_Control_SpectrumGroup:  'spectrumGroup.pid',
+                STD_Target_SpectrumGroup:   'spectrumGroup.pid',
+                MatchPeaksWithin:           DefaultMinDist,
+                MinEfficiency:              DefaultEfficiency,
+                RefPL:                      DefaultReferencePeakList,
                }
 
   def _addNewHit(self, spectrum, hits):
