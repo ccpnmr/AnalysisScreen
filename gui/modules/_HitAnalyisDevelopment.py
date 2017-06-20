@@ -86,75 +86,101 @@ class HitsAnalysis(CcpnModule):
     self.mainWidget.setContentsMargins(20,20,20,20)
 
 
-    ## Set ExperimentType  Label
+    ## Set ExperimentType Frame
     column = 0
-    self.experimentTypeLabel = Label(self.mainWidget, text='Experiment Type',
-                                     grid=(0, column))
-    self.experimentTypeRadioButtons = RadioButtons(self.mainWidget, texts=['1H', 'STD', 'WaterLogsy', 't1'],
-                                                   direction='V', vAlign='t',
-                                                   grid=(1, column))
+    self.experimentTypeWidgetsFrame = Frame(self.mainWidget,  setLayout=True, margins=(10,10,10,10),
+                                         grid=(0, column))
+
+    self.experimentTypeLabel = Label(self.experimentTypeWidgetsFrame, text='Experiment Type',
+                                     grid=(0, 0), vAlign='t',)
+
+    self.experimentTypeRadioButtons = RadioButtons(self.experimentTypeWidgetsFrame,
+                                                   texts=['1H', 'STD', 'WaterLogsy', 't1'],
+                                                   direction='V',
+                                                   grid=(1, 0))
+    self.experimentTypeWidgetsFrame.getLayout().setAlignment(Qt.AlignTop)
+
+
     ## Set SpectrumHit Table Label
     column += 1
-    self.spectrumHitTableLabel = Label(self.mainWidget, text='SpectrumHits',
-                               grid = (0, column))
+    self.spectrumHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10,10,10,10),
+                                     grid=(0, column))
+    self.spectrumHitTableLabel = Label(self.spectrumHitWidgetsFrame, text='SpectrumHits',vAlign='t',
+                               grid = (0, 0))
 
     ## Set SpectrumHit Table
-    self.hitTable = ObjectTable(self.mainWidget, columns=[], actionCallback=self._hitTableCallback,
+    self.hitTable = ObjectTable(self.spectrumHitWidgetsFrame, columns=[], actionCallback=self._hitTableCallback,
                                selectionCallback=self._selectionCallback, objects=[],
-                               grid=(1, column))
+                               grid=(1, 0))
     self._setSpectrumHitTable()
 
     ## Set SpectrumHit Table Buttons
-    self.hitButtons = ButtonList(self.mainWidget, texts=['', '', '', '', ''],
+    self.hitButtons = ButtonList(self.spectrumHitWidgetsFrame, texts=['', '', '', '', ''],
                                callbacks=[self._movePreviousRow, self._deleteHit, self._rejectAssignment,
                                           self._acceptAssignment, self._moveNextRow],
                                icons=[self.previousIcon, self.minusIcon, self.rejectIcon, self.acceptIcon,self.nextIcon],
                                tipTexts=[None, None, None, None, None],
                                direction='H', hAlign='c',
-                               grid=(2, column))
+                               grid=(2, 0))
 
 
-    ## Set PeakHit Table Label
+    ## Set PeakHit Frame
     column += 1
-    self.peakHitTableLabel = Label(self.mainWidget, text='Target Peak Hits',
+    self.peakHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10,10,10,10),
                                        grid=(0, column))
 
-    self.peakTable = ObjectTable(self.mainWidget, columns=[], actionCallback=self._hitTableCallback,
-                                selectionCallback=self._selectionCallback, objects=[],
-                                grid=(1, column))
+    self.peakHitTableLabel = Label(self.peakHitWidgetsFrame, text='Target Peak Hits',vAlign='t',
+                                       grid=(0, 0))
 
-    self.peakButtons = ButtonList(self.mainWidget, texts=['', '', '', ],
+    self.peakTable = ObjectTable(self.peakHitWidgetsFrame, columns=[], actionCallback=self._hitTableCallback,
+                                selectionCallback=self._selectionCallback, objects=[],
+                                grid=(1, 0))
+
+    self.peakButtons = ButtonList(self.peakHitWidgetsFrame, texts=['', '', '', ],
                                  callbacks=[self._movePreviousRow, None, self._moveNextRow],
                                  icons=[self.previousIcon, self.minusIcon, self.nextIcon],
                                  tipTexts=[None, None,  None],
                                  direction='H', hAlign='c',
-                                 grid=(2, column))
+                                 grid=(2, 0))
 
 
-    ## Set PeakHit Table Label
+    ## Set reference Widgets frame
     column += 1
-    self.referencePeakTableLabel = Label(self.mainWidget, text='Matched Reference Peak',
-                                   grid=(0, column))
+    self.referenceWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10,10,10,10),
+                                       grid=(0, column))
 
-    self.referencePeakTable = ObjectTable(self.mainWidget, columns=[], actionCallback=self._hitTableCallback,
+    self.referencePeakTableLabel = Label(self.referenceWidgetsFrame, text='Matched Reference Peak',
+                                   grid=(0, 0))
+
+    self.referencePeakTable = ObjectTable(self.referenceWidgetsFrame, columns=[], actionCallback=self._hitTableCallback,
                                  selectionCallback=self._selectionCallback, objects=[],
-                                 grid=(1, column))
+                                 grid=(1, 0))
+
+    self.referenceButtons = ButtonList(self.referenceWidgetsFrame, texts=['', '', '', ],
+                                  callbacks=[self._movePreviousRow, None, self._moveNextRow],
+                                  icons=[self.previousIcon, self.minusIcon, self.nextIcon],
+                                  tipTexts=[None, None, None],
+                                  direction='H', hAlign='c',
+                                  grid=(2, 0))
 
     ## Set substance Details
     column += 1
-    self.substanceDetailsLabel = Label(self.mainWidget, text='Substance Details',
-                                         grid=(0, column))
+    self.substanceDetailsFrame = Frame(self.mainWidget, setLayout=True, margins=(10,10,10,10),
+                                       grid=(0, column))
 
-    self.substanceDetailsFrame = Frame(self.mainWidget, setLayout=True,
-                                       grid=(1, column))
 
-    ## compound view goes inside the substanceDetailsFrame
-    self.compoundView = CompoundView(self.substanceDetailsFrame, smiles=[], hAlign='c',vAlign='t',
-                                 grid=(0, 0))
+    self.substanceDetailsLabel = Label(self.substanceDetailsFrame, text='Substance Details',
+                                       grid=(0, 0))
 
-    ## List view goes inside the substanceDetailsFrame
-    self.substanceDetailsList = CompoundView(self.substanceDetailsFrame, smiles=[], hAlign='c', vAlign='t',
-                                     grid=(0, 0))
+
+    self.compoundView = CompoundView(self.substanceDetailsFrame, smiles=[], #hAlign='t',vAlign='t',
+                                 grid=(1, 0))
+    # self.compoundView.setContentsMargins(10, 10, 10, 10)
+
+    self.listWidgetsHitDetails = ListWidget(self.substanceDetailsFrame, #hAlign='t',vAlign='t',
+                                     grid=(2, 0))
+
+    # self.listWidgetsHitDetails.setContentsMargins(10,10,10,10)
 
   def _setSpectrumHitTable(self):
     "Sets parameters to the SpectrumHitTable."
