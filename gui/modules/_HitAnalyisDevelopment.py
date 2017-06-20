@@ -29,19 +29,22 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CompoundView import CompoundView
 from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings, ObjectTableFilter
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.modules.PeakTable import PeakListTableWidget
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Frame import Frame
+from functools import partial
+from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import REFERENCEPEAKLIST, TARGETPEAKLIST
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
 class HitsAnalysis(CcpnModule):
 
-  includeSettingsWidget = False
+  includeSettingsWidget = True
   maxSettingsState = 2
   settingsPosition = 'top'
   className = 'ScreeningHits'
@@ -51,9 +54,9 @@ class HitsAnalysis(CcpnModule):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     self._spectrumHits = []
-
     self.application = None
     self.project = None
+    self.current = None
 
     if mainWindow is not None:
       self.mainWindow = mainWindow
@@ -78,6 +81,7 @@ class HitsAnalysis(CcpnModule):
     self.settingIcon = Icon('icons/applications-system')
     self.exportIcon = Icon('icons/export')
     self._createWidgets()
+    self._createSettingsWidgets()
 
 
   def _createWidgets(self):
@@ -90,7 +94,30 @@ class HitsAnalysis(CcpnModule):
     column = 0
     self.experimentTypeWidgetsFrame = Frame(self.mainWidget,  setLayout=True, margins=(10,10,10,10),
                                          grid=(0, column))
+    column += 1
+    self.spectrumHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
+                                         grid=(0, column))
 
+    column += 1
+    self.peakHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
+                                     grid=(0, column))
+
+    column += 1
+    self.referenceWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
+                                       grid=(0, column))
+
+    column += 1
+    self.substanceDetailsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
+                                       grid=(0, column))
+
+    self._setExperimentTypeWidgets()
+    self._setSpectrumHitWidgets()
+    self._setPeakHitWidgets()
+    self._setReferenceHitWidgets()
+    self._setSubstanceDetailsWidgets()
+    self._setSpectrumHitTable()
+
+  def _setExperimentTypeWidgets(self):
     self.experimentTypeLabel = Label(self.experimentTypeWidgetsFrame, text='Experiment Type',
                                      grid=(0, 0), vAlign='t',)
 
@@ -100,87 +127,72 @@ class HitsAnalysis(CcpnModule):
                                                    grid=(1, 0))
     self.experimentTypeWidgetsFrame.getLayout().setAlignment(Qt.AlignTop)
 
+  def _setSpectrumHitWidgets(self):
 
-    ## Set SpectrumHit Table Label
-    column += 1
-    self.spectrumHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10,10,10,10),
-                                     grid=(0, column))
     self.spectrumHitTableLabel = Label(self.spectrumHitWidgetsFrame, text='SpectrumHits',vAlign='t',
                                grid = (0, 0))
 
-    ## Set SpectrumHit Table
+
     self.hitTable = ObjectTable(self.spectrumHitWidgetsFrame, columns=[], actionCallback=self._hitTableCallback,
                                selectionCallback=self._selectionCallback, objects=[],
                                grid=(1, 0))
-    self._setSpectrumHitTable()
 
-    ## Set SpectrumHit Table Buttons
+
     self.hitButtons = ButtonList(self.spectrumHitWidgetsFrame, texts=['', '', '', '', ''],
-                               callbacks=[self._movePreviousRow, self._deleteHit, self._rejectAssignment,
-                                          self._acceptAssignment, self._moveNextRow],
+                               callbacks=[self._movePreviousRow, self._deleteHit,
+                                          partial(self._setHitIsConfirmed,False),
+                                          partial(self._setHitIsConfirmed,True),
+                                          self._moveNextRow],
                                icons=[self.previousIcon, self.minusIcon, self.rejectIcon, self.acceptIcon,self.nextIcon],
                                tipTexts=[None, None, None, None, None],
-                               direction='H', hAlign='c',
+                               direction='H', vAlign='b',
                                grid=(2, 0))
 
 
-    ## Set PeakHit Frame
-    column += 1
-    self.peakHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10,10,10,10),
-                                       grid=(0, column))
 
+
+  def _setPeakHitWidgets(self):
     self.peakHitTableLabel = Label(self.peakHitWidgetsFrame, text='Target Peak Hits',vAlign='t',
                                        grid=(0, 0))
 
-    self.peakTable = ObjectTable(self.peakHitWidgetsFrame, columns=[], actionCallback=self._hitTableCallback,
-                                selectionCallback=self._selectionCallback, objects=[],
-                                grid=(1, 0))
+    self.targetPeakTable = CustomPeakTableWidget(self.peakHitWidgetsFrame, moduleParent=self, application=self.application,
+                                       grid=(1, 0))
 
     self.peakButtons = ButtonList(self.peakHitWidgetsFrame, texts=['', '', '', ],
                                  callbacks=[self._movePreviousRow, None, self._moveNextRow],
                                  icons=[self.previousIcon, self.minusIcon, self.nextIcon],
                                  tipTexts=[None, None,  None],
-                                 direction='H', hAlign='c',
+                                 direction='H', vAlign='b',
                                  grid=(2, 0))
 
 
-    ## Set reference Widgets frame
-    column += 1
-    self.referenceWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10,10,10,10),
-                                       grid=(0, column))
+  def _setReferenceHitWidgets(self):
 
-    self.referencePeakTableLabel = Label(self.referenceWidgetsFrame, text='Matched Reference Peak',
+    self.referencePeakTableLabel = Label(self.referenceWidgetsFrame, text='Matched Reference Peak', vAlign='t',
                                    grid=(0, 0))
 
-    self.referencePeakTable = ObjectTable(self.referenceWidgetsFrame, columns=[], actionCallback=self._hitTableCallback,
-                                 selectionCallback=self._selectionCallback, objects=[],
+    self.referencePeakTable = CustomPeakTableWidget(self.referenceWidgetsFrame, moduleParent=self, application=self.application,
                                  grid=(1, 0))
 
     self.referenceButtons = ButtonList(self.referenceWidgetsFrame, texts=['', '', '', ],
                                   callbacks=[self._movePreviousRow, None, self._moveNextRow],
                                   icons=[self.previousIcon, self.minusIcon, self.nextIcon],
                                   tipTexts=[None, None, None],
-                                  direction='H', hAlign='c',
+                                  direction='H', vAlign='b',
                                   grid=(2, 0))
 
-    ## Set substance Details
-    column += 1
-    self.substanceDetailsFrame = Frame(self.mainWidget, setLayout=True, margins=(10,10,10,10),
-                                       grid=(0, column))
 
+  def _setSubstanceDetailsWidgets(self):
 
     self.substanceDetailsLabel = Label(self.substanceDetailsFrame, text='Substance Details',
                                        grid=(0, 0))
-
-
     self.compoundView = CompoundView(self.substanceDetailsFrame, smiles=[], #hAlign='t',vAlign='t',
                                  grid=(1, 0))
-    # self.compoundView.setContentsMargins(10, 10, 10, 10)
 
     self.listWidgetsHitDetails = ListWidget(self.substanceDetailsFrame, #hAlign='t',vAlign='t',
                                      grid=(2, 0))
 
-    # self.listWidgetsHitDetails.setContentsMargins(10,10,10,10)
+
 
   def _setSpectrumHitTable(self):
     "Sets parameters to the SpectrumHitTable."
@@ -192,12 +204,73 @@ class HitsAnalysis(CcpnModule):
     if len(self._spectrumHits) > 0:
       self.hitTable.setCurrentObject(self._spectrumHits[0])
 
-  def _acceptAssignment(self):
+
+  def _createSettingsWidgets(self):
+    self.settingsWidget.setContentsMargins(20, 20, 20, 20)
+    row = 0
+    self.targetPeaksCheckbox = CheckBox(self.settingsWidget, text='Hide Target Peaks', checked=False,
+                                           callback=partial(self._hideShowWidgetFromCheckBox,
+                                                            widget=self.peakHitWidgetsFrame),
+                                           grid=(row, 0))
+
+    row += 1
+    self.referencePeaksCheckbox = CheckBox(self.settingsWidget, text='Hide Reference Peaks', checked=False,
+                                           callback=partial(self._hideShowWidgetFromCheckBox,
+                                                            widget=self.referenceWidgetsFrame),
+                                           grid=(row, 0))
+
+    row +=1
+    self.substanceDetailsCheckbox = CheckBox(self.settingsWidget, text='Hide Substance Details', checked=False,
+                                           callback=partial(self._hideShowWidgetFromCheckBox,
+                                                            widget= self.substanceDetailsFrame),
+                                           grid=(row,0))
+
+
+  def _hideShowWidgetFromCheckBox(self, widget):
+    '''Specific to hide a widget from a checkbox callback  '''
+    if self.sender() is not None:
+      if self.sender().isChecked():
+        widget.hide()
+      else:
+        widget.show()
+
+  def _setPeakTables(self):
+    targetPeakList = self._getTargetPeakList()
+    if targetPeakList is not None:
+      self.targetPeakTable.pLwidget.select(targetPeakList.pid)
+      self.targetPeakTable._updateTable()
+
+    referencePeakList = self._getReferencePeakList()
+
+    if referencePeakList is not None:
+      self.referencePeakTable.pLwidget.select(referencePeakList.pid)
+      self.referencePeakTable._updateTable()
+
+
+  def _getTargetPeakList(self):
+    if self.current is not None:
+      if self.current.spectrumHit is not None:
+        for pl in self.current.spectrumHit.spectrum.peakLists:
+          if pl.isSimulated and pl.title == TARGETPEAKLIST:
+            return pl
+
+  def _getReferencePeakList(self):
+    if self.current is not None:
+      if self.current.spectrumHit is not None:
+        for pl in self.current.spectrumHit.spectrum.peakLists:
+          if pl.isSimulated and pl.title == REFERENCEPEAKLIST:
+            return pl
+
+  def _setHitIsConfirmed(self, value:bool):
     ''' Documentation '''
-    hit = self.current.spectrumHit
-    if hit is not None:
-      hit.isConfirmed = True
-      self._updateHitTable()
+    if self.current is not None:
+      hit = self.current.spectrumHit
+      if hit is not None:
+        hit.isConfirmed = value
+        self._updateHitTable()
+
+
+
 
   def _addHit(self):
     ''' Documentation '''
@@ -209,10 +282,13 @@ class HitsAnalysis(CcpnModule):
     """
     set as current the selected spectrumHit on the table
     """
-    if spectrumHit is None:
-      self.current.clearSpectrumHits()
-    else:
-      self.current.spectrumHit = spectrumHit
+    if self.current is not None:
+      if spectrumHit is None:
+        self.current.clearSpectrumHits()
+      else:
+        self.current.spectrumHit = spectrumHit
+        self._setPeakTables()
+
 
 
   def _clearDisplayView(self):
@@ -260,15 +336,13 @@ class HitsAnalysis(CcpnModule):
   def _deleteHit(self):
     ''' Deletes hit from project and from the table. If is last cleans all graphics
     '''
-    hitToDelete = self.pullDownHit.getObject()
-    hitToDelete.delete()
-    if hitToDelete in self._spectrumHits:
-      self._spectrumHits.remove(hitToDelete)
-    self._moveNextRow()
-    self._updateHitTable()
-    if len(self._spectrumHits)<=0:
-      self._clearDisplayView()
-      self.pullDownHit.setData([])
+    if self.current is not None:
+      spectrumHit = self.current.spectrumHit
+      if spectrumHit is not None:
+        spectrumHit.delete()
+        self._moveNextRow()
+        self._updateHitTable()
+
 
   def _displayAllSampleComponents(self):
     ''' Documentation '''
@@ -307,19 +381,6 @@ class HitsAnalysis(CcpnModule):
     return set(list(positions))
 
 
-  def _getPullDownObj(self):
-    ''' Documentation '''
-
-    currentObjPulldown = self.pullDownHit.currentObject()
-    if hasattr(currentObjPulldown, 'spectrum'):
-      spectrumHit = currentObjPulldown
-      substanceName = spectrumHit.substanceName
-      substance = self.project.getByPid('SU:'+substanceName+'.')
-      if substance is not None:
-        return substance.sampleComponents[0]
-    else:
-      sampleComponent = currentObjPulldown
-      return sampleComponent
 
 
   def _getSampleInfoToDisplay(self):
@@ -362,65 +423,45 @@ class HitsAnalysis(CcpnModule):
 
     if len(self._getPullDownObj().spectrumHits)>0:
       hit = self._getPullDownObj().spectrumHits[0]
-      hitInfo = {'Score  ':hit.figureOfMerit,
-                    'Std  ':hit.meritCode,
-                    'NormalisedChange ':hit.normalisedChange,
-                    'concentration  ':hit.concentration,
-                    'concentrationError ':hit.concentrationError,
-                    'comment  ':hit.comment,
-                    }
+      hitInfo = {
+                'Score:  ':hit.figureOfMerit,
+                'NormalisedChange: ':hit.normalisedChange,
+                'concentration:  ':hit.concentration,
+                'concentrationError: ':hit.concentrationError,
+                'comment:  ':hit.comment,
+                }
       return hitInfo
     else:
       return {'Add new hit to display contents': ''}
 
 
-  def _getSelectedSample(self):
-    ''' Documentation '''
-
-    return self._getPullDownObj().sample
 
 
-  def _hideDeleteButton(self):
-    ''' Documentation '''
-
-    self.showDeleteHitButtons.hide()
-    self.addHitButton.show()
-
-
-  def _hitTableCallback(self, row:int=None, col:int=None, obj:object=None):
-    ''' Documentation '''
-
-    pass
-    # FIXME TODO
-    # peaks = self._getPullDownObj().substance.referenceSpectra[0].peakLists[1].peaks
-    # from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
-    # if self._current.strip is not None:
-    #   navigateToPositionInStrip(strip=self._current.strip, positions=peak.position)
-    # for peak in peaks:
-    #   navigateToPeakPosition(self.project, peak=peak, selectedDisplays=[displayed.pid], markPositions=True)
 
 
   def _moveNextRow(self):
     ''' Documentation '''
 
     self.currentRowPosition = self.hitTable.getSelectedRows()
-    newPosition = self.currentRowPosition[0]+1
-    self.hitTable.selectRow(newPosition)
-    lastRow = len(self.project.spectrumHits)
-    if newPosition == lastRow:
-     self.hitTable.selectRow(0)
+    if len(self.currentRowPosition)>0:
+      newPosition = self.currentRowPosition[0]+1
+      self.hitTable.selectRow(newPosition)
+      lastRow = len(self.project.spectrumHits)
+      if newPosition == lastRow:
+       self.hitTable.selectRow(0)
 
 
   def _movePreviousRow(self):
     ''' Documentation '''
 
     self.currentRowPosition = self.hitTable.getSelectedRows()
-    newPosition = self.currentRowPosition[0]-1
-    lastRow = len(self.project.spectrumHits)-1
-    if newPosition == -1:
-      self.hitTable.selectRow(lastRow)
-    else:
-      self.hitTable.selectRow(newPosition)
+    if len(self.currentRowPosition) > 0:
+      newPosition = self.currentRowPosition[0]-1
+      lastRow = len(self.project.spectrumHits)-1
+      if newPosition == -1:
+        self.hitTable.selectRow(lastRow)
+      else:
+        self.hitTable.selectRow(newPosition)
 
 
   def _populateInfoList(self, name, value):
@@ -437,12 +478,6 @@ class HitsAnalysis(CcpnModule):
       item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)# | QtCore.Qt.ItemIsEditable)
 
 
-  def _rejectAssignment(self):
-    ''' Documentation '''
-    pass
-    # self._updateHitTable()
-
-
 
   def _showHitInfoOnDisplay(self):
     ''' Documentation '''
@@ -454,9 +489,10 @@ class HitsAnalysis(CcpnModule):
 
   def _showTextHitDetails(self):
     ''' Documentation '''
-
+    if self.current is not None:
+     pass
     color = QtGui.QColor('Red')
-    ''' setSpectrum Hit '''
+    ## setSpectrum Hit
     headerHit =  QtGui.QListWidgetItem('\nSpectrum Hit Details')
     headerHit.setFlags(QtCore.Qt.NoItemFlags)
     headerHit.setTextColor(color)
@@ -464,7 +500,7 @@ class HitsAnalysis(CcpnModule):
     for name, value in self._getSpectrumHitInfoToDisplay().items():
       self._populateInfoList(name, value)
 
-    ''' setSubstance '''
+    ## setSubstance
     headerSubstance =  QtGui.QListWidgetItem('\nSubstance Details')
     headerSubstance.setFlags(QtCore.Qt.NoItemFlags)
     headerSubstance.setTextColor(color)
@@ -472,7 +508,7 @@ class HitsAnalysis(CcpnModule):
     for name, value in self._getSubstanceInfoToDisplay().items():
       self._populateInfoList(name, value)
 
-    ''' setSample '''
+    ## setSample
     headerSample =  QtGui.QListWidgetItem('\nSample Details')
     headerSample.setFlags(QtCore.Qt.NoItemFlags)
     headerSample.setTextColor(color)
@@ -532,24 +568,27 @@ class HitsAnalysis(CcpnModule):
 
 
 
-#   def exportToXls(self):
-#     ''' Export a simple xlxs file from the results '''
-#     self.nameAndPath = ''
-#     fType = 'XLS (*.xlsx)'
-#     dialog = FileDialog(self, fileMode=0, acceptMode=1, preferences=self.preferences, filter=fType)
-#     filePath = dialog.selectedFiles()[0]
-#     self.nameAndPath = filePath
-#
-#     sampleColumn = [str(sample.pid) for sample in self.project.samples]
-#     sampleHits = [str(sample.spectrumHits) for sample in self.project.samples]
-#     df = DataFrame({'Mixture name': sampleColumn, 'Sample Hits': sampleHits})
-#     df.to_excel(self.nameAndPath, sheet_name='sheet1', index=False)
 
 
 #
 #     self.strip.viewBox.autoRange()
 
 # project.spectrumDisplays[0].spectrumActionDict[project.spectrumDisplays[0].spectrumViews[0].spectrum._apiDataSource].setChecked(False)
+
+class CustomPeakTableWidget(PeakListTableWidget):
+
+  def __init__(self, parent, moduleParent, application, peakList=None, **kwds):
+
+    if application is not None:
+      PeakListTableWidget.__init__(self, parent=parent, moduleParent=moduleParent, application=application,
+                                   peakList=peakList, updateSettingsWidgets=False, **kwds)
+
+      self.pLwidget.hide()
+      self.posUnitPulldownLabel.hide()
+      self.posUnitPulldown.hide()
+      self.setSizePolicy(QtGui.QSizePolicy(
+                                          QtGui.QSizePolicy.Expanding,
+                                          QtGui.QSizePolicy.Expanding))
 
 
 if __name__ == '__main__':

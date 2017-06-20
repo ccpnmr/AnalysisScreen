@@ -23,8 +23,8 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 # Start of code
 #=========================================================================================
 
-
-
+TARGETPEAKLIST = 'Target PeakList'
+REFERENCEPEAKLIST = 'Reference PeakList'
 
 def _addNewHit(spectrum, hits):
   """
@@ -34,8 +34,8 @@ def _addNewHit(spectrum, hits):
   :return:
   """
   spectrum.newSpectrumHit(substanceName=spectrum.name)
-  newTargetPeakList = spectrum.newPeakList(title='Target Hit', isSimulated=True, comment='PeakList containing peak hits')
-  newReferencePeakList = spectrum.newPeakList(title='Reference Peaks', isSimulated=True,
+  newTargetPeakList = spectrum.newPeakList(title=TARGETPEAKLIST, isSimulated=True, comment='PeakList containing peak hits')
+  newReferencePeakList = spectrum.newPeakList(title=REFERENCEPEAKLIST, isSimulated=True,
                                            comment='PeakList containing matched peak to the reference')
 
 
