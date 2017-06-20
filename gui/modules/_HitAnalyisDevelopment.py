@@ -36,8 +36,10 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.modules.PeakTable import PeakListTableWidget
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Frame import Frame
+
 from functools import partial
 from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import REFERENCEPEAKLIST, TARGETPEAKLIST
+from ccpn.core.lib.Notifiers import Notifier
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
@@ -68,6 +70,7 @@ class HitsAnalysis(CcpnModule):
       self._spectrumHits = self.project.spectrumHits
 
 
+
     ######## ======== Icons ====== ########
     self.acceptIcon = Icon('icons/dialog-apply')
     self.rejectIcon = Icon('icons/reject')
@@ -83,6 +86,10 @@ class HitsAnalysis(CcpnModule):
     self._createWidgets()
     self._createSettingsWidgets()
 
+    # set notifier
+    if self.project is not None:
+      self._spectrumHitNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE],
+                                           'SpectrumHit', self._spectrumHitNotifierCallback)
 
   def _createWidgets(self):
     ''' Documentation '''
@@ -133,7 +140,7 @@ class HitsAnalysis(CcpnModule):
                                grid = (0, 0))
 
 
-    self.hitTable = ObjectTable(self.spectrumHitWidgetsFrame, columns=[], actionCallback=self._hitTableCallback,
+    self.hitTable = ObjectTable(self.spectrumHitWidgetsFrame, columns=[], actionCallback=None,
                                selectionCallback=self._selectionCallback, objects=[],
                                grid=(1, 0))
 
@@ -239,13 +246,16 @@ class HitsAnalysis(CcpnModule):
     if targetPeakList is not None:
       self.targetPeakTable.pLwidget.select(targetPeakList.pid)
       self.targetPeakTable._updateTable()
+    else:
+      self.targetPeakTable.clearTable()
 
     referencePeakList = self._getReferencePeakList()
 
     if referencePeakList is not None:
       self.referencePeakTable.pLwidget.select(referencePeakList.pid)
       self.referencePeakTable._updateTable()
-
+    else:
+      self.referencePeakTable.clearTable()
 
   def _getTargetPeakList(self):
     if self.current is not None:
@@ -284,10 +294,10 @@ class HitsAnalysis(CcpnModule):
     """
     if self.current is not None:
       if spectrumHit is None:
-        self.current.clearSpectrumHits()
+        self.current.spectrumHit = None
       else:
         self.current.spectrumHit = spectrumHit
-        self._setPeakTables()
+      self._setPeakTables()
 
 
 
@@ -397,38 +407,41 @@ class HitsAnalysis(CcpnModule):
     return sampleInfo
 
 
-  def _getSubstanceInfoToDisplay(self):
+  def _getSubstanceInfoToDisplay(self, spectrumHit):
+    ''' Documentation '''
+    if spectrumHit is not None:
+
+      sampleComponent = self._getPullDownObj()
+      substance = sampleComponent.substance
+      substanceInfo = {'name  ':substance.name,
+                    # 'synonyms ':substance.synonyms,
+                    'userCode ':substance.userCode,
+                    'empiricalFormula ':substance.empiricalFormula,
+                    'molecularMass  ':substance.molecularMass,
+                    'atomCount  ':substance.atomCount,
+                    'bondCount  ':substance.bondCount,
+                    'ringCount  ':substance.ringCount,
+                    'hBondDonorCount  ':substance.hBondDonorCount,
+                    'hBondAcceptorCount ':substance.hBondAcceptorCount,
+                    'polarSurfaceArea ':substance.polarSurfaceArea,
+                    'logPartitionCoefficien ':substance.logPartitionCoefficient,
+                    'comment  ':substance.comment}
+      return substanceInfo
+
+    else:
+     return {'Link to a Substance to display contents': ''}
+
+
+  def _getSpectrumHitInfoToDisplay(self, spectrumHit):
     ''' Documentation '''
 
-    sampleComponent = self._getPullDownObj()
-    substance = sampleComponent.substance
-    substanceInfo = {'name  ':substance.name,
-                  # 'synonyms ':substance.synonyms,
-                  'userCode ':substance.userCode,
-                  'empiricalFormula ':substance.empiricalFormula,
-                  'molecularMass  ':substance.molecularMass,
-                  'atomCount  ':substance.atomCount,
-                  'bondCount  ':substance.bondCount,
-                  'ringCount  ':substance.ringCount,
-                  'hBondDonorCount  ':substance.hBondDonorCount,
-                  'hBondAcceptorCount ':substance.hBondAcceptorCount,
-                  'polarSurfaceArea ':substance.polarSurfaceArea,
-                  'logPartitionCoefficien ':substance.logPartitionCoefficient,
-                  'comment  ':substance.comment}
-    return substanceInfo
-
-
-  def _getSpectrumHitInfoToDisplay(self):
-    ''' Documentation '''
-
-    if len(self._getPullDownObj().spectrumHits)>0:
-      hit = self._getPullDownObj().spectrumHits[0]
+    if spectrumHit is not None:
       hitInfo = {
-                'Score:  ':hit.figureOfMerit,
-                'NormalisedChange: ':hit.normalisedChange,
-                'concentration:  ':hit.concentration,
-                'concentrationError: ':hit.concentrationError,
-                'comment:  ':hit.comment,
+                'Score:  ':spectrumHit.figureOfMerit,
+                'NormalisedChange: ':spectrumHit.normalisedChange,
+                'concentration:  ':spectrumHit.concentration,
+                'concentrationError: ':spectrumHit.concentrationError,
+                'comment:  ':spectrumHit.comment,
                 }
       return hitInfo
     else:
@@ -490,31 +503,32 @@ class HitsAnalysis(CcpnModule):
   def _showTextHitDetails(self):
     ''' Documentation '''
     if self.current is not None:
-     pass
-    color = QtGui.QColor('Red')
-    ## setSpectrum Hit
-    headerHit =  QtGui.QListWidgetItem('\nSpectrum Hit Details')
-    headerHit.setFlags(QtCore.Qt.NoItemFlags)
-    headerHit.setTextColor(color)
-    self.listWidgetsHitDetails.addItem(headerHit)
-    for name, value in self._getSpectrumHitInfoToDisplay().items():
-      self._populateInfoList(name, value)
+      spectrumHit = self.current.spectrumHit
 
-    ## setSubstance
-    headerSubstance =  QtGui.QListWidgetItem('\nSubstance Details')
-    headerSubstance.setFlags(QtCore.Qt.NoItemFlags)
-    headerSubstance.setTextColor(color)
-    self.listWidgetsHitDetails.addItem(headerSubstance)
-    for name, value in self._getSubstanceInfoToDisplay().items():
-      self._populateInfoList(name, value)
+      color = QtGui.QColor('Red')
+      ## setSpectrum Hit
+      headerHit =  QtGui.QListWidgetItem('\nSpectrum Hit Details')
+      headerHit.setFlags(QtCore.Qt.NoItemFlags)
+      headerHit.setTextColor(color)
+      self.listWidgetsHitDetails.addItem(headerHit)
+      for name, value in self._getSpectrumHitInfoToDisplay().items():
+        self._populateInfoList(name, value)
 
-    ## setSample
-    headerSample =  QtGui.QListWidgetItem('\nSample Details')
-    headerSample.setFlags(QtCore.Qt.NoItemFlags)
-    headerSample.setTextColor(color)
-    self.listWidgetsHitDetails.addItem(headerSample)
-    for name, value in self._getSampleInfoToDisplay().items():
-      self._populateInfoList(name, value)
+      ## setSubstance
+      headerSubstance =  QtGui.QListWidgetItem('\nSubstance Details')
+      headerSubstance.setFlags(QtCore.Qt.NoItemFlags)
+      headerSubstance.setTextColor(color)
+      self.listWidgetsHitDetails.addItem(headerSubstance)
+      for name, value in self._getSubstanceInfoToDisplay().items():
+        self._populateInfoList(name, value)
+
+      ## setSample
+      headerSample =  QtGui.QListWidgetItem('\nSample Details')
+      headerSample.setFlags(QtCore.Qt.NoItemFlags)
+      headerSample.setTextColor(color)
+      self.listWidgetsHitDetails.addItem(headerSample)
+      for name, value in self._getSampleInfoToDisplay().items():
+        self._populateInfoList(name, value)
 
   def _showMolecule(self):
     ''' Documentation '''
@@ -564,10 +578,15 @@ class HitsAnalysis(CcpnModule):
 
   def _updateHitTable(self):
     ''' Documentation '''
-    self.hitTable.setObjects(self._spectrumHits)
+    if self.project is not None:
+      spectrumHits = [sp for sp in self.project.spectrumHits]
+      self.hitTable.setObjects(spectrumHits)
+    else:
+      self.hitTable.setObjects([])
 
 
-
+  def _spectrumHitNotifierCallback(self, *kw):
+    self._updateHitTable()
 
 
 #
