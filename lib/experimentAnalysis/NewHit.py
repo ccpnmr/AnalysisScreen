@@ -33,15 +33,21 @@ def _addNewHit(spectrum, hits):
   :param hits: List of tuples containing peaks hits in the form [(referencePeak, targetPeak, MatchedPosition)]
   :return:
   """
-  spectrum.newSpectrumHit(substanceName=spectrum.name)
+  project = spectrum.project
+  if not project.getByPid('SH:'+spectrum.name):
+    spectrumHit = spectrum.newSpectrumHit(substanceName=spectrum.name)
+  else:
+    spectrumHit = spectrum.newSpectrumHit(substanceName=spectrum.name+1) #avoids Api errors
+
   newTargetPeakList = spectrum.newPeakList(title=TARGETPEAKLIST, isSimulated=True, comment='PeakList containing peak hits')
   newReferencePeakList = spectrum.newPeakList(title=REFERENCEPEAKLIST, isSimulated=True,
                                            comment='PeakList containing matched peak to the reference')
 
-
+  referenceSpectra = []
   for  hit in hits:
     if len(hit) == 3:
       referencePeak, targetPeak, position = hit
+      referenceSpectra.append(referencePeak.peakList.spectrum)
       newPeakFromReference = referencePeak.copyTo(newReferencePeakList)
       newPeakFromTarget = targetPeak.copyTo(newTargetPeakList)
 
@@ -49,3 +55,12 @@ def _addNewHit(spectrum, hits):
       newPeakFromTarget.annotation = 'Hit'
       newPeakFromReference.comment = 'Hit: Peak matched and copied From Reference PeakList'
       newPeakFromTarget.comment = 'Hit: Peak matched and copied From Target PeakList '
+
+  if len(referenceSpectra)>0:
+    spectrumHit._referenceSpectrum = referenceSpectra[0]
+    substance = referenceSpectra[0].referenceSubstance
+    if substance is not None:
+      if not project.getByPid('SH:' + substance.name):
+        spectrumHit.rename(substance.name)
+      else:
+        spectrumHit.rename(substance.name+1) #avoids Api errors

@@ -113,6 +113,7 @@ class HitsAnalysis(CcpnModule):
     column += 1
     self.spectrumHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
                                            grid=(0, column))
+    self.spectrumHitWidgetsFrame.setMinimumWidth(200)
 
     column += 1
     self.peakHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
@@ -234,13 +235,11 @@ class HitsAnalysis(CcpnModule):
                                            callback=partial(self._hideShowWidgetFromCheckBox,
                                                             widget=self.peakHitWidgetsFrame),
                                            grid=(row, 0))
-
     row += 1
     self.referencePeaksCheckbox = CheckBox(self.settingsWidget, text='Hide Reference Peaks', checked=False,
                                            callback=partial(self._hideShowWidgetFromCheckBox,
                                                             widget=self.referenceWidgetsFrame),
                                            grid=(row, 0))
-
     row +=1
     self.substanceDetailsCheckbox = CheckBox(self.settingsWidget, text='Hide Substance Details', checked=False,
                                            callback=partial(self._hideShowWidgetFromCheckBox,
@@ -311,15 +310,6 @@ class HitsAnalysis(CcpnModule):
         hit.isConfirmed = value
         self._updateHitTable()
 
-
-
-
-  def _addHit(self):
-    ''' Documentation '''
-    pass
-
-
-
   def _selectionCallback(self, spectrumHit, *args):
     """
     set as current the selected spectrumHit on the table
@@ -330,22 +320,8 @@ class HitsAnalysis(CcpnModule):
       else:
         self.current.spectrumHit = spectrumHit
       self._setPeakTables()
+      self._showHitInfoOnDisplay()
 
-
-
-  def _clearDisplayView(self):
-    ''' Documentation '''
-    pass
-    # # currentDisplayed = self.project.getByPid('GD:user.View.1D:H')
-    #
-    # currentDisplayed = self.project.strips[0]
-    # for spectrumView in currentDisplayed.spectrumViews:
-    #   spectrumView.delete()
-    #
-    # if len(self.project.windows) > 0:
-    #   self.mainWindow = self.project.windows[0]
-    #   self.mainWindow.clearMarks()
-    # return currentDisplayed
 
   def _clearListWidget(self):
     ''' Documentation '''
@@ -360,20 +336,9 @@ class HitsAnalysis(CcpnModule):
 
   def _commitMovePreviousRow(self):
     ''' Documentation '''
-
     self._acceptAssignment()
     self._movePreviousRow(self.hitTable)
 
-  def _createDummyHits(self):
-    ''' Testing only '''
-
-
-    self.samples = self.project.samples
-    for sample in self.project.samples:
-      self.substance = sample.sampleComponents[0].substance
-      self.hit = sample.spectra[0].newSpectrumHit(substanceName=str(self.substance.name))
-      self.hit.comment = 'No'
-    # return self.project.spectrumHits
 
   def _deleteHit(self):
     ''' Deletes hit from project and from the table. If is last cleans all graphics
@@ -398,14 +363,7 @@ class HitsAnalysis(CcpnModule):
           peak.delete()
     self._updateHitTable()
 
-  def _displayAllSampleComponents(self):
-    ''' Documentation '''
 
-    sampleComponentSpectra = [sc.substance.referenceSpectra[0] for sc in self.pullDownHit.currentObject().sample.sampleComponents]
-    for spectrum in sampleComponentSpectra:
-      spectrum.scale = float(0.5)
-      # self.project.getByPid('GD:user.View.1D:H').displaySpectrum(spectrum)
-      self.project.strips[0].displaySpectrum(spectrum)
 
   def _displaySampleAndHit(self):
     ''' Documentation '''
@@ -440,7 +398,6 @@ class HitsAnalysis(CcpnModule):
   def _getSampleInfoToDisplay(self):
     ''' Documentation '''
 
-    sample = self._getPullDownObj().sample
     sampleInfo = {'Name':sample.name,
                   'Amount':sample.amount,
                   'CreationDate':sample.creationDate,
@@ -455,8 +412,6 @@ class HitsAnalysis(CcpnModule):
     ''' Documentation '''
     if spectrumHit is not None:
 
-      sampleComponent = self._getPullDownObj()
-      substance = sampleComponent.substance
       substanceInfo = {'name  ':substance.name,
                     # 'synonyms ':substance.synonyms,
                     'userCode ':substance.userCode,
@@ -541,7 +496,7 @@ class HitsAnalysis(CcpnModule):
     ''' Documentation '''
     self._clearListWidget()
     self._showMolecule()
-    self._showTextHitDetails()
+    # self._showTextHitDetails()
 
 
 
@@ -577,48 +532,26 @@ class HitsAnalysis(CcpnModule):
 
   def _showMolecule(self):
     ''' Documentation '''
-    substance = self._getPullDownObj().substance
-    self.smiles = substance.smiles
-    if self.smiles is not None:
-      self.compoundView  = CompoundView(self, smiles=self.smiles, preferences=self.preferences)
-      self.hitDetailsGroupLayout.addWidget(self.compoundView, 1,1)
-      self.compoundView.centerView()
-      self.compoundView.resetView()
-      self.compoundView.updateAll()
+    substance = self._getReferenceSubstance()
+    if substance is not None:
+      if substance.smiles is not None:
+        smiles = [substance.smiles]
+        if len(smiles)>0:
+          self.compoundView.setSmiles = smiles
 
 
 
-
-  def _spectraToDisplay(self):
-    ''' return sample spectra and spectrum from the hit pulldown'''
-    spectraToDisplay = []
-
-    sampleSpectraToDisplay = [x for x in self.pullDownHit.currentObject().sample.spectra if x.experimentType != 'Water-LOGSY.H']
-
-    sampleSpectraToDisplay[-1].scale =  float(0.03125)
-
-    spectraToDisplay.append(sampleSpectraToDisplay)
-    currentObjPulldown = self.pullDownHit.currentObject()
-
-    if hasattr(currentObjPulldown, 'spectrum'):
-      substanceName = currentObjPulldown.substanceName
-      substanceRefSpectrum = self.project.getByPid('SU:'+str(substanceName)+'.').referenceSpectra[0]
-      substanceRefSpectrum.scale = float(0.5)
-      spectraToDisplay[0].append(substanceRefSpectrum)
-    else:
-      refSpectrum = currentObjPulldown.substance.referenceSpectra[0]
-      refSpectrum.scale = float(0.5)
-      spectraToDisplay[0].append(refSpectrum)
-    # spectraToDisplayPL = [spectrum.peakLists[0] for spectrum in spectraToDisplay[0]]
-
-    return spectraToDisplay[0]
-
-  def _testEditor(self, hit, value):
-    ''' Documentation '''
-    hit.comment = value
+  def _getReferenceSubstance(self):
+    if self.project is not None:
+      if self.current.spectrumHit is not None:
+        if self.current.spectrumHit._referenceSpectrum is not None:
+          if self.current.spectrumHit._referenceSpectrum.referenceSubstance is not None:
+            return self.current.spectrumHit._referenceSpectrum.referenceSubstance
+        else:
+          print('Reference Substance not set for %s. '%self.current.spectrumHit )
 
   def _scoreEdit(self, hit, value):
-    ''' Documentation '''
+    ''' Allows to edit the hit merit score '''
     hit.meritCode = value
 
   def _updateHitTable(self):
