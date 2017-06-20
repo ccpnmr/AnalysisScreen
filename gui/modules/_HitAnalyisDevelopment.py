@@ -44,6 +44,15 @@ from ccpn.core.lib.Notifiers import Notifier
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
+ALL_ExperimentTypes = 'All'
+ExperimentTypesDict =  {
+                        'STD':'STD.H',
+                        'Water-LOGSY':'Water-LOGSY.H',
+                        'H':'H',
+                        't1rho':'H[t1rho(H)]' ,
+                        ALL_ExperimentTypes: None
+                        }
+
 class HitsAnalysis(CcpnModule):
 
   includeSettingsWidget = True
@@ -100,22 +109,22 @@ class HitsAnalysis(CcpnModule):
     ## Set ExperimentType Frame
     column = 0
     self.experimentTypeWidgetsFrame = Frame(self.mainWidget,  setLayout=True, margins=(10,10,10,10),
-                                         grid=(0, column))
+                                           grid=(0, column))
     column += 1
     self.spectrumHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
-                                         grid=(0, column))
+                                           grid=(0, column))
 
     column += 1
     self.peakHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
-                                     grid=(0, column))
+                                          grid=(0, column))
 
     column += 1
     self.referenceWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
-                                       grid=(0, column))
+                                          grid=(0, column))
 
     column += 1
     self.substanceDetailsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
-                                       grid=(0, column))
+                                          grid=(0, column))
 
     self._setExperimentTypeWidgets()
     self._setSpectrumHitWidgets()
@@ -129,7 +138,8 @@ class HitsAnalysis(CcpnModule):
                                      grid=(0, 0), vAlign='t',)
 
     self.experimentTypeRadioButtons = RadioButtons(self.experimentTypeWidgetsFrame,
-                                                   texts=['1H', 'STD', 'WaterLogsy', 't1'],
+                                                   texts=sorted(list(ExperimentTypesDict.keys())),
+                                                   callback=self._showBytExperimentType,
                                                    direction='V',
                                                    grid=(1, 0))
     self.experimentTypeWidgetsFrame.getLayout().setAlignment(Qt.AlignTop)
@@ -245,6 +255,23 @@ class HitsAnalysis(CcpnModule):
         widget.hide()
       else:
         widget.show()
+
+  def _showBytExperimentType(self):
+    "Shows hits by the experiment type of the spectrumHit.spectrum. If not Defined, only All is active"
+    selectedExpType = self.experimentTypeRadioButtons.get()
+    if self.project is not None:
+      if selectedExpType == ALL_ExperimentTypes:
+        self._spectrumHits = self.project.spectrumHits
+        self._updateHitTable()
+        return
+
+      self._spectrumHits = []
+      for spectrumHit in self.project.spectrumHits:
+        experimentType = spectrumHit.spectrum.experimentType
+        if experimentType == ExperimentTypesDict[selectedExpType]:
+          self._spectrumHits.append(spectrumHit)
+      self._updateHitTable()
+
 
   def _setPeakTables(self):
     targetPeakList = self._getTargetPeakList()
@@ -597,8 +624,7 @@ class HitsAnalysis(CcpnModule):
   def _updateHitTable(self):
     ''' Documentation '''
     if self.project is not None:
-      spectrumHits = [sp for sp in self.project.spectrumHits]
-      self.hitTable.setObjects(spectrumHits)
+      self.hitTable.setObjects(self._spectrumHits)
     else:
       self.hitTable.setObjects([])
 

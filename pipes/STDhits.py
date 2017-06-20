@@ -143,9 +143,9 @@ class STDHitFinder(SpectraPipe):
       for stdSpectrum in stdTargetSpectrumGroup.spectra:
         if stdSpectrum:
           hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=referenceSpectrumGroup.spectra, limitRange=minimumDistance)
-          hits = [i for i in hits if len(hits)>0]
+          hits = [i for hit in hits for i in hit]
+
           if len(hits)>0:
-            print(hits)
             _addNewHit(stdSpectrum, hits)
 
             # self._addNewHit(stdSpectrum, hits)

@@ -39,15 +39,13 @@ def _addNewHit(spectrum, hits):
                                            comment='PeakList containing matched peak to the reference')
 
 
-  for  item in hits:
-    if len(item)>0:
-      for hit in item:
-        if len(hit) == 3:
-          referencePeak, targetPeak, position = hit
-          newPeakFromReference = referencePeak.copyTo(newReferencePeakList)
-          newPeakFromTarget = targetPeak.copyTo(newTargetPeakList)
+  for  hit in hits:
+    if len(hit) == 3:
+      referencePeak, targetPeak, position = hit
+      newPeakFromReference = referencePeak.copyTo(newReferencePeakList)
+      newPeakFromTarget = targetPeak.copyTo(newTargetPeakList)
 
-          newPeakFromReference.annotation = 'Hit'
-          newPeakFromTarget.annotation = 'Hit'
-          newPeakFromReference.comment = 'Hit: Peak matched and copied From Reference PeakList'
-          newPeakFromTarget.comment = 'Hit: Peak matched and copied From Target PeakList '
+      newPeakFromReference.annotation = 'Hit'
+      newPeakFromTarget.annotation = 'Hit'
+      newPeakFromReference.comment = 'Hit: Peak matched and copied From Reference PeakList'
+      newPeakFromTarget.comment = 'Hit: Peak matched and copied From Target PeakList '
