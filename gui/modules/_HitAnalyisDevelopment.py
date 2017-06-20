@@ -24,20 +24,17 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt4 import QtCore, QtGui
-
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CompoundView import CompoundView
-
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.modules.PeakTable import PeakListTableWidget
-
-
-# from ccpn.ui.gui.lib.Window import navigateToNmrResidue, navigateToPeakPosition
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Frame import Frame
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
@@ -83,50 +80,95 @@ class HitsAnalysis(CcpnModule):
     self._createWidgets()
 
 
-
-
-
-
-
-
   def _createWidgets(self):
     ''' Documentation '''
 
     self.mainWidget.setContentsMargins(20,20,20,20)
 
+
+    ## Set ExperimentType  Label
+    column = 0
+    self.experimentTypeLabel = Label(self.mainWidget, text='Experiment Type',
+                                     grid=(0, column))
+    self.experimentTypeRadioButtons = RadioButtons(self.mainWidget, texts=['1H', 'STD', 'WaterLogsy', 't1'],
+                                                   direction='V', vAlign='t',
+                                                   grid=(1, column))
+    ## Set SpectrumHit Table Label
+    column += 1
+    self.spectrumHitTableLabel = Label(self.mainWidget, text='SpectrumHits',
+                               grid = (0, column))
+
+    ## Set SpectrumHit Table
+    self.hitTable = ObjectTable(self.mainWidget, columns=[], actionCallback=self._hitTableCallback,
+                               selectionCallback=self._selectionCallback, objects=[],
+                               grid=(1, column))
+    self._setSpectrumHitTable()
+
+    ## Set SpectrumHit Table Buttons
+    self.hitButtons = ButtonList(self.mainWidget, texts=['', '', '', '', ''],
+                               callbacks=[self._movePreviousRow, self._deleteHit, self._rejectAssignment,
+                                          self._acceptAssignment, self._moveNextRow],
+                               icons=[self.previousIcon, self.minusIcon, self.rejectIcon, self.acceptIcon,self.nextIcon],
+                               tipTexts=[None, None, None, None, None],
+                               direction='H', hAlign='c',
+                               grid=(2, column))
+
+
+    ## Set PeakHit Table Label
+    column += 1
+    self.peakHitTableLabel = Label(self.mainWidget, text='Target Peak Hits',
+                                       grid=(0, column))
+
+    self.peakTable = ObjectTable(self.mainWidget, columns=[], actionCallback=self._hitTableCallback,
+                                selectionCallback=self._selectionCallback, objects=[],
+                                grid=(1, column))
+
+    self.peakButtons = ButtonList(self.mainWidget, texts=['', '', '', ],
+                                 callbacks=[self._movePreviousRow, None, self._moveNextRow],
+                                 icons=[self.previousIcon, self.minusIcon, self.nextIcon],
+                                 tipTexts=[None, None,  None],
+                                 direction='H', hAlign='c',
+                                 grid=(2, column))
+
+
+    ## Set PeakHit Table Label
+    column += 1
+    self.referencePeakTableLabel = Label(self.mainWidget, text='Matched Reference Peak',
+                                   grid=(0, column))
+
+    self.referencePeakTable = ObjectTable(self.mainWidget, columns=[], actionCallback=self._hitTableCallback,
+                                 selectionCallback=self._selectionCallback, objects=[],
+                                 grid=(1, column))
+
+    ## Set substance Details
+    column += 1
+    self.substanceDetailsLabel = Label(self.mainWidget, text='Substance Details',
+                                         grid=(0, column))
+
+    self.substanceDetailsFrame = Frame(self.mainWidget, setLayout=True,
+                                       grid=(1, column))
+
+    ## compound view goes inside the substanceDetailsFrame
+    self.compoundView = CompoundView(self.substanceDetailsFrame, smiles=[], hAlign='c',vAlign='t',
+                                 grid=(0, 0))
+
+    ## List view goes inside the substanceDetailsFrame
+    self.substanceDetailsList = CompoundView(self.substanceDetailsFrame, smiles=[], hAlign='c', vAlign='t',
+                                     grid=(0, 0))
+
+  def _setSpectrumHitTable(self):
+    "Sets parameters to the SpectrumHitTable."
     columns = [Column('Hit Name', lambda hit:str(hit.substanceName)),
-               Column('Confirmed', lambda hit:str(hit.isConfirmed), setEditValue=lambda hit, value: self._testEditor(hit, value)),
+               Column('Confirmed', lambda hit:str(hit.isConfirmed)), # setEditValue=lambda hit, value: self._testEditor(hit, value)),
                Column('Merit', lambda hit:str(hit.meritCode), setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
 
-    self.hitTable = ObjectTable(self.mainWidget, columns, actionCallback=self._hitTableCallback,
-                                selectionCallback=self._selectionCallback, objects=[], grid=(0,0))
-    self.hitTable.setObjects(self._spectrumHits)
-    if len(self._spectrumHits)>0:
+    self.hitTable.setObjectsAndColumns(self._spectrumHits, columns)
+    if len(self._spectrumHits) > 0:
       self.hitTable.setCurrentObject(self._spectrumHits[0])
-
-    self.hitButtons = ButtonList(self.mainWidget,
-                                 texts=['', '', '', '', ''],
-                                 callbacks=[self._movePreviousRow, self._deleteHit, self._rejectAssignment,
-                                            self._acceptAssignment, self._moveNextRow],
-                                 icons=[self.previousIcon, self.minusIcon, self.rejectIcon, self.acceptIcon,
-                                        self.nextIcon],
-                                 tipTexts=[None, None, None, None, None],
-                                 direction='H', hAlign='c', grid=(1,0))
-
-
-    # self.settingButtons = ButtonList(self.mainWidget, texts = ['',],
-    #                                  callbacks=[self._createExportButton,],
-    #                                  icons=[self.exportIcon,],
-    #                                  tipTexts=['',], direction='H',  grid=(0,1))
-
-    # self.settingButtons.setStyleSheet("background-color: transparent")
-
-
-
 
   def _acceptAssignment(self):
     ''' Documentation '''
-    hit = self.current.hit
+    hit = self.current.spectrumHit
     if hit is not None:
       hit.isConfirmed = True
       self._updateHitTable()
@@ -395,7 +437,6 @@ class HitsAnalysis(CcpnModule):
     self.listWidgetsHitDetails.addItem(headerHit)
     for name, value in self._getSpectrumHitInfoToDisplay().items():
       self._populateInfoList(name, value)
-
 
     ''' setSubstance '''
     headerSubstance =  QtGui.QListWidgetItem('\nSubstance Details')
