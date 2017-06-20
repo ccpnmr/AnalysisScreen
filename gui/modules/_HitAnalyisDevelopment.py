@@ -146,10 +146,11 @@ class HitsAnalysis(CcpnModule):
 
 
     self.hitButtons = ButtonList(self.spectrumHitWidgetsFrame, texts=['', '', '', '', ''],
-                               callbacks=[self._movePreviousRow, self._deleteHit,
+                               callbacks=[partial(self._movePreviousRow,self.hitTable),
+                                          self._deleteHit,
                                           partial(self._setHitIsConfirmed,False),
                                           partial(self._setHitIsConfirmed,True),
-                                          self._moveNextRow],
+                                          partial(self._movePreviousRow, self.hitTable)],
                                icons=[self.previousIcon, self.minusIcon, self.rejectIcon, self.acceptIcon,self.nextIcon],
                                tipTexts=[None, None, None, None, None],
                                direction='H', vAlign='b',
@@ -166,7 +167,9 @@ class HitsAnalysis(CcpnModule):
                                        grid=(1, 0))
 
     self.peakButtons = ButtonList(self.peakHitWidgetsFrame, texts=['', '', '', ],
-                                 callbacks=[self._movePreviousRow, None, self._moveNextRow],
+                                 callbacks=[partial(self._movePreviousRow,self.targetPeakTable),
+                                            partial(self._deletePeaks,self.targetPeakTable) ,
+                                            partial(self._movePreviousRow,self.targetPeakTable)],
                                  icons=[self.previousIcon, self.minusIcon, self.nextIcon],
                                  tipTexts=[None, None,  None],
                                  direction='H', vAlign='b',
@@ -182,7 +185,9 @@ class HitsAnalysis(CcpnModule):
                                  grid=(1, 0))
 
     self.referenceButtons = ButtonList(self.referenceWidgetsFrame, texts=['', '', '', ],
-                                  callbacks=[self._movePreviousRow, None, self._moveNextRow],
+                                  callbacks=[partial(self._movePreviousRow,self.referencePeakTable),
+                                             partial(self._deletePeaks, self.referencePeakTable),
+                                             partial(self._movePreviousRow,self.referencePeakTable)],
                                   icons=[self.previousIcon, self.minusIcon, self.nextIcon],
                                   tipTexts=[None, None, None],
                                   direction='H', vAlign='b',
@@ -324,13 +329,13 @@ class HitsAnalysis(CcpnModule):
     ''' Documentation '''
 
     self._acceptAssignment()
-    self._moveNextRow()
+    self._moveNextRow(self.hitTable)
 
   def _commitMovePreviousRow(self):
     ''' Documentation '''
 
     self._acceptAssignment()
-    self._movePreviousRow()
+    self._movePreviousRow(self.hitTable)
 
   def _createDummyHits(self):
     ''' Testing only '''
@@ -350,9 +355,21 @@ class HitsAnalysis(CcpnModule):
       spectrumHit = self.current.spectrumHit
       if spectrumHit is not None:
         spectrumHit.delete()
-        self._moveNextRow()
-        self._updateHitTable()
 
+      self._selectFirstRowHitTable()
+      self._updateHitTable()
+
+  def _selectFirstRowHitTable(self):
+    if len(self.hitTable.objects) >0:
+      self.hitTable.selectObject(self.hitTable.objects[0])
+
+  def _deletePeaks(self, table):
+    if table is not None:
+      peaks = table.getSelectedObjects()
+      for peak in peaks:
+        if peak is not None:
+          peak.delete()
+    self._updateHitTable()
 
   def _displayAllSampleComponents(self):
     ''' Documentation '''
@@ -452,29 +469,30 @@ class HitsAnalysis(CcpnModule):
 
 
 
-  def _moveNextRow(self):
+  def _moveNextRow(self, table):
     ''' Documentation '''
 
-    self.currentRowPosition = self.hitTable.getSelectedRows()
+    self.currentRowPosition = table.getSelectedRows()
     if len(self.currentRowPosition)>0:
       newPosition = self.currentRowPosition[0]+1
-      self.hitTable.selectRow(newPosition)
+      table.selectRow(newPosition)
       lastRow = len(self.project.spectrumHits)
       if newPosition == lastRow:
-       self.hitTable.selectRow(0)
+        table.selectRow(0)
 
 
-  def _movePreviousRow(self):
+
+  def _movePreviousRow(self, table):
     ''' Documentation '''
 
-    self.currentRowPosition = self.hitTable.getSelectedRows()
+    self.currentRowPosition = table.getSelectedRows()
     if len(self.currentRowPosition) > 0:
       newPosition = self.currentRowPosition[0]-1
       lastRow = len(self.project.spectrumHits)-1
       if newPosition == -1:
-        self.hitTable.selectRow(lastRow)
+        table.selectRow(lastRow)
       else:
-        self.hitTable.selectRow(newPosition)
+        table.selectRow(newPosition)
 
 
   def _populateInfoList(self, name, value):
