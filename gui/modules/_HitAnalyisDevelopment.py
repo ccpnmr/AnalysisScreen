@@ -113,21 +113,19 @@ class HitsAnalysis(CcpnModule):
                                            grid=(0, column))
     column += 1
     self.spectrumHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
-                                           grid=(0, column))
+                                           grid=(0, column), gridSpan=(2, column))
     self.spectrumHitWidgetsFrame.setMinimumWidth(200)
-
     column += 1
     self.peakHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
-                                          grid=(0, column))
-
-    column += 1
+                                          grid=(1, column))
+    self.peakHitWidgetsFrame.setMinimumWidth(400)
+    # column += 1
     self.referenceWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
                                           grid=(0, column))
-
+    self.referenceWidgetsFrame.setMinimumWidth(400)
     column += 1
     self.substanceDetailsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
-                                          grid=(0, column))
-
+                                          grid=(0, column), gridSpan=(2, column))
     self._setExperimentTypeWidgets()
     self._setSpectrumHitWidgets()
     self._setPeakHitWidgets()
@@ -196,14 +194,14 @@ class HitsAnalysis(CcpnModule):
     self.referencePeakTable = CustomPeakTableWidget(self.referenceWidgetsFrame, moduleParent=self, application=self.application,
                                  grid=(1, 0))
 
-    self.referenceButtons = ButtonList(self.referenceWidgetsFrame, texts=['', '', '', ],
-                                  callbacks=[partial(self._movePreviousRow,self.referencePeakTable),
-                                             partial(self._deletePeaks, self.referencePeakTable),
-                                             partial(self._movePreviousRow,self.referencePeakTable)],
-                                  icons=[self.previousIcon, self.minusIcon, self.nextIcon],
-                                  tipTexts=[None, None, None],
-                                  direction='H', vAlign='b',
-                                  grid=(2, 0))
+    # self.referenceButtons = ButtonList(self.referenceWidgetsFrame, texts=['', '', '', ],
+    #                               callbacks=[partial(self._movePreviousRow,self.referencePeakTable),
+    #                                         None,
+    #                                          partial(self._movePreviousRow,self.referencePeakTable)],
+    #                               icons=[self.previousIcon, self.rejectIcon, self.nextIcon],
+    #                               tipTexts=[None, None, None],
+    #                               direction='H', vAlign='b',
+    #                               grid=(2, 0))
 
 
   def _setSubstanceDetailsWidgets(self):
@@ -220,9 +218,10 @@ class HitsAnalysis(CcpnModule):
 
   def _setSpectrumHitTable(self):
     "Sets parameters to the SpectrumHitTable."
+
     columns = [Column('Hit Name', lambda hit:str(hit.substanceName)),
                Column('Confirmed', lambda hit:str(hit.isConfirmed)), # setEditValue=lambda hit, value: self._testEditor(hit, value)),
-               Column('Merit', lambda hit:str(hit.meritCode), setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
+               Column('Merit', lambda hit:str(hit.meritCode))] #setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
 
     self.hitTable.setObjectsAndColumns(self._spectrumHits, columns)
     if len(self._spectrumHits) > 0:
@@ -272,6 +271,8 @@ class HitsAnalysis(CcpnModule):
           self._spectrumHits.append(spectrumHit)
       self._updateHitTable()
 
+
+
   def _selectionTargetPeakCallback(self, peaks, *args):
     """
     set as current the selected peaks on the table and populates the reference peak Table
@@ -294,12 +295,13 @@ class HitsAnalysis(CcpnModule):
 
   def _referencePeakTableCallback(self, peaks, *args):
     self.referencePeakTable._selectionCallback(peaks, *args)
-    for peak in peaks:
-      if peak is not None:
-        spectrum = peak.peakList.spectrum
-        substance = spectrum.referenceSubstance
-        if substance is not None:
-          self._showHitInfoOnDisplay(substance)
+    if peaks is not None:
+      for peak in peaks:
+        if peak is not None:
+          spectrum = peak.peakList.spectrum
+          substance = spectrum.referenceSubstance
+          if substance is not None:
+            self._showHitInfoOnDisplay(substance)
 
 
 
@@ -339,12 +341,7 @@ class HitsAnalysis(CcpnModule):
           if pl.isSimulated and pl.title == TARGETPEAKLIST:
             return pl
 
-  def _getReferencePeakList(self):
-    if self.current is not None:
-      if self.current.spectrumHit is not None:
-        for pl in self.current.spectrumHit.spectrum.peakLists:
-          if pl.isSimulated and pl.title == REFERENCEPEAKLIST:
-            return pl
+
 
   def _setHitIsConfirmed(self, value:bool):
     ''' Documentation '''
@@ -393,7 +390,6 @@ class HitsAnalysis(CcpnModule):
         spectrumHit.delete()
 
       self._selectFirstRowHitTable()
-      self._updateHitTable()
 
   def _selectFirstRowHitTable(self):
     if len(self.hitTable.objects) >0:
@@ -405,7 +401,9 @@ class HitsAnalysis(CcpnModule):
       for peak in peaks:
         if peak is not None:
           peak.delete()
+
     self._updateHitTable()
+    self.referencePeakTable.clearTable()
 
 
 
@@ -593,20 +591,24 @@ class HitsAnalysis(CcpnModule):
 
   def _scoreEdit(self, hit, value):
     ''' Allows to edit the hit merit score '''
-    hit.meritCode = value
+    if hit is not None:
+      hit.meritCode = value
 
   def _updateHitTable(self):
     ''' Documentation '''
     if self.project is not None:
-      self.hitTable.setObjects(self._spectrumHits)
+      hits = [hit for hit in self._spectrumHits if hit is not None]
+      self.hitTable.setObjects(hits)
     else:
       self.hitTable.setObjects([])
 
 
   def _spectrumHitNotifierCallback(self, *kw):
+    self._spectrumHits = self.project.spectrumHits
     self._updateHitTable()
 
 
+#
 #
 #     self.strip.viewBox.autoRange()
 
@@ -623,7 +625,7 @@ class CustomPeakTableWidget(PeakListTableWidget):
       self.pLwidget.hide()
       self.posUnitPulldownLabel.hide()
       self.posUnitPulldown.hide()
-      self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding))
+      # self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding))
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
