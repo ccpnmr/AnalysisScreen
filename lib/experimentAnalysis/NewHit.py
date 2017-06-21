@@ -75,9 +75,6 @@ def _addNewHit(spectrum, hits):
       referencePeak._linkedPeak = newPeakFromTarget
 
       # newPeakFromReference = referencePeak.copyTo(newReferencePeakList)
-
-      # newPeakFromReference.annotation = 'Hit'
-      newPeakFromTarget.annotation = 'Hit'
       # newPeakFromReference.comment = 'Hit: Peak matched and copied From Reference PeakList'
       newPeakFromTarget.comment = 'Hit: Peak matched and copied From Target PeakList '
 

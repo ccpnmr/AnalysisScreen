@@ -195,6 +195,7 @@ class HitsAnalysis(CcpnModule):
     self.referencePeakTable = CustomPeakTableWidget(self.referenceWidgetsFrame, moduleParent=self, application=self.application,
                                  grid=(1, 0))
 
+
     self.referenceButtons = ButtonList(self.referenceWidgetsFrame, texts=['', '', '', ],
                                   callbacks=[partial(self._movePreviousRow,self.referencePeakTable),
                                              partial(self._deletePeaks, self.referencePeakTable),
@@ -298,6 +299,8 @@ class HitsAnalysis(CcpnModule):
     if referencePeakList is not None:
       self.referencePeakTable._updateTable(useSelectedPeakList=False, peaks=[peak])
 
+    self.referencePeakTable.hideColumn(1)
+
   def _setPeakTables(self):
     targetPeakList = self._getTargetPeakList()
     if targetPeakList is not None:
@@ -306,6 +309,8 @@ class HitsAnalysis(CcpnModule):
       self.targetPeakTable.selectionCallback = self._selectionTargetPeakCallback
     else:
       self.targetPeakTable.clearTable()
+
+    self.targetPeakTable.hideColumn(1)
 
     # referencePeakList = self._getReferencePeakList()
     #
@@ -348,7 +353,7 @@ class HitsAnalysis(CcpnModule):
         self.current.spectrumHit = spectrumHit
       self._setPeakTables()
       self._showHitInfoOnDisplay()
-
+      self.referencePeakTable.clearTable()
 
   def _clearListWidget(self):
     ''' Documentation '''
@@ -608,10 +613,7 @@ class CustomPeakTableWidget(PeakListTableWidget):
       self.pLwidget.hide()
       self.posUnitPulldownLabel.hide()
       self.posUnitPulldown.hide()
-      self.setSizePolicy(QtGui.QSizePolicy(
-                                          QtGui.QSizePolicy.Expanding,
-                                          QtGui.QSizePolicy.Expanding))
-
+      self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding))
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
