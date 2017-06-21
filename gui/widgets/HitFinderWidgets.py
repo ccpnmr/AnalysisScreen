@@ -1,9 +1,18 @@
-
+from functools import partial
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
+def _disableReferenceSG(cls, referenceSpectrumGroup):
+  pulldown = getattr(cls, referenceSpectrumGroup)
+  checkBox  = cls.sender()
+  if pulldown is not None and checkBox is not None:
+    if checkBox.isChecked():
+      pulldown.setEnabled(False)
+    else:
+      pulldown.setEnabled(True)
 
 def _addSGpulldowns(cls, row, SGVarNames):
   for varName in SGVarNames:
@@ -13,8 +22,15 @@ def _addSGpulldowns(cls, row, SGVarNames):
     row += 1
 
 
-def _addCommonHitFinderWidgets(cls, row, RefPL, MatchPeaksWithin, DefaultMinDist, thresholdName, defaultThreshold):
+def _addCommonHitFinderWidgets(cls, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPL, MatchPeaksWithin, DefaultMinDist, thresholdName, defaultThreshold):
 
+  isMixtureLabel = Label(cls.pipeFrame, ReferenceFromMixture, grid=(row, 0))
+  setattr(cls, ReferenceFromMixture, CheckBox(cls.pipeFrame, checked=False,
+                                              callback=partial(_disableReferenceSG, cls, ReferenceSpectrumGroup
+                                                               ),
+                                              grid=(row, 1)))
+
+  row += 1
   peakListLabel = Label(cls.pipeFrame, RefPL, grid=(row, 0))
   setattr(cls, RefPL, Spinbox(cls.pipeFrame, value=0, max=0, grid=(row, 1)))
 

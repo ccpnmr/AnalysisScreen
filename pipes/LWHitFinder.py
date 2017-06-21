@@ -47,9 +47,10 @@ import numpy as np
 
 ## Widget variables and/or _kwargs keys
 ReferenceSpectrumGroup = 'Reference_SpectrumGroup'
+ReferenceFromMixture = 'Reference_from_Mixture'
 TargetSpectrumGroup = 'Target_SpectrumGroup'
 ControlSpectrumGroup = 'Control_SpectrumGroup'
-SGVarNames = [ReferenceSpectrumGroup, ControlSpectrumGroup, TargetSpectrumGroup]
+SGVarNames = [ControlSpectrumGroup, TargetSpectrumGroup, ReferenceSpectrumGroup]
 
 MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'
 ReferencePeakList = 'Reference_PeakList'
@@ -87,8 +88,8 @@ class LWHitFinderGuiPipe(GuiPipe):
     row = 0
     hw._addSGpulldowns(self, row, SGVarNames)
     row += len(SGVarNames)
-    hw._addCommonHitFinderWidgets(self, row, ReferencePeakList, MatchPeaksWithin, DefaultMinimumDistance,
-                                  MinLWvariation, DefaultMinimalLW)
+    hw._addCommonHitFinderWidgets(self, row,ReferenceSpectrumGroup, ReferenceFromMixture, ReferencePeakList,
+                                  MatchPeaksWithin, DefaultMinimumDistance,  MinLWvariation, DefaultMinimalLW)
     self._updateWidgets()
 
 

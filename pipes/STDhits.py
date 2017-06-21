@@ -48,7 +48,8 @@ from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit
 ReferenceSpectrumGroup = 'Reference_SpectrumGroup'
 STD_Control_SpectrumGroup = 'STD_Control_SpectrumGroup'
 STD_Target_SpectrumGroup = 'STD_Target_SpectrumGroup'
-SGVarNames = [ReferenceSpectrumGroup, STD_Control_SpectrumGroup, STD_Target_SpectrumGroup]
+ReferenceFromMixture = 'Reference_from_Mixture'
+SGVarNames = [STD_Target_SpectrumGroup, ReferenceSpectrumGroup]
 
 MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'
 RefPL = 'Reference_PeakList'
@@ -88,7 +89,8 @@ class STDHitFinderGuiPipe(GuiPipe):
     hw._addSGpulldowns(self, row, SGVarNames)
 
     row += len(SGVarNames)
-    hw._addCommonHitFinderWidgets(self, row, RefPL, MatchPeaksWithin, DefaultMinDist, MinEfficiency, DefaultEfficiency)
+    hw._addCommonHitFinderWidgets(self, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPL, MatchPeaksWithin, DefaultMinDist,
+                                  MinEfficiency, DefaultEfficiency)
 
     self._updateWidgets()
 

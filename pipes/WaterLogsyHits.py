@@ -49,9 +49,10 @@ import numpy as np
 
 ## Widget variables and/or _kwargs keys
 ReferenceSpectrumGroup = 'Reference_SpectrumGroup'
+ReferenceFromMixture = 'Reference_from_Mixture'
 TargetSpectrumGroup    = 'WL_Target_SpectrumGroup'
 ControlSpectrumGroup   = 'WL_Control_SpectrumGroup'
-SGVarNames = [ReferenceSpectrumGroup, ControlSpectrumGroup, TargetSpectrumGroup]
+SGVarNames = [ControlSpectrumGroup, TargetSpectrumGroup, ReferenceSpectrumGroup]
 
 MatchPeaksWithin  =  'Match_Peaks_Within_(ppm)'
 RefPL = 'Reference_PeakList'
@@ -96,7 +97,8 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
     hw._addSGpulldowns(self, row, SGVarNames)
 
     row += len(SGVarNames)
-    hw._addCommonHitFinderWidgets(self, row, RefPL, MatchPeaksWithin, DefaultMinDist, MinEfficiency, DefaultEfficiency)
+    hw._addCommonHitFinderWidgets(self, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPL, MatchPeaksWithin,
+                                  DefaultMinDist, MinEfficiency, DefaultEfficiency)
 
     self._updateWidgets()
 

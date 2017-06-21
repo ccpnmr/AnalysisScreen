@@ -540,7 +540,6 @@ class HitsAnalysis(CcpnModule):
           self.compoundView.setSmiles = smiles
 
 
-
   def _getReferenceSubstance(self):
     if self.project is not None:
       if self.current.spectrumHit is not None:
