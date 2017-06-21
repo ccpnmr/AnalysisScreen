@@ -36,7 +36,7 @@ from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.AnalysisScreen.lib.experimentAnalysis.STD import _find_STD_Hits
-from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit
+from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit, _getReferencesFromSample
 
 ########################################################################################################################
 ###   Attributes:
@@ -121,6 +121,7 @@ class STDHitFinder(SpectraPipe):
                 ReferenceSpectrumGroup:     'spectrumGroup.pid',
                 STD_Control_SpectrumGroup:  'spectrumGroup.pid',
                 STD_Target_SpectrumGroup:   'spectrumGroup.pid',
+                ReferenceFromMixture:       False,
                 MatchPeaksWithin:           DefaultMinDist,
                 MinEfficiency:              DefaultEfficiency,
                 RefPL:                      DefaultReferencePeakList,
@@ -135,16 +136,22 @@ class STDHitFinder(SpectraPipe):
 
     referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
     stdTargetSpectrumGroup = self._getSpectrumGroup(self._kwargs[STD_Target_SpectrumGroup])
-
+    referenceFromMixture = self._kwargs[ReferenceFromMixture]
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
     minimumEfficiency = float(self._kwargs[MinEfficiency])
     nPeakList = int(self._kwargs[RefPL])
 
-    # hits = []
-    if referenceSpectrumGroup and stdTargetSpectrumGroup is not None:
+    references = []
+
+    if referenceSpectrumGroup is not None:
       for stdSpectrum in stdTargetSpectrumGroup.spectra:
         if stdSpectrum:
-          hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=referenceSpectrumGroup.spectra, limitRange=minimumDistance)
+          if referenceFromMixture:
+            references = _getReferencesFromSample(stdSpectrum)
+          else:
+            if referenceSpectrumGroup is not None:
+              references = referenceSpectrumGroup.spectra
+          hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance)
           hits = [i for hit in hits for i in hit]
 
           if len(hits)>0:

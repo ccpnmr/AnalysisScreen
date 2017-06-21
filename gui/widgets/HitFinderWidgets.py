@@ -22,7 +22,8 @@ def _addSGpulldowns(cls, row, SGVarNames):
     row += 1
 
 
-def _addCommonHitFinderWidgets(cls, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPL, MatchPeaksWithin, DefaultMinDist, thresholdName, defaultThreshold):
+def _addCommonHitFinderWidgets(cls, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPL, MatchPeaksWithin,
+                               DefaultMinDist, thresholdName, defaultThreshold):
 
   isMixtureLabel = Label(cls.pipeFrame, ReferenceFromMixture, grid=(row, 0))
   setattr(cls, ReferenceFromMixture, CheckBox(cls.pipeFrame, checked=False,

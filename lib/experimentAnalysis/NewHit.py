@@ -26,6 +26,24 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 TARGETPEAKLIST = 'Target PeakList'
 REFERENCEPEAKLIST = 'Reference PeakList'
 
+
+def _getReferencesFromSample(spectrum):
+  '''
+  Gets the reference spectra from samples.
+  Sample.spectra  -> spectrum recorded using different experiment type
+  Sample.sampleComponent -> substance -> referenceSpectra -> reference for the Sample.spectra exp type
+  '''
+  sample = spectrum.sample
+  referenceSpectra = []
+  if sample is not None:
+    for sampleComponent in sample.sampleComponents:
+      if sampleComponent is not None:
+        substance = sampleComponent.substance
+        if substance is not None:
+          referenceSpectra += substance.referenceSpectra
+  return list(set((referenceSpectra)))
+
+
 def _addNewHit(spectrum, hits):
   """
 
@@ -34,33 +52,32 @@ def _addNewHit(spectrum, hits):
   :return:
   """
   project = spectrum.project
-  if not project.getByPid('SH:'+spectrum.name):
-    spectrumHit = spectrum.newSpectrumHit(substanceName=spectrum.name)
-  else:
-    spectrumHit = spectrum.newSpectrumHit(substanceName=spectrum.name+1) #avoids Api errors
+
+  spectrumHit = spectrum.newSpectrumHit(substanceName=spectrum.name)
+
 
   newTargetPeakList = spectrum.newPeakList(title=TARGETPEAKLIST, isSimulated=True, comment='PeakList containing peak hits')
-  newReferencePeakList = spectrum.newPeakList(title=REFERENCEPEAKLIST, isSimulated=True,
-                                           comment='PeakList containing matched peak to the reference')
+
+  # newReferencePeakList = spectrum.newPeakList(title=REFERENCEPEAKLIST, isSimulated=True,
+  #                                          comment='PeakList containing matched peak to the reference')
 
   referenceSpectra = []
   for  hit in hits:
     if len(hit) == 3:
       referencePeak, targetPeak, position = hit
       referenceSpectra.append(referencePeak.peakList.spectrum)
-      newPeakFromReference = referencePeak.copyTo(newReferencePeakList)
       newPeakFromTarget = targetPeak.copyTo(newTargetPeakList)
 
-      newPeakFromReference.annotation = 'Hit'
+      newPeakFromTarget.annotation = referencePeak.pid #hack but we need to link the reference Peak to the target Peak.
+      referencePeak.annotation = newPeakFromTarget.pid #hack but we need to link the reference Peak to the target Peak.
+
+      newPeakFromTarget._linkedPeak = referencePeak  # hack but we need to link the reference Peak to the target Peak.
+      referencePeak._linkedPeak = newPeakFromTarget
+
+      # newPeakFromReference = referencePeak.copyTo(newReferencePeakList)
+
+      # newPeakFromReference.annotation = 'Hit'
       newPeakFromTarget.annotation = 'Hit'
-      newPeakFromReference.comment = 'Hit: Peak matched and copied From Reference PeakList'
+      # newPeakFromReference.comment = 'Hit: Peak matched and copied From Reference PeakList'
       newPeakFromTarget.comment = 'Hit: Peak matched and copied From Target PeakList '
 
-  if len(referenceSpectra)>0:
-    spectrumHit._referenceSpectrum = referenceSpectra[0]
-    substance = referenceSpectra[0].referenceSubstance
-    if substance is not None:
-      if not project.getByPid('SH:' + substance.name):
-        spectrumHit.rename(substance.name)
-      else:
-        spectrumHit.rename(substance.name+1) #avoids Api errors

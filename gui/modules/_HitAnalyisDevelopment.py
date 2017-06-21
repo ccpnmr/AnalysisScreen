@@ -271,22 +271,49 @@ class HitsAnalysis(CcpnModule):
           self._spectrumHits.append(spectrumHit)
       self._updateHitTable()
 
+  def _selectionTargetPeakCallback(self, peaks, *args):
+    """
+    set as current the selected peaks on the table
+    """
+    matchedPeak = None
+
+    if peaks is None:
+      self.current.clearPeaks()
+    else:
+      self.current.peaks = peaks
+      for peak in peaks:
+        if peak._linkedPeak is not None:
+          matchedPeak  = peak._linkedPeak
+        else:
+           #NB HACK until we have linkedPeak!!
+          if peak.annotation is not None:
+            matchedPeak = self.project.getByPid(peak.annotation)
+      if matchedPeak is not None:
+        self._populateReferencePeakTable(matchedPeak)
+
+  def _populateReferencePeakTable(self, peak):
+    'populates the table only with matched peaks linked to the targetPeak'
+    referencePeakList = peak.peakList
+    self.referencePeakTable.pLwidget.select(referencePeakList.pid)
+    if referencePeakList is not None:
+      self.referencePeakTable._updateTable(useSelectedPeakList=False, peaks=[peak])
 
   def _setPeakTables(self):
     targetPeakList = self._getTargetPeakList()
     if targetPeakList is not None:
       self.targetPeakTable.pLwidget.select(targetPeakList.pid)
       self.targetPeakTable._updateTable()
+      self.targetPeakTable.selectionCallback = self._selectionTargetPeakCallback
     else:
       self.targetPeakTable.clearTable()
 
-    referencePeakList = self._getReferencePeakList()
-
-    if referencePeakList is not None:
-      self.referencePeakTable.pLwidget.select(referencePeakList.pid)
-      self.referencePeakTable._updateTable()
-    else:
-      self.referencePeakTable.clearTable()
+    # referencePeakList = self._getReferencePeakList()
+    #
+    # if referencePeakList is not None:
+    #   self.referencePeakTable.pLwidget.select(referencePeakList.pid)
+    #   self.referencePeakTable._updateTable()
+    # else:
+    #   self.referencePeakTable.clearTable()
 
   def _getTargetPeakList(self):
     if self.current is not None:
