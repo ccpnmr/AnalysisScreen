@@ -68,6 +68,7 @@ class HitsAnalysis(CcpnModule):
     self.application = None
     self.project = None
     self.current = None
+    self.preferences = None
 
     if mainWindow is not None:
       self.mainWindow = mainWindow
@@ -195,7 +196,6 @@ class HitsAnalysis(CcpnModule):
     self.referencePeakTable = CustomPeakTableWidget(self.referenceWidgetsFrame, moduleParent=self, application=self.application,
                                  grid=(1, 0))
 
-
     self.referenceButtons = ButtonList(self.referenceWidgetsFrame, texts=['', '', '', ],
                                   callbacks=[partial(self._movePreviousRow,self.referencePeakTable),
                                              partial(self._deletePeaks, self.referencePeakTable),
@@ -210,7 +210,7 @@ class HitsAnalysis(CcpnModule):
 
     self.substanceDetailsLabel = Label(self.substanceDetailsFrame, text='Substance Details',
                                        grid=(0, 0))
-    self.compoundView = CompoundView(self.substanceDetailsFrame, smiles=[], #hAlign='t',vAlign='t',
+    self.compoundView = CompoundView(self.substanceDetailsFrame, preferences=self.preferences, smiles=[], #hAlign='t',vAlign='t',
                                  grid=(1, 0))
 
     self.listWidgetsHitDetails = ListWidget(self.substanceDetailsFrame, #hAlign='t',vAlign='t',
@@ -274,14 +274,12 @@ class HitsAnalysis(CcpnModule):
 
   def _selectionTargetPeakCallback(self, peaks, *args):
     """
-    set as current the selected peaks on the table
+    set as current the selected peaks on the table and populates the reference peak Table
     """
     matchedPeak = None
 
-    if peaks is None:
-      self.current.clearPeaks()
-    else:
-      self.current.peaks = peaks
+    self.targetPeakTable._selectionCallback(peaks, *args) #set currentPeaks
+    if peaks is not None:
       for peak in peaks:
         if peak._linkedPeak is not None:
           matchedPeak  = peak._linkedPeak
@@ -292,33 +290,47 @@ class HitsAnalysis(CcpnModule):
       if matchedPeak is not None:
         self._populateReferencePeakTable(matchedPeak)
 
+
+
+  def _referencePeakTableCallback(self, peaks, *args):
+    self.referencePeakTable._selectionCallback(peaks, *args)
+    for peak in peaks:
+      if peak is not None:
+        spectrum = peak.peakList.spectrum
+        substance = spectrum.referenceSubstance
+        if substance is not None:
+          self._showHitInfoOnDisplay(substance)
+
+
+
   def _populateReferencePeakTable(self, peak):
     'populates the table only with matched peaks linked to the targetPeak'
-    referencePeakList = peak.peakList
-    self.referencePeakTable.pLwidget.select(referencePeakList.pid)
-    if referencePeakList is not None:
-      self.referencePeakTable._updateTable(useSelectedPeakList=False, peaks=[peak])
+    self.referencePeakTable.selectionCallback = self._referencePeakTableCallback
+    if peak is not None:
+      referencePeakList = peak.peakList
+      self.referencePeakTable.pLwidget.select(referencePeakList.pid)
+      if referencePeakList is not None:
+        self.referencePeakTable._updateTable(useSelectedPeakList=False, peaks=[peak])
+      self.referencePeakTable.hideColumn(1)
+      self.referencePeakTable.selectObject(peak)
 
-    self.referencePeakTable.hideColumn(1)
 
-  def _setPeakTables(self):
+
+
+
+  def _setTargetPeakTable(self):
+    self.referencePeakTable.clearTable()
     targetPeakList = self._getTargetPeakList()
     if targetPeakList is not None:
       self.targetPeakTable.pLwidget.select(targetPeakList.pid)
       self.targetPeakTable._updateTable()
       self.targetPeakTable.selectionCallback = self._selectionTargetPeakCallback
+      if len(self.targetPeakTable.objects)>0:
+        self.targetPeakTable.selectObject(self.targetPeakTable.objects[0])
     else:
       self.targetPeakTable.clearTable()
-
     self.targetPeakTable.hideColumn(1)
 
-    # referencePeakList = self._getReferencePeakList()
-    #
-    # if referencePeakList is not None:
-    #   self.referencePeakTable.pLwidget.select(referencePeakList.pid)
-    #   self.referencePeakTable._updateTable()
-    # else:
-    #   self.referencePeakTable.clearTable()
 
   def _getTargetPeakList(self):
     if self.current is not None:
@@ -351,9 +363,9 @@ class HitsAnalysis(CcpnModule):
         self.current.spectrumHit = None
       else:
         self.current.spectrumHit = spectrumHit
-      self._setPeakTables()
-      self._showHitInfoOnDisplay()
-      self.referencePeakTable.clearTable()
+
+      self._setTargetPeakTable()
+
 
   def _clearListWidget(self):
     ''' Documentation '''
@@ -415,7 +427,7 @@ class HitsAnalysis(CcpnModule):
         currentDisplayed.spectrumActionDict[spectrumView.spectrum._apiDataSource].setChecked(True)
       else:
         currentDisplayed.spectrumActionDict[spectrumView.spectrum._apiDataSource].setChecked(False)
-    self._showHitInfoOnDisplay()
+    # self._showHitInfoOnDisplay()
 
 
   def _getPositionOnSpectrum(self):
@@ -427,22 +439,24 @@ class HitsAnalysis(CcpnModule):
 
 
 
-  def _getSampleInfoToDisplay(self):
+  def _getSampleInfoToDisplay(self, sample):
     ''' Documentation '''
+    if sample is not None:
+      sampleInfo = {'Name':sample.name,
+                    'Amount':sample.amount,
+                    'CreationDate':sample.creationDate,
+                    'PlateIdentifier':sample.plateIdentifier,
+                    'RowNumber':sample.rowNumber,
+                    'ColumnNumber':sample.columnNumber,
+                    'Comment':sample.comment,}
+      return sampleInfo
+    else:
+      return {'Link to a Substance to display contents': ''}
 
-    sampleInfo = {'Name':sample.name,
-                  'Amount':sample.amount,
-                  'CreationDate':sample.creationDate,
-                  'PlateIdentifier':sample.plateIdentifier,
-                  'RowNumber':sample.rowNumber,
-                  'ColumnNumber':sample.columnNumber,
-                  'Comment':sample.comment,}
-    return sampleInfo
 
-
-  def _getSubstanceInfoToDisplay(self, spectrumHit):
+  def _getSubstanceInfoToDisplay(self, substance):
     ''' Documentation '''
-    if spectrumHit is not None:
+    if substance is not None:
 
       substanceInfo = {'name  ':substance.name,
                     # 'synonyms ':substance.synonyms,
@@ -463,20 +477,20 @@ class HitsAnalysis(CcpnModule):
      return {'Link to a Substance to display contents': ''}
 
 
-  def _getSpectrumHitInfoToDisplay(self, spectrumHit):
-    ''' Documentation '''
-
-    if spectrumHit is not None:
-      hitInfo = {
-                'Score:  ':spectrumHit.figureOfMerit,
-                'NormalisedChange: ':spectrumHit.normalisedChange,
-                'concentration:  ':spectrumHit.concentration,
-                'concentrationError: ':spectrumHit.concentrationError,
-                'comment:  ':spectrumHit.comment,
-                }
-      return hitInfo
-    else:
-      return {'Add new hit to display contents': ''}
+  # def _getSpectrumHitInfoToDisplay(self, spectrumHit):
+  #   ''' Documentation '''
+  #
+  #   if spectrumHit is not None:
+  #     hitInfo = {
+  #               'Score:  ':spectrumHit.figureOfMerit,
+  #               'NormalisedChange: ':spectrumHit.normalisedChange,
+  #               'concentration:  ':spectrumHit.concentration,
+  #               'concentrationError: ':spectrumHit.concentrationError,
+  #               'comment:  ':spectrumHit.comment,
+  #               }
+  #     return hitInfo
+  #   else:
+  #     return {'Add new hit to display contents': ''}
 
 
 
@@ -524,62 +538,58 @@ class HitsAnalysis(CcpnModule):
 
 
 
-  def _showHitInfoOnDisplay(self):
+  def _showHitInfoOnDisplay(self, substance):
     ''' Documentation '''
     self._clearListWidget()
-    self._showMolecule()
-    # self._showTextHitDetails()
+    self._showMolecule(substance)
+    self._showTextHitDetails(substance)
 
 
 
-  def _showTextHitDetails(self):
+  def _showTextHitDetails(self, substance):
     ''' Documentation '''
-    if self.current is not None:
-      spectrumHit = self.current.spectrumHit
+    if substance is not None:
 
       color = QtGui.QColor('Red')
       ## setSpectrum Hit
-      headerHit =  QtGui.QListWidgetItem('\nSpectrum Hit Details')
-      headerHit.setFlags(QtCore.Qt.NoItemFlags)
-      headerHit.setTextColor(color)
-      self.listWidgetsHitDetails.addItem(headerHit)
-      for name, value in self._getSpectrumHitInfoToDisplay().items():
-        self._populateInfoList(name, value)
+      # headerHit =  QtGui.QListWidgetItem('\nSpectrum Hit Details')
+      # headerHit.setFlags(QtCore.Qt.NoItemFlags)
+      # headerHit.setTextColor(color)
+      # self.listWidgetsHitDetails.addItem(headerHit)
+      # for name, value in self._getSpectrumHitInfoToDisplay(substance).items():
+      #   self._populateInfoList(name, value)
 
       ## setSubstance
-      headerSubstance =  QtGui.QListWidgetItem('\nSubstance Details')
+      headerSubstance =  QtGui.QListWidgetItem('\n' +substance.name+ ' Details')
       headerSubstance.setFlags(QtCore.Qt.NoItemFlags)
       headerSubstance.setTextColor(color)
       self.listWidgetsHitDetails.addItem(headerSubstance)
-      for name, value in self._getSubstanceInfoToDisplay().items():
+      for name, value in self._getSubstanceInfoToDisplay(substance).items():
         self._populateInfoList(name, value)
 
       ## setSample
-      headerSample =  QtGui.QListWidgetItem('\nSample Details')
-      headerSample.setFlags(QtCore.Qt.NoItemFlags)
-      headerSample.setTextColor(color)
-      self.listWidgetsHitDetails.addItem(headerSample)
-      for name, value in self._getSampleInfoToDisplay().items():
-        self._populateInfoList(name, value)
+      if len(substance.sampleComponents)>0:
+        sampleComponent = substance.sampleComponents[0]
+        if sampleComponent is not None:
+          sample = sampleComponent.sample
+          headerSample =  QtGui.QListWidgetItem('\n'+sample.name+' Details')
+          headerSample.setFlags(QtCore.Qt.NoItemFlags)
+          headerSample.setTextColor(color)
+          self.listWidgetsHitDetails.addItem(headerSample)
+          for name, value in self._getSampleInfoToDisplay(sample).items():
+            self._populateInfoList(name, value)
 
-  def _showMolecule(self):
+  def _showMolecule(self, substance):
     ''' Documentation '''
-    substance = self._getReferenceSubstance()
     if substance is not None:
       if substance.smiles is not None:
-        smiles = [substance.smiles]
-        if len(smiles)>0:
-          self.compoundView.setSmiles = smiles
+        smiles = substance.smiles
+        self.compoundView.setSmiles(smiles)
 
 
-  def _getReferenceSubstance(self):
-    if self.project is not None:
-      if self.current.spectrumHit is not None:
-        if self.current.spectrumHit._referenceSpectrum is not None:
-          if self.current.spectrumHit._referenceSpectrum.referenceSubstance is not None:
-            return self.current.spectrumHit._referenceSpectrum.referenceSubstance
-        else:
-          print('Reference Substance not set for %s. '%self.current.spectrumHit )
+
+
+
 
   def _scoreEdit(self, hit, value):
     ''' Allows to edit the hit merit score '''
