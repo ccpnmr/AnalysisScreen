@@ -44,6 +44,7 @@ from ccpn.core.lib.Notifiers import Notifier
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
+ReferenceLabel = 'Reference Details: '
 ALL_ExperimentTypes = 'All'
 ExperimentTypesDict =  {
                         'STD':'STD.H',
@@ -206,7 +207,7 @@ class HitsAnalysis(CcpnModule):
 
   def _setSubstanceDetailsWidgets(self):
 
-    self.substanceDetailsLabel = Label(self.substanceDetailsFrame, text='Substance Details',
+    self.substanceDetailsLabel = Label(self.substanceDetailsFrame, text=ReferenceLabel,
                                        grid=(0, 0))
     self.compoundView = CompoundView(self.substanceDetailsFrame, preferences=self.preferences, smiles=[], #hAlign='t',vAlign='t',
                                  grid=(1, 0))
@@ -558,7 +559,9 @@ class HitsAnalysis(CcpnModule):
       #   self._populateInfoList(name, value)
 
       ## setSubstance
-      headerSubstance =  QtGui.QListWidgetItem('\n' +substance.name+ ' Details')
+
+      self.substanceDetailsLabel.set(ReferenceLabel+substance.name)
+      headerSubstance =  QtGui.QListWidgetItem('\n Substance Details')
       headerSubstance.setFlags(QtCore.Qt.NoItemFlags)
       headerSubstance.setTextColor(color)
       self.listWidgetsHitDetails.addItem(headerSubstance)
