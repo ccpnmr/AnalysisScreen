@@ -212,7 +212,7 @@ class HitsAnalysis(CcpnModule):
     self.compoundView = CompoundView(self.substanceDetailsFrame, preferences=self.preferences, smiles=[], #hAlign='t',vAlign='t',
                                  grid=(1, 0))
 
-    self.listWidgetsHitDetails = ListWidget(self.substanceDetailsFrame, #hAlign='t',vAlign='t',
+    self.listWidgetsHitDetails = ListWidget(self.substanceDetailsFrame, contextMenu=False, #hAlign='t',vAlign='t',
                                      grid=(2, 0))
 
 
@@ -441,13 +441,13 @@ class HitsAnalysis(CcpnModule):
   def _getSampleInfoToDisplay(self, sample):
     ''' Documentation '''
     if sample is not None:
-      sampleInfo = {'Name':sample.name,
-                    'Amount':sample.amount,
-                    'CreationDate':sample.creationDate,
-                    'PlateIdentifier':sample.plateIdentifier,
-                    'RowNumber':sample.rowNumber,
-                    'ColumnNumber':sample.columnNumber,
-                    'Comment':sample.comment,}
+      sampleInfo = {'Name: ':sample.name,
+                    'Amount: ':sample.amount,
+                    'CreationDate: ':sample.creationDate,
+                    'PlateIdentifier: ':sample.plateIdentifier,
+                    'RowNumber: ':sample.rowNumber,
+                    'ColumnNumber: ':sample.columnNumber,
+                    'Comment: ':sample.comment,}
       return sampleInfo
     else:
       return {'Link to a Substance to display contents': ''}
@@ -457,19 +457,19 @@ class HitsAnalysis(CcpnModule):
     ''' Documentation '''
     if substance is not None:
 
-      substanceInfo = {'name  ':substance.name,
-                    # 'synonyms ':substance.synonyms,
-                    'userCode ':substance.userCode,
-                    'empiricalFormula ':substance.empiricalFormula,
-                    'molecularMass  ':substance.molecularMass,
-                    'atomCount  ':substance.atomCount,
-                    'bondCount  ':substance.bondCount,
-                    'ringCount  ':substance.ringCount,
-                    'hBondDonorCount  ':substance.hBondDonorCount,
-                    'hBondAcceptorCount ':substance.hBondAcceptorCount,
-                    'polarSurfaceArea ':substance.polarSurfaceArea,
-                    'logPartitionCoefficien ':substance.logPartitionCoefficient,
-                    'comment  ':substance.comment}
+      substanceInfo = {'name: ':substance.name,
+                    'synonyms: ':substance.synonyms,
+                    'userCode: ':substance.userCode,
+                    'empiricalFormula: ':substance.empiricalFormula,
+                    'molecularMass: ':substance.molecularMass,
+                    'atomCount: ':substance.atomCount,
+                    'bondCount: ':substance.bondCount,
+                    'ringCount: ':substance.ringCount,
+                    'hBondDonorCount: ':substance.hBondDonorCount,
+                    'hBondAcceptorCount: ':substance.hBondAcceptorCount,
+                    'polarSurfaceArea: ':substance.polarSurfaceArea,
+                    'logPartitionCoefficien: ':substance.logPartitionCoefficient,
+                    'comment: ':substance.comment}
       return substanceInfo
 
     else:
@@ -561,7 +561,7 @@ class HitsAnalysis(CcpnModule):
       ## setSubstance
 
       self.substanceDetailsLabel.set(ReferenceLabel+substance.name)
-      headerSubstance =  QtGui.QListWidgetItem('\n Substance Details')
+      headerSubstance =  QtGui.QListWidgetItem('\nSubstance Details')
       headerSubstance.setFlags(QtCore.Qt.NoItemFlags)
       headerSubstance.setTextColor(color)
       self.listWidgetsHitDetails.addItem(headerSubstance)
