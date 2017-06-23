@@ -37,9 +37,7 @@ from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.AnalysisScreen.lib.experimentAnalysis import WaterLogsy as wl
-from scipy import signal
-import numpy as np
-
+from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit, _getReferencesFromSample
 
 ########################################################################################################################
 ###   Attributes:
@@ -130,6 +128,7 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
                 ReferenceSpectrumGroup:  'spectrumGroup.pid',
                 TargetSpectrumGroup:     'spectrumGroup.pid',
                 ControlSpectrumGroup:    'spectrumGroup.pid',
+                ReferenceFromMixture:    False,
                 MatchPeaksWithin:        DefaultMinDist,
                 MinEfficiency:           MinEfficiency,
                 RefPL:                   DefaultReferencePeakList,
@@ -145,19 +144,47 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
     referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
     wLcontrolSpectrumGroup = self._getSpectrumGroup(self._kwargs[ControlSpectrumGroup])
     wLtargetSpectrumGroup = self._getSpectrumGroup(self._kwargs[TargetSpectrumGroup])
+    referenceFromMixture = self._kwargs[ReferenceFromMixture]
 
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
     minimumEfficiency = float(self._kwargs[MinEfficiency])
     nPeakList = int(self._kwargs[RefPL])
 
     mode = self._kwargs[ModeHit]
+    references = []
 
-    if referenceSpectrumGroup and wLtargetSpectrumGroup is not None:
+    if wLcontrolSpectrumGroup is None:
+      mode = wl.PositiveOnly
 
-      for targetSpectrum, controlSpectrum in zip(wLtargetSpectrumGroup.spectra, referenceSpectrumGroup.spectra):
-        hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, wLControl=controlSpectrum, mode=mode, limitRange=minimumDistance)
-        if len(hits)>0:
-          print(hits)
+      if wLtargetSpectrumGroup is not None:
+        for targetSpectrum in wLtargetSpectrumGroup.spectra:
+
+          if referenceFromMixture:
+            references = _getReferencesFromSample(targetSpectrum)
+          else:
+            if referenceSpectrumGroup is not None:
+              references = referenceSpectrumGroup.spectra
+
+          hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, references=references,
+                                       mode=mode, limitRange=minimumDistance)
+          if len(hits) > 0:
+            print(hits)
+    else:
+      if wLtargetSpectrumGroup is not None:
+        if len(wLtargetSpectrumGroup.spectra) == len(wLtargetSpectrumGroup.spectra):
+          for targetSpectrum, controlSpectrum in zip(wLtargetSpectrumGroup.spectra, wLcontrolSpectrumGroup.spectra):
+
+            if referenceFromMixture:
+              references = _getReferencesFromSample(targetSpectrum)
+            else:
+              if referenceSpectrumGroup is not None:
+                references = referenceSpectrumGroup.spectra
+
+            hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, references=references,
+                                         mode=mode, limitRange=minimumDistance)
+            if len(hits) > 0:
+              print(hits)
+
 
     return spectra
 

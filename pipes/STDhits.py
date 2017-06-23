@@ -56,7 +56,7 @@ RefPL = 'Reference_PeakList'
 MinEfficiency = 'Minimal_Efficiency'
 
 ## defaults
-DefaultEfficiency = 10
+DefaultEfficiency = 7
 DefaultMinDist = 0.01
 DefaultReferencePeakList = 0
 
@@ -143,21 +143,20 @@ class STDHitFinder(SpectraPipe):
 
     references = []
 
-    if referenceSpectrumGroup is not None:
-      for stdSpectrum in stdTargetSpectrumGroup.spectra:
-        if stdSpectrum:
-          if referenceFromMixture:
-            references = _getReferencesFromSample(stdSpectrum)
-          else:
-            if referenceSpectrumGroup is not None:
-              references = referenceSpectrumGroup.spectra
-          hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance)
-          hits = [i for hit in hits for i in hit]
+    for stdSpectrum in stdTargetSpectrumGroup.spectra:
+      if stdSpectrum:
+        if referenceFromMixture:
+          references = _getReferencesFromSample(stdSpectrum)
+        else:
+          if referenceSpectrumGroup is not None:
+            references = referenceSpectrumGroup.spectra
+        hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance)
+        hits = [i for hit in hits for i in hit]
 
-          if len(hits)>0:
-            _addNewHit(stdSpectrum, hits)
+        if len(hits)>0:
+          _addNewHit(stdSpectrum, hits)
 
-            # self._addNewHit(stdSpectrum, hits)
+          # self._addNewHit(stdSpectrum, hits)
 
     return spectra
 

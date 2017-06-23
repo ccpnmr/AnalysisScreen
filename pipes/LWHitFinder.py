@@ -35,8 +35,8 @@ from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.AnalysisScreen.lib.experimentAnalysis.LineBroadening import findBroadenedPeaks
-from scipy import signal
-import numpy as np
+from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit, _getReferencesFromSample
+
 
 
 ########################################################################################################################
@@ -118,17 +118,8 @@ class LWHitFinder(SpectraPipe):
                MatchPeaksWithin:         DefaultMinimumDistance,
                MinLWvariation:          DefaultMinimalLW,
                ReferencePeakList:       DefaultReferencePeakList,
+               ReferenceFromMixture: False,
                }
-
-  def _addNewHit(self, spectrum, hits):
-    spectrum.newSpectrumHit(substanceName = spectrum.name)
-    npl = spectrum.newPeakList(title = 'Hits', isSimulated=True, comment='PeakList containing peak hits')
-    for hit in hits:
-      if hit is not None:
-        referencePeak , targetPeak, position = hit
-        referencePeak.copyTo(npl)
-        referencePeak.annotation = 'hit'
-        targetPeak.annotation = 'hit'
 
 
   def runPipe(self, spectra):
@@ -144,6 +135,7 @@ class LWHitFinder(SpectraPipe):
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
     minLWvariation = float(self._kwargs[MinLWvariation])
     nPeakList = int(self._kwargs[ReferencePeakList])
+    referenceFromMixture = self._kwargs[ReferenceFromMixture]
 
     if referenceSpectrumGroup and targetSpectrumGroup is not None:
       if len(referenceSpectrumGroup.spectra) == len(targetSpectrumGroup.spectra):
