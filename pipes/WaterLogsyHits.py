@@ -28,11 +28,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
-
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
@@ -158,21 +154,9 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
 
       if wLtargetSpectrumGroup is not None:
         for targetSpectrum in wLtargetSpectrumGroup.spectra:
-
-          if referenceFromMixture:
-            references = _getReferencesFromSample(targetSpectrum)
-          else:
-            if referenceSpectrumGroup is not None:
-              references = referenceSpectrumGroup.spectra
-
-          hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, references=references,
-                                       mode=mode, limitRange=minimumDistance)
-          if len(hits) > 0:
-            print(hits)
-    else:
-      if wLtargetSpectrumGroup is not None:
-        if len(wLtargetSpectrumGroup.spectra) == len(wLtargetSpectrumGroup.spectra):
-          for targetSpectrum, controlSpectrum in zip(wLtargetSpectrumGroup.spectra, wLcontrolSpectrumGroup.spectra):
+          if targetSpectrum is not None:
+            if targetSpectrum.experimentType is None:
+              targetSpectrum.experimentType = 'Water-LOGSY.H'
 
             if referenceFromMixture:
               references = _getReferencesFromSample(targetSpectrum)
@@ -180,10 +164,28 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
               if referenceSpectrumGroup is not None:
                 references = referenceSpectrumGroup.spectra
 
-            hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, references=references,
-                                         mode=mode, limitRange=minimumDistance)
-            if len(hits) > 0:
-              print(hits)
+              hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, references=references,
+                                           mode=mode, limitRange=minimumDistance)
+              if len(hits) > 0:
+                _addNewHit(targetSpectrum, hits)
+    else:
+      if wLtargetSpectrumGroup is not None:
+        if len(wLtargetSpectrumGroup.spectra) == len(wLtargetSpectrumGroup.spectra):
+          for targetSpectrum, controlSpectrum in zip(wLtargetSpectrumGroup.spectra, wLcontrolSpectrumGroup.spectra):
+            if targetSpectrum is not None:
+              if targetSpectrum.experimentType is None:
+                targetSpectrum.experimentType = 'Water-LOGSY.H'
+
+              if referenceFromMixture:
+                references = _getReferencesFromSample(targetSpectrum)
+              else:
+                if referenceSpectrumGroup is not None:
+                  references = referenceSpectrumGroup.spectra
+
+              hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, references=references,
+                                           mode=mode, limitRange=minimumDistance)
+              if len(hits) > 0:
+                _addNewHit(targetSpectrum, hits)
 
 
     return spectra

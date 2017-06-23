@@ -183,8 +183,6 @@ def findWaterLogsyHits(wLTarget, wLControl=None, references=None, mode=Intensity
                 list[{'referenceHit':obj Reference, 'peakHits':list[peakHit, ...]}]
 
 
-
-  #@@
   '''
 
   hits = []

@@ -62,7 +62,7 @@ def comparePeakArea(areaA, areaB, minimalDiff):
   return BELOWTRESHOLD, 0
 
 
-def findBroadenedPeaks(ReferenceSpectrum, targetSpectrum, minimalDiff=0.01, limitRange=0.01, peakListIndex=1):
+def findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=0.01, limitRange=0.01, peakListIndex=1):
   '''
   :param spectrumA:  Reference spectrum  -> object
   :param spectrumB:  Target spectrum object -> object
@@ -72,7 +72,7 @@ def findBroadenedPeaks(ReferenceSpectrum, targetSpectrum, minimalDiff=0.01, limi
   '''
 
   peakHits = []
-  matches = matchPeaks(reference=ReferenceSpectrum, spectrumB=targetSpectrum, limitRange=limitRange,
+  matches = matchPeaks(reference=controlSpectrum, spectrumB=targetSpectrum, limitRange=limitRange,
                           peakListIndex=peakListIndex)
   for match in matches:
     referencePeak, targetPeak, pos = match
@@ -81,5 +81,6 @@ def findBroadenedPeaks(ReferenceSpectrum, targetSpectrum, minimalDiff=0.01, limi
         msg, value = comparePeakArea(referencePeak.lineWidths[0], targetPeak.lineWidths[0], minimalDiff)
         if msg == INCREASED:
           peakHits.append(match)
-
+  for peakHit in peakHits:
+    print(peakHit)
   return peakHits

@@ -145,6 +145,8 @@ class STDHitFinder(SpectraPipe):
 
     for stdSpectrum in stdTargetSpectrumGroup.spectra:
       if stdSpectrum:
+        if stdSpectrum.experimentType is None:
+          stdSpectrum.experimentType = 'STD.H'
         if referenceFromMixture:
           references = _getReferencesFromSample(stdSpectrum)
         else:
@@ -156,7 +158,6 @@ class STDHitFinder(SpectraPipe):
         if len(hits)>0:
           _addNewHit(stdSpectrum, hits)
 
-          # self._addNewHit(stdSpectrum, hits)
 
     return spectra
 

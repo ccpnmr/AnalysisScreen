@@ -383,7 +383,7 @@ class MatchPeaks(QtGui.QWidget):
     self.mainWindow.moduleArea.moveModule(spectrumDisplay.module, position='top', neighbor=showScreeningHitsModule)
     self.mainWindow.moduleArea.guiWindow.deleteBlankDisplay()
 
-    self.project.strips[0].viewBox.autoRange()
+    # self.project.strips[0].viewBox.autoRange()
 
     currentDisplayed = self.project.strips[0]
     for spectrumView in currentDisplayed.spectrumViews:

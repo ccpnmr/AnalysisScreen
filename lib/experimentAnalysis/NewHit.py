@@ -63,6 +63,7 @@ def _addNewHit(spectrum, hits):
 
   referenceSpectra = []
   for  hit in hits:
+    print(hit)
     if len(hit) == 3:
       referencePeak, targetPeak, position = hit
       referenceSpectra.append(referencePeak.peakList.spectrum)

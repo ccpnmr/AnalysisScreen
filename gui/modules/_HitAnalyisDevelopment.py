@@ -314,7 +314,6 @@ class HitsAnalysis(CcpnModule):
       self.referencePeakTable.pLwidget.select(referencePeakList.pid)
       if referencePeakList is not None:
         self.referencePeakTable._updateTable(useSelectedPeakList=False, peaks=[peak])
-      self.referencePeakTable.hideColumn(1)
       self.referencePeakTable.selectObject(peak)
 
 
@@ -406,27 +405,6 @@ class HitsAnalysis(CcpnModule):
     self._updateHitTable()
     self.referencePeakTable.clearTable()
 
-
-
-  def _displaySampleAndHit(self):
-    ''' Documentation '''
-
-    currentDisplay = self._clearDisplayView()
-    for spectrum in self._spectraToDisplay():
-      currentDisplay.displaySpectrum(spectrum)
-      # currentDisplay.showPeaks(spectrum.peakList)
-    # self.project.strips[0].viewBox.autoRange()
-
-  def _displaySelectedComponent(self):
-    ''' Documentation '''
-
-    currentDisplayed = self.project.strips[0]._parent
-    for spectrumView in currentDisplayed.spectrumViews:
-      if spectrumView.spectrum in self._spectraToDisplay():
-        currentDisplayed.spectrumActionDict[spectrumView.spectrum._apiDataSource].setChecked(True)
-      else:
-        currentDisplayed.spectrumActionDict[spectrumView.spectrum._apiDataSource].setChecked(False)
-    # self._showHitInfoOnDisplay()
 
 
   def _getPositionOnSpectrum(self):

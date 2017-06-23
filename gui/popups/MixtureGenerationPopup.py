@@ -51,6 +51,8 @@ class MixtureGenerationPopup(CcpnDialog):
 
     if mainWindow is None: #This allows opening the popup for graphical tests
       self.project = None
+      self.current = None
+
     else:
       self.mainWindow = mainWindow
       self.project = self.mainWindow.project
@@ -58,6 +60,7 @@ class MixtureGenerationPopup(CcpnDialog):
       self.application = self.mainWindow.application
       self.generalPreferences = self.application.preferences.general
       self.colourScheme = self.generalPreferences.colourScheme
+      self.current = self.application.current
 
     self.settingIcon = Icon('icons/applications-system')
     self.excludedRegionsWidgets = ExcludeRegions(self)
@@ -389,12 +392,12 @@ class MixtureGenerationPopup(CcpnDialog):
 
     self.moduleArea.moveModule(spectrumDisplay, position='top', neighbor=mixtureAnalysisModule)
     # self.moduleArea.guiWindow.deleteBlankDisplay()
-    self.project.strips[0].viewBox.autoRange()
-
-    currentDisplayed = self.project.strips[0]
-    for spectrumView in currentDisplayed.spectrumViews:
-      if spectrumView is not None:
-        spectrumView.delete()
+    # self.project.strips[0].viewBox.autoRange()
+    if self.current is not None:
+      currentDisplayed = self.current.strip
+      for spectrumView in currentDisplayed.spectrumViews:
+        if spectrumView is not None:
+          spectrumView.delete()
 
 
 
