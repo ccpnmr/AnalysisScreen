@@ -34,7 +34,7 @@ from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from ccpn.AnalysisScreen.lib.experimentAnalysis.LineBroadening import findBroadenedPeaks
+from ccpn.AnalysisScreen.lib.experimentAnalysis.LineBroadening import findBroadenedPeaks, matchHitToReference
 from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit, _getReferencesFromSample
 
 
@@ -136,15 +136,25 @@ class LWHitFinder(SpectraPipe):
     minLWvariation = float(self._kwargs[MinLWvariation])
     nPeakList = int(self._kwargs[ReferencePeakList])
     referenceFromMixture = self._kwargs[ReferenceFromMixture]
+    references = []
 
-    if referenceSpectrumGroup and targetSpectrumGroup is not None:
-      if len(referenceSpectrumGroup.spectra) == len(targetSpectrumGroup.spectra):
-        for referenceSpectrum, targetSpectrum in zip(referenceSpectrumGroup.spectra, targetSpectrumGroup.spectra):
-            hits = findBroadenedPeaks(referenceSpectrum, targetSpectrum, minimalDiff=minLWvariation, limitRange=minimumDistance,
-                                      peakListIndex=nPeakList)
+    if controlSpectrumGroup and targetSpectrumGroup is not None:
+      if len(controlSpectrumGroup.spectra) == len(targetSpectrumGroup.spectra):
+        for controlSpectrum, targetSpectrum in zip(controlSpectrumGroup.spectra, targetSpectrumGroup.spectra):
+          if referenceFromMixture:
+            references = _getReferencesFromSample(targetSpectrum)
+          else:
+            if referenceSpectrumGroup is not None:
+              references = referenceSpectrumGroup.spectra
 
-            if len(hits)>0:
-              self._addNewHit(referenceSpectrum, hits)
+            ## 'First find hits by broadening'
+            targetHits = findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=minLWvariation,
+                                            limitRange=minimumDistance, peakListIndex=nPeakList)
+
+            ## 'Second match TargetPeak ToReference '
+            if len(targetHits)>0:
+              matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
+                                               peakListIndex=nPeakList)
 
 
 
