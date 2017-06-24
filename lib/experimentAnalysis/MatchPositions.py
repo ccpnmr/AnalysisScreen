@@ -45,7 +45,6 @@ currentFile = inspect.getfile(inspect.currentframe())
 
 def matchingPosition(data, limitMax, limitMin):
   '''
-  In this example will use numpy  logical and argwhere a condition is met.
 
   Data: the list of peak positions.
   posToMatch: the peak from spectrum2 to match in the reference peaks

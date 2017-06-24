@@ -41,7 +41,7 @@ def _getReferencesFromSample(spectrum):
         substance = sampleComponent.substance
         if substance is not None:
           referenceSpectra += substance.referenceSpectra
-  return list(set((referenceSpectra)))
+  return list(set(referenceSpectra))
 
 
 def _addNewHit(spectrum, hits):

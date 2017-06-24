@@ -147,21 +147,24 @@ class LWHitFinder(SpectraPipe):
               targetSpectrum.experimentType = 'H'
             if referenceFromMixture:
               references = _getReferencesFromSample(targetSpectrum)
+              print(references, 'FFF')
             else:
               if referenceSpectrumGroup is not None:
                 references = referenceSpectrumGroup.spectra
+                print(references, 'eee')
 
-              ## 'First find hits by broadening'
-              targetHits = findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=minLWvariation,
-                                              limitRange=minimumDistance, peakListIndex=1)
-              targetHits = [i for hit in targetHits for i in hit]   # clean up the empty sublists
-              ## 'Second match TargetPeak ToReference '
-              if len(targetHits)>0:
-                matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
-                                                 peakListIndex=1)
-                matchedRef = [i for hit in matchedRef for i in hit]  # clean up the empty sublists
-                if len(matchedRef) > 0:
-                  _addNewHit(targetSpectrum, matchedRef)
+
+            ## 'First find hits by broadening'
+            targetHits = findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=minLWvariation,
+                                            limitRange=minimumDistance, peakListIndex=1)
+            targetHits = [i for hit in targetHits for i in hit]   # clean up the empty sublists
+            ## 'Second match TargetPeak ToReference '
+            if len(targetHits)>0:
+              matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
+                                               peakListIndex=1)
+              matchedRef = [i for hit in matchedRef for i in hit]  # clean up the empty sublists
+              if len(matchedRef) > 0:
+                _addNewHit(targetSpectrum, matchedRef)
 
 
 

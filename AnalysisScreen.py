@@ -4,7 +4,7 @@ from ccpn.AnalysisScreen.lib.ScreenLookup import _loadScreenLookupFile
 from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
 from ccpn.AnalysisScreen.gui.popups.MixtureGenerationPopup import MixtureGenerationPopup
 
-from ccpn.AnalysisScreen.gui.modules._HitAnalyisDevelopment import HitsAnalysis
+from ccpn.AnalysisScreen.gui.modules.HitAnalyis import HitsAnalysis
 from ccpn.ui.gui.widgets import MessageDialog
 
 applicationName = 'Screen'

@@ -73,28 +73,50 @@ def _find_STD_Hits(stdSpectrum, referenceSpectra: list, isMixture=False,
   return hits
 
 
-def _calculatePeakEffiency(hitSTDPeak, onResonanceSpectrum, offResonanceSpectrum, limitRange=0.0):
-  ''' matchs the hit peak to the on and off Resonance and determines the efficiency change'''
-  if not onResonanceSpectrum.peakLists[0].peaks and not offResonanceSpectrum.peakLists[0].peaks: return
-
-
-def _stdEfficiency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, hitPositions, minDistance):
+def _stdEfficiency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, stdPeaks, limitRange):
   '''
 
   :param spectrumOffResonancePeaks:
   :param spectrumOnResonancePeaks:
-  :param matchedPositions: list of hit positions
-  :param minDistance:
+  :param stdPeaks:
+  :param limitRange: limit to match on-off res and std peaks
   :return:
   '''
   efficiency = []
-  for position in hitPositions:
+
+
+
+
+
+  for stdPeak in stdPeaks:
+
     for onResPeak in spectrumOnResonancePeaks:
       for offResPeak in spectrumOffResonancePeaks:
-        if abs(offResPeak.position[0] - onResPeak.position[0]) <= float(minDistance) and offResPeak.position[
-          0] == position:
+        if abs(offResPeak.position[0] - onResPeak.position[0]) <= float(limitRange) \
+            and offResPeak.position[0] == stdPeak.position[0]:
+
+
+
           fullValue = ((abs(offResPeak.height - onResPeak.height)) / offResPeak.height) * 100
           value = decimal.Decimal(fullValue).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN)
-          efficiency.append(value)
+          print(value)
+          efficiency.append((value, stdPeak))
 
   return efficiency
+
+
+def _calculatePeakEffiency(stdSpectrum, onResonanceSpectrum, offResonanceSpectrum, n_peakList=0, limitRange=0.01):
+  ''' matchs the hit peak to the on and off Resonance and determines the efficiency change'''
+  # if not onResonanceSpectrum.peakLists[n_peakList].peaks and not offResonanceSpectrum.peakLists[n_peakList].peaks: return
+
+
+  matches = matchPeaks(reference=onResonanceSpectrum, spectrumB=offResonanceSpectrum, limitRange=limitRange,
+                       peakListIndex=n_peakList)
+  for match in matches:
+    referencePeak, targetPeak, pos = match
+
+    fullValue = ((abs(referencePeak.height - targetPeak.height)) / referencePeak.height) * 100
+    value = decimal.Decimal(fullValue).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN)
+    print(value, pos)
+
+
