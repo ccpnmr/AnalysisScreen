@@ -33,6 +33,7 @@ from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.AnalysisScreen.lib.experimentAnalysis.STD import _calculatePeakEffiency
 
 ########################################################################################################################
 ###   Attributes:
@@ -43,7 +44,8 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 ## Widget variables and/or _kwargs keys
 OffResonanceSpectrumGroup = 'Off_Resonance_SpectrumGroup'
 OnResonanceSpectrumGroup = 'On_Resonance_SpectrumGroup'
-SGVarNames = [OffResonanceSpectrumGroup, OnResonanceSpectrumGroup]
+STDSpectrumGroup = 'STD_SpectrumGroup'
+SGVarNames = [OffResonanceSpectrumGroup, OnResonanceSpectrumGroup, STDSpectrumGroup]
 RefPL = 'Reference_PeakList'
 MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'
 
@@ -108,6 +110,7 @@ class STDEfficiencyPipe(SpectraPipe):
   _kwargs  =   {
                 OffResonanceSpectrumGroup: 'OffResonanceSpectrumGroup.pid',
                 OnResonanceSpectrumGroup:  'OnResonanceSpectrumGroup.pid',
+                STDSpectrumGroup:          'STDSpectrumGroup.pid',
                 MatchPeaksWithin:          DefaultMinDist,
                 RefPL:                     DefaultReferencePeakList,
                }
@@ -116,20 +119,28 @@ class STDEfficiencyPipe(SpectraPipe):
   def runPipe(self, spectra):
     '''
     :param spectra: inputData
-    :return:
+    :return: calculates the STD peak efficiency and stores the value in the peak.figureOfMerit.
     '''
 
-    print(NotImplemented)
-
+    stdSpectrumGroup = self._getSpectrumGroup(self._kwargs[STDSpectrumGroup])
     offResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OffResonanceSpectrumGroup])
     onResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OnResonanceSpectrumGroup])
 
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
     nPeakList = int(self._kwargs[RefPL])
 
-    if offResonanceSpectrumGroup and onResonanceSpectrumGroup is not None:
-      # TODO
-      pass
+    groups = [stdSpectrumGroup, offResonanceSpectrumGroup, onResonanceSpectrumGroup]
+    for group in groups:
+      if group is None:
+        # TODO add log message
+        return
+    if len(stdSpectrumGroup.spectra) == len(offResonanceSpectrumGroup.spectra) == len(onResonanceSpectrumGroup.spectra):
+      for stdSpectrum, offResonanceSpectrum, onResonanceSpectrum in zip(
+          stdSpectrumGroup.spectra, offResonanceSpectrumGroup.spectra,onResonanceSpectrumGroup.spectra):
+
+        _calculatePeakEffiency(stdSpectrum, onResonanceSpectrum, offResonanceSpectrum, n_peakList=nPeakList,
+                               limitRange=minimumDistance)
+        # TODO add log message of efficiency
 
     return spectra
 

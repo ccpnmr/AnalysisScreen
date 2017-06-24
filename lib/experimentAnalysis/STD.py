@@ -49,18 +49,6 @@ def spectrumDifference(spectrumA, spectrumB):
     return np.array([])
 
 
-def efficiency(a, b):
-  '''
-  Calculetes the efficiencies between two arrays.
-  EG STD efficiensy:
-
-  :param a: off resonance array or peak intensity
-  :param b: on resonance array or peak intensity
-  :return:  efficiency in percentage
-  '''
-
-  return (abs(a - b) / a) * 100
-
 
 def _find_STD_Hits(stdSpectrum, referenceSpectra: list, isMixture=False,
                   limitRange=0.01, minEfficiency=None, maxEfficiency=None, excludeRegions=None):
@@ -73,50 +61,30 @@ def _find_STD_Hits(stdSpectrum, referenceSpectra: list, isMixture=False,
   return hits
 
 
-def _stdEfficiency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, stdPeaks, limitRange):
-  '''
-
-  :param spectrumOffResonancePeaks:
-  :param spectrumOnResonancePeaks:
-  :param stdPeaks:
-  :param limitRange: limit to match on-off res and std peaks
-  :return:
-  '''
-  efficiency = []
-
-
-
-
-
-  for stdPeak in stdPeaks:
-
-    for onResPeak in spectrumOnResonancePeaks:
-      for offResPeak in spectrumOffResonancePeaks:
-        if abs(offResPeak.position[0] - onResPeak.position[0]) <= float(limitRange) \
-            and offResPeak.position[0] == stdPeak.position[0]:
-
-
-
-          fullValue = ((abs(offResPeak.height - onResPeak.height)) / offResPeak.height) * 100
-          value = decimal.Decimal(fullValue).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN)
-          print(value)
-          efficiency.append((value, stdPeak))
-
-  return efficiency
-
 
 def _calculatePeakEffiency(stdSpectrum, onResonanceSpectrum, offResonanceSpectrum, n_peakList=0, limitRange=0.01):
   ''' matchs the hit peak to the on and off Resonance and determines the efficiency change'''
   # if not onResonanceSpectrum.peakLists[n_peakList].peaks and not offResonanceSpectrum.peakLists[n_peakList].peaks: return
 
 
-  matches = matchPeaks(reference=onResonanceSpectrum, spectrumB=offResonanceSpectrum, limitRange=limitRange,
+  matches = matchPeaks(reference=offResonanceSpectrum, spectrumB=onResonanceSpectrum, limitRange=limitRange,
                        peakListIndex=n_peakList)
+  meritItems = []
   for match in matches:
-    referencePeak, targetPeak, pos = match
+    offpeak, onPeak, pos = match
+    if float(offpeak.height) != 0.00:
+      merit = (abs(offpeak.height - onPeak.height)) / offpeak.height
+      pos = (offpeak.position[0]+onPeak.position[0])/2
+      meritItems.append((merit, pos))
 
-    fullValue = ((abs(referencePeak.height - targetPeak.height)) / referencePeak.height) * 100
-    value = decimal.Decimal(fullValue).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN)
-    print(value, pos)
+  for item in meritItems:
+    if len(item)==2:
+      merit, pos = item
+      if len(stdSpectrum.peakLists)>n_peakList:
+        for stdPeak in stdSpectrum.peakLists[n_peakList].peaks:
+          if abs(stdPeak.position[0]-pos) <= limitRange:
+            stdPeak.figureOfMerit = merit
 
+#     fullValue = ((abs(referencePeak.height - targetPeak.height)) / referencePeak.height) * 100
+#     value = decimal.Decimal(fullValue).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN)
 
