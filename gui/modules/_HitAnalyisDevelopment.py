@@ -44,6 +44,8 @@ from ccpn.core.lib.Notifiers import Notifier
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
+ListWidgetHeaderColor = QtGui.QColor('Red')
+
 ReferenceLabel = 'Reference Details: '
 ALL_ExperimentTypes = 'All'
 ExperimentTypesDict =  {
@@ -303,8 +305,18 @@ class HitsAnalysis(CcpnModule):
           substance = spectrum.referenceSubstance
           if substance is not None:
             self._showHitInfoOnDisplay(substance)
+          else:
+            self._showSpectrumInfo(spectrum)
 
 
+  def _showSpectrumInfo(self, spectrum):
+
+    self.substanceDetailsLabel.set(ReferenceLabel + spectrum.name)
+    self.listWidgetsHitDetails.clear()
+    header = QtGui.QListWidgetItem('\n No Substance Details Found')
+    header.setFlags(QtCore.Qt.NoItemFlags)
+    header.setTextColor(ListWidgetHeaderColor)
+    self.listWidgetsHitDetails.addItem(header)
 
   def _populateReferencePeakTable(self, peak):
     'populates the table only with matched peaks linked to the targetPeak'
@@ -331,7 +343,6 @@ class HitsAnalysis(CcpnModule):
         self.targetPeakTable.selectObject(self.targetPeakTable.objects[0])
     else:
       self.targetPeakTable.clearTable()
-    self.targetPeakTable.hideColumn(1)
 
 
   def _getTargetPeakList(self):
@@ -404,16 +415,6 @@ class HitsAnalysis(CcpnModule):
 
     self._updateHitTable()
     self.referencePeakTable.clearTable()
-
-
-
-  def _getPositionOnSpectrum(self):
-    ''' Documentation '''
-    peaks = self._getPullDownObj().substance.referenceSpectra[0].peakLists[1].peaks
-    positions = [peak.position for peak in peaks]
-    return set(list(positions))
-
-
 
 
   def _getSampleInfoToDisplay(self, sample):
@@ -527,11 +528,11 @@ class HitsAnalysis(CcpnModule):
     ''' Documentation '''
     if substance is not None:
 
-      color = QtGui.QColor('Red')
+
       ## setSpectrum Hit
       # headerHit =  QtGui.QListWidgetItem('\nSpectrum Hit Details')
       # headerHit.setFlags(QtCore.Qt.NoItemFlags)
-      # headerHit.setTextColor(color)
+      # headerHit.setTextColor(ListWidgetHeaderColor)
       # self.listWidgetsHitDetails.addItem(headerHit)
       # for name, value in self._getSpectrumHitInfoToDisplay(substance).items():
       #   self._populateInfoList(name, value)
@@ -541,7 +542,7 @@ class HitsAnalysis(CcpnModule):
       self.substanceDetailsLabel.set(ReferenceLabel+substance.name)
       headerSubstance =  QtGui.QListWidgetItem('\nSubstance Details')
       headerSubstance.setFlags(QtCore.Qt.NoItemFlags)
-      headerSubstance.setTextColor(color)
+      headerSubstance.setTextColor(ListWidgetHeaderColor)
       self.listWidgetsHitDetails.addItem(headerSubstance)
       for name, value in self._getSubstanceInfoToDisplay(substance).items():
         self._populateInfoList(name, value)
@@ -553,7 +554,7 @@ class HitsAnalysis(CcpnModule):
           sample = sampleComponent.sample
           headerSample =  QtGui.QListWidgetItem('\n'+sample.name+' Details')
           headerSample.setFlags(QtCore.Qt.NoItemFlags)
-          headerSample.setTextColor(color)
+          headerSample.setTextColor(ListWidgetHeaderColor)
           self.listWidgetsHitDetails.addItem(headerSample)
           for name, value in self._getSampleInfoToDisplay(sample).items():
             self._populateInfoList(name, value)

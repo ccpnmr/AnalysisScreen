@@ -34,7 +34,7 @@ from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.AnalysisScreen.lib.experimentAnalysis import WaterLogsy as wl
 from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit, _getReferencesFromSample
-
+from ccpn.AnalysisScreen.lib.experimentAnalysis.MatchPositions import  matchHitToReference
 ########################################################################################################################
 ###   Attributes:
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
@@ -149,7 +149,7 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
     mode = self._kwargs[ModeHit]
     references = []
 
-    if wLcontrolSpectrumGroup is None:
+    if wLcontrolSpectrumGroup is None: # if no control is given. Find hits just by positive peaks in the target spectrum
       mode = wl.PositiveOnly
 
       if wLtargetSpectrumGroup is not None:
@@ -164,13 +164,19 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
               if referenceSpectrumGroup is not None:
                 references = referenceSpectrumGroup.spectra
 
-              hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, references=references,
-                                           mode=mode, limitRange=minimumDistance)
+              hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, mode=mode, limitRange=minimumDistance)
               if len(hits) > 0:
-                _addNewHit(targetSpectrum, hits)
-    else:
+                # _addNewHit(targetSpectrum, hits)
+                matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
+                                                 peakListIndex=nPeakList)
+                matchedRef = [i for hit in matchedRef for i in hit]  # clean up the empty sublists
+                if len(matchedRef) > 0:
+                  _addNewHit(targetSpectrum, matchedRef)
+
+
+    else:# if control is given. Find hits  by any mode
       if wLtargetSpectrumGroup is not None:
-        if len(wLtargetSpectrumGroup.spectra) == len(wLtargetSpectrumGroup.spectra):
+        if len(wLtargetSpectrumGroup.spectra) == len(wLcontrolSpectrumGroup.spectra):
           for targetSpectrum, controlSpectrum in zip(wLtargetSpectrumGroup.spectra, wLcontrolSpectrumGroup.spectra):
             if targetSpectrum is not None:
               if targetSpectrum.experimentType is None:
@@ -182,10 +188,16 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
                 if referenceSpectrumGroup is not None:
                   references = referenceSpectrumGroup.spectra
 
-              hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, references=references,
+              hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, wLControl=controlSpectrum,
                                            mode=mode, limitRange=minimumDistance)
+              hits = [i for hit in hits for i in hit]  # clean up the empty sublists
               if len(hits) > 0:
-                _addNewHit(targetSpectrum, hits)
+                # _addNewHit(targetSpectrum, hits)
+                matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
+                                                 peakListIndex=nPeakList)
+                matchedRef = [i for hit in matchedRef for i in hit]  # clean up the empty sublists
+                if len(matchedRef) > 0:
+                  _addNewHit(targetSpectrum, matchedRef)
 
 
     return spectra

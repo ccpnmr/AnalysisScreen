@@ -86,19 +86,19 @@ def findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=0.01, limitR
   return peakHits
 
 
-def matchHitToReference(spectrumHit, referenceSpectra, limitRange=0.01, peakListIndex=1):
-  '''
-
-  :param targetHitSpectrum: spectrum calculated as hit (peak linewhidths changed compared to its control)
-  :param referenceSpectra: list of reference spectra. Eg mixture or single reference spectrum
-  :return: matches of the hit peak to the references
-  '''
-
-  hits = []
-  if referenceSpectra:
-    for referenceSpectrum in referenceSpectra:
-      matches = matchPeaks(reference=referenceSpectrum, spectrumB=spectrumHit, limitRange=limitRange,
-                              peakListIndex=peakListIndex)
-      hits.append(matches)
-
-  return hits
+# def matchHitToReference(spectrumHit, referenceSpectra, limitRange=0.01, peakListIndex=1):
+#   '''
+#
+#   :param targetHitSpectrum: spectrum calculated as hit (peak linewhidths changed compared to its control)
+#   :param referenceSpectra: list of reference spectra. Eg mixture or single reference spectrum
+#   :return: matches of the hit peak to the references
+#   '''
+#
+#   hits = []
+#   if referenceSpectra:
+#     for referenceSpectrum in referenceSpectra:
+#       matches = matchPeaks(reference=referenceSpectrum, spectrumB=spectrumHit, limitRange=limitRange,
+#                               peakListIndex=peakListIndex)
+#       hits.append(matches)
+#
+#   return hits

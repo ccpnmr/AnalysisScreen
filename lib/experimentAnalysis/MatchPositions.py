@@ -81,7 +81,7 @@ def matchPeaks(reference, spectrumB, limitRange, peakListIndex=0, ):
   :param reference: the reference spectrum object
   :param spectrumB: the spectrum object to match against the reference
   :param limitRange: ppm range where to find a matching peak
-  :return:
+  :return:Tuple of reference Peak, target Peak, position of match
   '''
 
   referencePeakPositions = np.array([peak.position[0] for peak in reference.peakLists[peakListIndex].peaks if peak.position])
@@ -97,3 +97,21 @@ def matchPeaks(reference, spectrumB, limitRange, peakListIndex=0, ):
       allMatches.append((referencePeaks[0], peakB, matches))
 
   return allMatches
+
+
+def matchHitToReference(spectrumHit, referenceSpectra, limitRange=0.01, peakListIndex=1):
+  '''
+
+  :param targetHitSpectrum: spectrum calculated as hit (peak linewhidths changed compared to its control)
+  :param referenceSpectra: list of reference spectra. Eg mixture or single reference spectrum
+  :return: matches of the hit peak to the references
+  '''
+
+  hits = []
+  if referenceSpectra:
+    for referenceSpectrum in referenceSpectra:
+      matches = matchPeaks(reference=referenceSpectrum, spectrumB=spectrumHit, limitRange=limitRange,
+                              peakListIndex=peakListIndex)
+      hits.append(matches)
+
+  return hits

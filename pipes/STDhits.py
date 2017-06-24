@@ -153,7 +153,7 @@ class STDHitFinder(SpectraPipe):
           if referenceSpectrumGroup is not None:
             references = referenceSpectrumGroup.spectra
         hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance)
-        hits = [i for hit in hits for i in hit]
+        hits = [i for hit in hits for i in hit] # clean up the empty sublists
 
         if len(hits)>0:
           _addNewHit(stdSpectrum, hits)

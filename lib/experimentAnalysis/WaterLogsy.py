@@ -42,8 +42,7 @@ def __positiveHits(wlT_Peaks, wlT_PeakPos_filtered):
   for wlPeak in wlT_Peaks:
     if pa.intensitySignChanged(-1, wlPeak.height):
       if wlPeak.position[0] in wlT_PeakPos_filtered:
-        hits.append({'wLControlPeak': None, 'TargetPeak': wlPeak,
-                     'Pos': wlPeak.position[0], 'HitType': PositiveOnly})
+        hits.append((None, wlPeak, wlPeak.position[0]))
   return hits
 
 
@@ -96,10 +95,9 @@ def __findHitsByMissingTargetPeaks(wLControl, wLTarget, matchedControl, peakList
           % (wLTarget.name, wLControl.name, missingWLT_peaks))
     for wLControlPeak in missingWLT_peaks:
       ##add new peak to peaklists of wlTarget with same position but 0 intensity. Keep it as hit
-      wLTargetnewPeak = wLTarget.peakLists[peakListTarget].newPeak(position=wLControlPeak.position, intensity=0, comment='Hit')
+      wLTargetnewPeak = wLTarget.peakLists[peakListTarget].newPeak(position=wLControlPeak.position, height=0.0, comment='Hit')
       wLTarget.peakLists[0].peaks.append(wLTargetnewPeak)
-      hits.append({'wLControlPeak': wLControlPeak, 'TargetPeak': wLTargetnewPeak,
-                   'Pos': wLTargetnewPeak.position[0], 'HitType': 'MissingPeak'})
+      hits.append((wLControlPeak, wLTargetnewPeak, wLTargetnewPeak.position[0]))
   return hits
 
 
@@ -107,8 +105,7 @@ def __findHitsByIntensityChange(wLControlPeak, TargetPeak):
   hits = []
   intensityDifferences = pa.getIntensiyChange(wLControlPeak.height, TargetPeak.height)
   if abs(intensityDifferences) > 0.0:
-    hits.append({'wLControlPeak': wLControlPeak, 'TargetPeak': TargetPeak,
-                 'Pos': TargetPeak.position[0], 'HitType': IntensityChanged})
+    hits.append(( wLControlPeak, TargetPeak,TargetPeak.position[0]))
 
   return hits
 
@@ -122,19 +119,16 @@ def __findHitsByMode(matches, matchedControl, wlT_PeakPos_filtered, mode):
     if pa.intensitySignChanged(wLControlPeak.height, TargetPeak.height):
       if TargetPeak.position[0] in wlT_PeakPos_filtered:
         if mode == SignChanged:
-          hits.append({'wLControlPeak': wLControlPeak, 'TargetPeak': TargetPeak,
-                       'Pos': TargetPeak.position[0], 'HitType': SignChanged})
+          hits.append((wLControlPeak, TargetPeak, TargetPeak.position[0]))
         else:
           if mode == IntensityChanged:
             intensityDifferences = pa.getIntensiyChange(wLControlPeak.height, TargetPeak.height)
             if abs(intensityDifferences) > 0.0:
-              hits.append({'wLControlPeak': wLControlPeak, 'TargetPeak': TargetPeak,
-                           'Pos': TargetPeak.position[0], 'HitType': IntensityChanged})
+              hits.append((wLControlPeak, TargetPeak, TargetPeak.position[0]))
 
     if mode == PositiveOnly:
       if pa.isPositive(TargetPeak.height):
-        hits.append({'wLControlPeak': wLControlPeak, 'TargetPeak': TargetPeak,
-                     'Pos': TargetPeak.position[0], 'HitType': 'positivePeaks'})
+        hits.append((wLControlPeak, TargetPeak, TargetPeak.position[0]))
   return hits
 
 
@@ -154,7 +148,7 @@ def __addMissingHits(hits, wLControl, wLTarget, matchedControl):
   return hits
 
 
-def findWaterLogsyHits(wLTarget, wLControl=None, references=None, mode=IntensityChanged, isMixture=False,
+def findWaterLogsyHits(wLTarget, wLControl=None, mode=PositiveOnly, isMixture=False,
                        limitRange=0.0, excludeRegions=None):
   '''
   wLTarget: obj spectrum.   wl spectrum with target
@@ -175,8 +169,7 @@ def findWaterLogsyHits(wLTarget, wLControl=None, references=None, mode=Intensity
   excludeRegions: region of spectrum to exclude. Format: list of lists E.G. [['start','stop'],  '...', ['start','stop']]
 
 
-  peakHit in the format {'wLControlPeak': obj, 'TargetPeak': obj,'Pos': float, 'HitType': str(one of: PositiveOnly, IntensityChanged, 'missingPeak'}
-
+  peakHit in the format Tuple of control Peak, target Peak, position of match
   return hits:
   if only wlTarget: return -->  list[peakHit, ...]
   if mixtures with references
@@ -199,14 +192,15 @@ def findWaterLogsyHits(wLTarget, wLControl=None, references=None, mode=Intensity
 
   if not wLControl:  ## if not control, find Only If there are positive peaks
     hits = __positiveHits(wlT_PeakPos_filtered=wlT_PeakPos_filtered, wlT_Peaks=wlT_Peaks)
-    if isMixture:
-      if references:
-        mixtureHits = __matchHitsToReferences(hits, references, limitRange)
-        return mixtureHits
-      else:
-        return hits
-    else:
-      return hits
+
+    # if isMixture:
+    #   if references:
+    #     mixtureHits = __matchHitsToReferences(hits, references, limitRange)
+    #     return mixtureHits
+    #   else:
+    #     return hits
+    # else:
+    return hits
 
   matches = mp.matchPeaks(reference=wLControl, spectrumB=wLTarget, limitRange=limitRange)
   matchedControl = []
@@ -214,15 +208,15 @@ def findWaterLogsyHits(wLTarget, wLControl=None, references=None, mode=Intensity
     hits = __findHitsByMode(matches, matchedControl, wlT_PeakPos_filtered, mode)
   if __isDifferentPeakCount(wLControl, wLTarget):
     hits = __addMissingHits(hits, wLControl, wLTarget, matchedControl)
-  if isMixture:
-    if references:
-      mixtureHits = __matchHitsToReferences(hits, references, limitRange)
-      return mixtureHits
-    else:
-      print('Reference not given')
-      return hits
-  else:
-    return hits
+  # if isMixture:
+  #   if references:
+  #     mixtureHits = __matchHitsToReferences(hits, references, limitRange)
+  #     return mixtureHits
+  #   else:
+  #     print('Reference not given')
+  #     return hits
+  # else:
+  return hits
 
 
 

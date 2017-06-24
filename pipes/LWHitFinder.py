@@ -34,7 +34,8 @@ from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from ccpn.AnalysisScreen.lib.experimentAnalysis.LineBroadening import findBroadenedPeaks, matchHitToReference
+from ccpn.AnalysisScreen.lib.experimentAnalysis.LineBroadening import findBroadenedPeaks
+from ccpn.AnalysisScreen.lib.experimentAnalysis.MatchPositions import  matchHitToReference
 from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit, _getReferencesFromSample
 
 
@@ -150,7 +151,7 @@ class LWHitFinder(SpectraPipe):
             ## 'First find hits by broadening'
             targetHits = findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=minLWvariation,
                                             limitRange=minimumDistance, peakListIndex=nPeakList)
-
+            targetHits = [i for hit in targetHits for i in hit]   # clean up the empty sublists
             ## 'Second match TargetPeak ToReference '
             if len(targetHits)>0:
               matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
