@@ -103,7 +103,6 @@ class HitsAnalysis(CcpnModule):
     if self.project is not None:
       self._spectrumHitNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE],
                                            'SpectrumHit', self._spectrumHitNotifierCallback)
-
   def _createWidgets(self):
     ''' Documentation '''
 
@@ -398,6 +397,9 @@ class HitsAnalysis(CcpnModule):
     if self.current is not None:
       spectrumHit = self.current.spectrumHit
       if spectrumHit is not None:
+        targetPeakList = self._getTargetPeakList()
+        if targetPeakList is not None:
+          targetPeakList.delete()
         spectrumHit.delete()
 
       self._selectFirstRowHitTable()
@@ -590,7 +592,17 @@ class HitsAnalysis(CcpnModule):
     self._updateHitTable()
 
 
-#
+  def _closeModule(self):
+    """Re-implementation of closeModule function from CcpnModule to unregister notification """
+    if self._spectrumHitNotifier is not None:
+      self._spectrumHitNotifier.unRegister()
+    super(HitsAnalysis, self)._closeModule()
+
+  def close(self):
+    """
+    Close the table from the commandline
+    """
+    self._closeModule()
 #
 #     self.strip.viewBox.autoRange()
 
