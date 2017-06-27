@@ -1,13 +1,18 @@
 from ccpn.framework.Framework import Framework
 from ccpn.core.Project import Project
+from ccpn.pipes import loadedPipes
+from ccpn.AnalysisScreen.pipes import _loadScreenPipes
 from ccpn.AnalysisScreen.lib.ScreenLookup import _loadScreenLookupFile
-from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
 from ccpn.AnalysisScreen.gui.popups.MixtureGenerationPopup import MixtureGenerationPopup
-from ccpn.AnalysisScreen.gui.modules.MixtureAnalysis import MixtureAnalysis
 from ccpn.AnalysisScreen.gui.modules.HitAnalyis import HitsAnalysis
+from ccpn.AnalysisScreen.gui.modules.MixtureAnalysis import MixtureAnalysis
 from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.modules.PipelineModule import GuiPipeline
+from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
 
 applicationName = 'Screen'
+
+_loadScreenPipes()  # load screen specific pipes
 
 class Screen(Framework):
   """Root class for Screen application"""
@@ -31,10 +36,6 @@ class Screen(Framework):
                 )
 
     self.addApplicationMenuSpec(menuSpec)
-
-    # screenModules = _importScreenModules({'MixtureAnalysis': 'Mixture Analysis'})
-    # showSa = screenModules[0](mainWindow=self.mainWindow)
-    # self.ui.mainWindow.moduleArea.addModule(showSa)
 
 
   def showPickPeakPopup(self):
@@ -63,13 +64,9 @@ class Screen(Framework):
     self.project._logger.info("application.showMixtureAnalysis()")
 
   def showScreeningPipeline(self, position='bottom', relativeTo=None):
-    from ccpn.ui.gui.modules.PipelineModule import GuiPipeline
-    from ccpn.pipes import loadedPipes
-    from  ccpn.AnalysisScreen import pipes
-    # _loadPipes()
+
     guiPipeline = GuiPipeline(mainWindow=self.ui.mainWindow, pipes=loadedPipes, templates=None)
     self.ui.mainWindow.moduleArea.addModule(guiPipeline, position='bottom')
-
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showScreeningPipeline()")
     self.project._logger.info("application.showScreeningPipeline()")
 
