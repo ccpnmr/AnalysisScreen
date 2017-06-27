@@ -85,6 +85,10 @@ class OutputHitsGuiPipe(GuiPipe):
     pass
 
 
+  def _closeBox(self):
+    'reset alreadyOpened flag '
+    OutputHitsGuiPipe._alreadyOpened = False
+    self.closeBox()
 
 
 

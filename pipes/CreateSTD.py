@@ -63,7 +63,9 @@ def _createSTDs(project, offResonanceSpectrumGroup, onResonanceSpectrumGroup):
       for offResSpectrum, onResSpectrum in zip(offResonanceSpectrumGroup.spectra, onResonanceSpectrumGroup.spectra):
         stdIntensities = spectrumDifference(offResSpectrum, onResSpectrum)
         stdPositions = offResSpectrum.positions
-        std = _create1DSpectrum(project, DefaultSTDname+offResSpectrum.name, stdIntensities, stdPositions, 'STD.H')
+
+        std = _create1DSpectrum(project=project,name=DefaultSTDname+offResSpectrum.name, intensities=stdIntensities,
+                                positions=stdPositions, expType='STD.H', axisCodes=offResSpectrum.axisCodes)
         spectraSTD.append(std)
   return spectraSTD
 
