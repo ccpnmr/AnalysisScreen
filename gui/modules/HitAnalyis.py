@@ -309,7 +309,8 @@ class HitsAnalysis(CcpnModule):
 
 
   def _showSpectrumInfo(self, spectrum):
-
+    self._clearListWidget()
+    self.compoundView.setSmiles('h')
     self.substanceDetailsLabel.set(ReferenceLabel + spectrum.name)
     self.listWidgetsHitDetails.clear()
     header = QtGui.QListWidgetItem('\n No Substance Details Found')
@@ -567,10 +568,6 @@ class HitsAnalysis(CcpnModule):
       if substance.smiles is not None:
         smiles = substance.smiles
         self.compoundView.setSmiles(smiles)
-
-
-
-
 
 
   def _scoreEdit(self, hit, value):
