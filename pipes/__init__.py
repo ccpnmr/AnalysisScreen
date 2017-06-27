@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 
 import pkgutil as _pkgutil
 
-def _loadPipes():
+def _loadScreenPipes():
   '''Imports all the Screen pipes. Once the files are read, they are registered together with the other common pipes.'''
   for loader, name, isPpkg in _pkgutil.walk_packages(__path__):
     loader.find_module(name).load_module(name)
