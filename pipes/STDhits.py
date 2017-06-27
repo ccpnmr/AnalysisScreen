@@ -138,8 +138,8 @@ class STDHitFinder(SpectraPipe):
     stdTargetSpectrumGroup = self._getSpectrumGroup(self._kwargs[STD_Target_SpectrumGroup])
     referenceFromMixture = self._kwargs[ReferenceFromMixture]
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
-    minimumEfficiency = float(self._kwargs[MinEfficiency])
-    nPeakList = int(self._kwargs[RefPL])
+    minimumEfficiency = float(self._kwargs[MinEfficiency])/100
+    peakListIndex = int(self._kwargs[RefPL])
 
     references = []
 
@@ -152,8 +152,10 @@ class STDHitFinder(SpectraPipe):
         else:
           if referenceSpectrumGroup is not None:
             references = referenceSpectrumGroup.spectra
-        hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance)
+        hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance,
+                              peakListIndex=peakListIndex,  minEfficiency=minimumEfficiency )
         hits = [i for hit in hits for i in hit] # clean up the empty sublists
+
 
         if len(hits)>0:
           _addNewHit(stdSpectrum, hits)

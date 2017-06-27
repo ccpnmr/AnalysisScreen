@@ -223,7 +223,7 @@ class HitsAnalysis(CcpnModule):
 
     columns = [Column('Hit Name', lambda hit:str(hit.substanceName)),
                Column('Confirmed', lambda hit:str(hit.isConfirmed)), # setEditValue=lambda hit, value: self._testEditor(hit, value)),
-               Column('Merit', lambda hit:str(hit.meritCode))] #setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
+               Column('Merit (Efficiency)', lambda hit:float(hit.figureOfMerit)*100)] #setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
 
     self.hitTable.setObjectsAndColumns(self._spectrumHits, columns)
     if len(self._spectrumHits) > 0:

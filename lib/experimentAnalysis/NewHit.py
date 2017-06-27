@@ -52,20 +52,16 @@ def _addNewHit(spectrum, hits):
   :return:
   """
   project = spectrum.project
-
+  efficiencies = []
   spectrumHit = spectrum.newSpectrumHit(substanceName=spectrum.name)
-
-
   newTargetPeakList = spectrum.newPeakList(title=TARGETPEAKLIST, isSimulated=True, comment='PeakList containing peak hits')
 
-  # newReferencePeakList = spectrum.newPeakList(title=REFERENCEPEAKLIST, isSimulated=True,
-  #                                          comment='PeakList containing matched peak to the reference')
 
   referenceSpectra = []
   for  hit in hits:
-    print(hit)
     if len(hit) == 3:
       referencePeak, targetPeak, position = hit
+      efficiencies.append(targetPeak.figureOfMerit)
       referenceSpectra.append(referencePeak.peakList.spectrum)
       newPeakFromTarget = targetPeak.copyTo(newTargetPeakList)
 
@@ -75,7 +71,7 @@ def _addNewHit(spectrum, hits):
       newPeakFromTarget._linkedPeak = referencePeak  # hack but we need to link the reference Peak to the target Peak.
       referencePeak._linkedPeak = newPeakFromTarget
 
-      # newPeakFromReference = referencePeak.copyTo(newReferencePeakList)
-      # newPeakFromReference.comment = 'Hit: Peak matched and copied From Reference PeakList'
       newPeakFromTarget.comment = 'Hit: Peak matched and copied From Target PeakList '
 
+  if min(efficiencies)!= 1.0:
+    spectrumHit.figureOfMerit = min(efficiencies)

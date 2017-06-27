@@ -48,18 +48,34 @@ def spectrumDifference(spectrumA, spectrumB):
   else:
     return np.array([])
 
-
-
-def _find_STD_Hits(stdSpectrum, referenceSpectra: list, isMixture=False,
-                  limitRange=0.01, minEfficiency=None, maxEfficiency=None, excludeRegions=None):
+def _find_STD_Hits(stdSpectrum, referenceSpectra:list, peakListIndex=0,limitRange=0.01, minEfficiency=0.005):
   hits = []
+  useFilteredHits = False
   if referenceSpectra:
     for referenceSpectrum in referenceSpectra:
-      matches = matchPeaks(reference=referenceSpectrum, spectrumB=stdSpectrum, limitRange=limitRange)
-      hits.append(matches)
-
+      matches = matchPeaks(reference=referenceSpectrum, spectrumB=stdSpectrum, limitRange=limitRange,
+                           peakListIndex=peakListIndex)
+      filteredMatches = []
+      for match in matches:
+        referencePeak, targetPeak, pos = match
+        if targetPeak.figureOfMerit != 1.0: #default value
+          useFilteredHits = True
+          if targetPeak.figureOfMerit >= minEfficiency:
+            filteredMatches.append(match)
+      if useFilteredHits:
+        hits.append(filteredMatches)
+      else:
+        hits.append(matches)
   return hits
-
+#
+# def _find_STD_Hits(stdSpectrum, referenceSpectra: list, isMixture=False,
+#                   limitRange=0.01, minEfficiency=None, maxEfficiency=None, excludeRegions=None):
+#   hits = []
+#   if referenceSpectra:
+#     for referenceSpectrum in referenceSpectra:
+#       matches = matchPeaks(reference=referenceSpectrum, spectrumB=stdSpectrum, limitRange=limitRange)
+#       hits.append(matches)
+#   return hits
 
 
 def _calculatePeakEffiency(stdSpectrum, onResonanceSpectrum, offResonanceSpectrum, n_peakList=0, limitRange=0.01):
