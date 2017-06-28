@@ -135,14 +135,14 @@ class STDCreator(SpectraPipe):
     offResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OffResonanceSpectrumGroup])
     onResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OnResonanceSpectrumGroup])
     newSTDSpectrumGroupName = self._kwargs[NewSTDSpectrumGroupName]
+    if None not in [offResonanceSpectrumGroup, onResonanceSpectrumGroup, newSTDSpectrumGroupName]:
+      stds = _createSTDs(self.project, offResonanceSpectrumGroup, onResonanceSpectrumGroup)
+      if len(stds)==len(offResonanceSpectrumGroup.spectra):
+        newSTDspectrumGroup = self._createNewSTDspectrumGroup(name=newSTDSpectrumGroupName, stdSpectra= stds)
+        self.spectrumGroups.update([newSTDspectrumGroup])
 
-    stds = _createSTDs(self.project, offResonanceSpectrumGroup, onResonanceSpectrumGroup)
-    if len(stds)==len(offResonanceSpectrumGroup.spectra):
-      newSTDspectrumGroup = self._createNewSTDspectrumGroup(name=newSTDSpectrumGroupName, stdSpectra= stds)
-      self.spectrumGroups.update([newSTDspectrumGroup])
-
-      listsOfSpectra =  [onResonanceSpectrumGroup.spectra, offResonanceSpectrumGroup.spectra, newSTDspectrumGroup.spectra]
-      spectra = [spectrum for spectra in listsOfSpectra for spectrum in spectra]
+        listsOfSpectra =  [onResonanceSpectrumGroup.spectra, offResonanceSpectrumGroup.spectra, newSTDspectrumGroup.spectra]
+        spectra = [spectrum for spectra in listsOfSpectra for spectrum in spectra]
 
     return set(spectra)
 

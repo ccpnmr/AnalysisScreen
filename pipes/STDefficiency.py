@@ -129,11 +129,10 @@ class STDEfficiencyPipe(SpectraPipe):
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
     nPeakList = int(self._kwargs[RefPL])
 
-    groups = [stdSpectrumGroup, offResonanceSpectrumGroup, onResonanceSpectrumGroup]
-    for group in groups:
-      if group is None:
-        # TODO add log message
-        return
+
+    if None in [stdSpectrumGroup, offResonanceSpectrumGroup, onResonanceSpectrumGroup]:
+      # TODO add log message
+      return
     if len(stdSpectrumGroup.spectra) == len(offResonanceSpectrumGroup.spectra) == len(onResonanceSpectrumGroup.spectra):
       for stdSpectrum, offResonanceSpectrum, onResonanceSpectrum in zip(
           stdSpectrumGroup.spectra, offResonanceSpectrumGroup.spectra,onResonanceSpectrumGroup.spectra):

@@ -113,9 +113,9 @@ class OutputHitsPipe(SpectraPipe):
   def runPipe(self, spectra):
     '''
     :param spectra: inputData
-    :return: aligned spectra
+    :return: spectra
     '''
-    pass
+
     return spectra
 
 OutputHitsPipe.register() # Registers the pipe in the pipeline

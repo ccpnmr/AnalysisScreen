@@ -21,6 +21,7 @@ class Screen(Framework):
     Framework.__init__(self, applicationName, applicationVersion, commandLineArguments)
     Project._loadLookupFile = _loadScreenLookupFile
 
+
   #########################################    Start setup Menu      #############################################
 
   def setupMenus( self ):
