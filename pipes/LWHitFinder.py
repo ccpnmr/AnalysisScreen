@@ -153,7 +153,6 @@ class LWHitFinder(SpectraPipe):
                 references = referenceSpectrumGroup.spectra
                 print(references, 'eee')
 
-
             ## 'First find hits by broadening'
             targetHits = findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=minLWvariation,
                                             limitRange=minimumDistance, peakListIndex=1)
@@ -166,9 +165,8 @@ class LWHitFinder(SpectraPipe):
               if len(matchedRef) > 0:
                 _addNewHit(targetSpectrum, matchedRef)
 
-
-
-    return spectra
+    SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
+    return list(set(list(spectra) + SGSpectra))
 
 LWHitFinder.register() # Registers the pipe in the pipeline
 

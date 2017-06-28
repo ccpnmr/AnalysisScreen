@@ -199,8 +199,8 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
                 if len(matchedRef) > 0:
                   _addNewHit(targetSpectrum, matchedRef)
 
-
-    return spectra
+    SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
+    return list(set(list(spectra) + SGSpectra))
 
 WaterLogsyHitFinderPipe.register() # Registers the pipe in the pipeline
 

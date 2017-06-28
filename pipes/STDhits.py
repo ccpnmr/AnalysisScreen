@@ -131,9 +131,8 @@ class STDHitFinder(SpectraPipe):
   def runPipe(self, spectra):
     '''
     :param spectra: inputData
-    :return: aligned spectra
+    :return: same spectra after finding hits. The spectra should be the same
     '''
-
     referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
     stdTargetSpectrumGroup = self._getSpectrumGroup(self._kwargs[STD_Target_SpectrumGroup])
     referenceFromMixture = self._kwargs[ReferenceFromMixture]
@@ -142,26 +141,27 @@ class STDHitFinder(SpectraPipe):
     peakListIndex = int(self._kwargs[RefPL])
 
     references = []
+    if stdTargetSpectrumGroup is not None:
+      if set(stdTargetSpectrumGroup.spectra).issubset(spectra): # make sure spectrumGroup.spectra are in the input spectra
+        for stdSpectrum in stdTargetSpectrumGroup.spectra:
+          if stdSpectrum:
+            if stdSpectrum.experimentType is None:
+              stdSpectrum.experimentType = 'STD.H'
+            if referenceFromMixture:
+              references = _getReferencesFromSample(stdSpectrum)
+            else:
+              if referenceSpectrumGroup is not None:
+                if set(referenceSpectrumGroup.spectra).issubset(spectra):
+                  references = referenceSpectrumGroup.spectra #make sure references are in the input spectra
+              hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance,
+                                    peakListIndex=peakListIndex,  minEfficiency=minimumEfficiency )
+              hits = [i for hit in hits for i in hit] # clean up the empty sublists
+              if len(hits)>0:
+                _addNewHit(stdSpectrum, hits)
 
-    for stdSpectrum in stdTargetSpectrumGroup.spectra:
-      if stdSpectrum:
-        if stdSpectrum.experimentType is None:
-          stdSpectrum.experimentType = 'STD.H'
-        if referenceFromMixture:
-          references = _getReferencesFromSample(stdSpectrum)
-        else:
-          if referenceSpectrumGroup is not None:
-            references = referenceSpectrumGroup.spectra
-        hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance,
-                              peakListIndex=peakListIndex,  minEfficiency=minimumEfficiency )
-        hits = [i for hit in hits for i in hit] # clean up the empty sublists
+    SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
+    return list(set(list(spectra)+SGSpectra))
 
-
-        if len(hits)>0:
-          _addNewHit(stdSpectrum, hits)
-
-
-    return spectra
 
 STDHitFinder.register() # Registers the pipe in the pipeline
 
