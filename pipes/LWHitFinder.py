@@ -135,7 +135,7 @@ class LWHitFinder(SpectraPipe):
     targetSpectrumGroup = self._getSpectrumGroup(self._kwargs[TargetSpectrumGroup])
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
     minLWvariation = float(self._kwargs[MinLWvariation])
-    nPeakList = int(self._kwargs[ReferencePeakList])
+    peakListIndex = int(self._kwargs[ReferencePeakList])
     referenceFromMixture = self._kwargs[ReferenceFromMixture]
     references = []
 
@@ -147,15 +147,13 @@ class LWHitFinder(SpectraPipe):
               targetSpectrum.experimentType = 'H'
             if referenceFromMixture:
               references = _getReferencesFromSample(targetSpectrum)
-              print(references, 'FFF')
             else:
               if referenceSpectrumGroup is not None:
                 references = referenceSpectrumGroup.spectra
-                print(references, 'eee')
 
             ## 'First find hits by broadening'
             targetHits = findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=minLWvariation,
-                                            limitRange=minimumDistance, peakListIndex=1)
+                                            limitRange=minimumDistance, peakListIndex=peakListIndex)
             targetHits = [i for hit in targetHits for i in hit]   # clean up the empty sublists
             ## 'Second match TargetPeak ToReference '
             if len(targetHits)>0:
