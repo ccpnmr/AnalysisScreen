@@ -6,10 +6,10 @@ import pathlib
 import pandas as pd
 
 ######################### Excel Headers ##################
-''' The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
-Changing these will fail to set the attribute'''
+"""The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
+Changing these will fail to set the attribute"""
 
-'''REFERENCES PAGE'''
+# '''REFERENCES PAGE'''
 GROUP_NAME = 'groupName'
 EXP_TYPE = 'expType'
 SPECTRUM_NAME = 'spectrumName'
@@ -31,7 +31,7 @@ userCode = 'userCode'
 sequenceString = 'sequenceString'
 casNumber = 'casNumber'
 
-'''SAMPLES PAGE'''
+# '''SAMPLES PAGE'''
 SAMPLE_NAME = 'sampleName'
 SPECTRUM_1H = 'spectrum_1H'
 SPECTRUM_OFF_RESONANCE = 'spectrum_Off_Res'
@@ -50,17 +50,6 @@ batchIdentifier = 'batchIdentifier'
 plateIdentifier = 'plateIdentifier'
 rowNumber = 'rowNumber'
 columnNumber = 'columnNumber'
-
-SPECTRUM_GROUPS = {
-                  'referencesSG' :'References',
-                  'offResSG' : 'OFF_RES',
-                  'onResSG' : 'ON_RES',
-                  'stdSG' :'STD',
-                  'oneHNoTargetSG': '1H-Target',
-                  'oneHPlusTargetSG' :'1H+Target',
-                  'wLNoTargetSG' : 'WL-Target',
-                  'wLPlusTargetSG' : 'WL+Target'
-                  }
 
 
 SAMPLE_PROPERTIES =  [comment, pH, ionicStrength,  amount , amountUnit,isHazardous,creationDate, batchIdentifier,
@@ -139,25 +128,24 @@ class ScreenExcelReader(object):
     for spectrumName, spectrumPath in zip(self.brukerDirs, self.fullBrukerFilePaths):
       for name in self.referencesDataFrame[SPECTRUM_NAME]:
         if str(spectrumName) == str(name):
+
           for data in self.referencesDataFrame.to_dict(orient="index").values():
             for key, value in data.items():
               if key == SPECTRUM_NAME:
-                if str(value) == str(spectrumName):
+                if str(value) == str(spectrumName) == name:
+                  print('spectrumName: ', spectrumName, 'name: ', name, 'key: ', key, 'value: ', value)
                   spectrum = self._project.loadData(spectrumPath)
-                  self._setRefSpectrumProperties(spectrum[0])
-
                   dataDict = {spectrum[0]: data}
+                  self._dispatchSpectrumToProjectGroups(dataDict)
                   self._createNewSubstance(dataDict)
+                else:
+                  pass
 
   def _initialiseParsingSamples(self):
     self._createSamplesDataDicts()
     for samplesDataDict in self.samplesDataDicts:
       self._getSampleSpectra(samplesDataDict)
 
-  def _setRefSpectrumProperties(self, spectrum):
-    spectrum.experimentType = 'H'
-    referenceSpectrumGroup = self._project.getByPid('SG:References')
-    referenceSpectrumGroup.spectra += (spectrum, )
 
   def _createSamplesDataDicts(self):
     self.samplesDataDicts = []
@@ -189,32 +177,7 @@ class ScreenExcelReader(object):
             spectrum.comment = SPECTRUM_ON_RESONANCE
           spectrum.experimentType = experimentType
           sample.spectra += (spectrum, )
-      self._setSpectrumGroups(sample, data)
 
-  def _setSpectrumGroups(self, sample, data):
-
-    withTarget = self._getDFValue('with_Target', data)
-    for spectrum in sample.spectra:
-      if spectrum.experimentType == 'H':
-        if withTarget == 'Yes':
-          self.oneHPlusTargetSG.spectra += (spectrum,)
-        else:
-          self.oneHNoTargetSG.spectra += (spectrum,)
-
-      elif spectrum.experimentType == 'STD.H':
-        if withTarget == 'Yes':
-          if spectrum.comment == SPECTRUM_OFF_RESONANCE:
-            self.offResSG.spectra += (spectrum,)
-          if spectrum.comment == SPECTRUM_ON_RESONANCE:
-            self.onResSG.spectra += (spectrum,)
-          if spectrum.comment == SPECTRUM_STD:
-            self.stdSG.spectra += (spectrum,)
-
-      elif spectrum.experimentType == 'Water-LOGSY.H':
-        if withTarget == 'Yes':
-          self.wLPlusTargetSG.spectra += (spectrum,)
-        else:
-          self.wLNoTargetSG.spectra += (spectrum,)
 
   def _getSpectrum(self, data, header):
       spectrumName = [[excelHeader, value] for excelHeader, value in data.items()
@@ -226,11 +189,40 @@ class ScreenExcelReader(object):
         return spectrum[0]
 
   def _createSpectrumGroups(self):
-    for key, value in SPECTRUM_GROUPS.items():
-      setattr(self, key, self._project.newSpectrumGroup(str(value)))
+    from collections import Counter
+    counteredGroups = Counter(self.referencesDataFrame[GROUP_NAME])
+    sortedGroups = [[k, ] * v for k, v in counteredGroups.items()]
+    filteredGroups = [i for j in sortedGroups for i in list(set(j))]
+    for groupName in filteredGroups:
+      name = self._checkDuplicatedSpectrumGroupName(groupName)
+      newSG =  self._createNewSpectrumGroup(name)
+
+  def _checkDuplicatedSpectrumGroupName(self, name):
+    for sg in self._project.spectrumGroups:
+      if sg.name == name:
+        name += '@'
+    return name
+
+  def _createNewSpectrumGroup(self, name):
+    if not self._project.getByPid('SG:' + name):
+      return self._project.newSpectrumGroup(name=str(name))
+    else:
+      name = self._checkDuplicatedSpectrumGroupName(name)
+      self._createNewSpectrumGroup(name)
+
+  def _addSpectrumToSpectrumGroup(self, spectrumGroup, spectrum):
+    spectrumGroup.spectra += (spectrum,)
+
+  def _dispatchSpectrumToProjectGroups(self, dataDict):
+    for spectrum, data in dataDict.items():
+      spectrumGroupName = data[GROUP_NAME]
+      spectrumGroup = self._project.getByPid('SG:'+spectrumGroupName)
+      if spectrumGroup is not None:
+        self._addSpectrumToSpectrumGroup(spectrumGroup, spectrum)
 
   def _createNewSubstance(self, dataDict):
     for spectrum, data in dataDict.items():
+      print(spectrum, 'REF SDSBDS')
       substance = self._project.newSubstance(name=spectrum.id)
       substance.referenceSpectra = [spectrum]
       self._setWrapperProperties(substance, SUBSTANCE_PROPERTIES, data)
@@ -241,6 +233,7 @@ class ScreenExcelReader(object):
         setattr(wrapperObject, property, (self._getDFValue(property, dataframe),))
       else:
         setattr(wrapperObject, property, self._getDFValue(property, dataframe))
+
 
   def _getDFValue(self, header, data):
     value = [[excelHeader, value] for excelHeader, value in data.items()

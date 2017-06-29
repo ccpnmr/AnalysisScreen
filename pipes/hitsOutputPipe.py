@@ -118,6 +118,6 @@ class OutputHitsPipe(SpectraPipe):
 
     return spectra
 
-OutputHitsPipe.register() # Registers the pipe in the pipeline
+# OutputHitsPipe.register() # Registers the pipe in the pipeline
 
 
