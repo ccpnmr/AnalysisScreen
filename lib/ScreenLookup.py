@@ -97,8 +97,10 @@ class ScreenExcelReader(object):
     self.brukerDirs = self._getBrukerTopDirs()
     if self.referencesDataFrame[SpectrumType].all() == BRUKER:
       self.fullFilePaths = self._getFullBrukerFilePaths()
+      self.spectrumFormat = BRUKER
     if self.referencesDataFrame[SpectrumType].all() == HDF5:
       self.fullFilePaths = self._getFullHDF5FilePaths()
+      self.spectrumFormat = HDF5
 
     self._loadReferenceSpectrumToProject()
     self._createReferencesDataDicts()
@@ -148,7 +150,6 @@ class ScreenExcelReader(object):
           if str(item).endswith('.hdf5'):
             item = item.split('.')[0]
           if item == spectrumName:
-            print(path,'ssss')
             data = self._project.loadData(path)
             if data is not None:
               if len(data)>0:
@@ -156,10 +157,14 @@ class ScreenExcelReader(object):
 
 
   def _createReferencesDataDicts(self):
+    spectrum = None
     for data in self.referencesDataFrame.to_dict(orient="index").values():
       for key, value in data.items():
         if key == SPECTRUM_NAME:
-          spectrum = self._project.getByPid('SP:'+str(value)+'-1')
+          if self.spectrumFormat == BRUKER:
+            spectrum = self._project.getByPid('SP:'+str(value)+'-1')
+          if self.spectrumFormat == HDF5:
+            spectrum = self._project.getByPid('SP:'+str(value))
           if spectrum is not None:
             dataDict = {spectrum: data}
             self._dispatchSpectrumToProjectGroups(dataDict)
