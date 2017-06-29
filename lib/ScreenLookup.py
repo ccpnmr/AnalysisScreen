@@ -163,7 +163,7 @@ class ScreenExcelReader(object):
         if key == SPECTRUM_NAME:
           if self.spectrumFormat == BRUKER:
             spectrum = self._project.getByPid('SP:'+str(value)+'-1')
-          if self.spectrumFormat == HDF5:
+          else:
             spectrum = self._project.getByPid('SP:'+str(value))
           if spectrum is not None:
             dataDict = {spectrum: data}
