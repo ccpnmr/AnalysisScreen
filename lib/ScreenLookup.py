@@ -51,6 +51,10 @@ plateIdentifier = 'plateIdentifier'
 rowNumber = 'rowNumber'
 columnNumber = 'columnNumber'
 
+SpectrumType = 'spectrumType'
+BRUKER = 'Bruker'
+HDF5 = 'HDF5'
+
 
 SAMPLE_PROPERTIES =  [comment, pH, ionicStrength,  amount , amountUnit,isHazardous,creationDate, batchIdentifier,
                       plateIdentifier,rowNumber,columnNumber]
@@ -83,6 +87,7 @@ class ScreenExcelReader(object):
 
 
     self.directoryPath = self._getWorkingDirectoryPath()
+    print(self.directoryPath)
     try:
       self.preferences = self._project._mainWidow.application.preferences
       self.preferences.general.dataPath = str(self.directoryPath)
@@ -90,8 +95,12 @@ class ScreenExcelReader(object):
       project._logger.warning('Data Path not set in preferences')
 
     self.brukerDirs = self._getBrukerTopDirs()
-    self.fullBrukerFilePaths = self._getFullBrukerFilePaths(self.brukerDirs)
+    if self.referencesDataFrame[SpectrumType].all() == BRUKER:
+      self.fullFilePaths = self._getFullBrukerFilePaths()
+    if self.referencesDataFrame[SpectrumType].all() == HDF5:
+      self.fullFilePaths = self._getFullHDF5FilePaths()
 
+    self._loadReferenceSpectrumToProject()
     self._createReferencesDataDicts()
     self._initialiseParsingSamples()
 
@@ -112,9 +121,17 @@ class ScreenExcelReader(object):
     brukerDirs = [dir for dir in dirs if not dir.endswith(excludedFiles)]
     return brukerDirs
 
-  def _getFullBrukerFilePaths(self, brukerDirs):
+  def _getFullHDF5FilePaths(self):
+    paths = []
+    for spectrumName in self.referencesDataFrame[SPECTRUM_NAME]:
+      path = self.directoryPath + '/' + str(spectrumName)+'.hdf5'
+      paths.append(str(path))
+    print(paths)
+    return paths
+
+  def _getFullBrukerFilePaths(self):
     fullPaths = []
-    for spectrumName in brukerDirs:
+    for spectrumName in self.brukerDirs:
       path = self.directoryPath + '/' + spectrumName
       for dirname, dirnames, filenames in os.walk(path):
         for filename in filenames:
@@ -123,23 +140,31 @@ class ScreenExcelReader(object):
             fullPaths.append(fullPath)
     return fullPaths
 
-  def _createReferencesDataDicts(self):
-    self.referencesDataDicts = []
-    for spectrumName, spectrumPath in zip(self.brukerDirs, self.fullBrukerFilePaths):
-      for name in self.referencesDataFrame[SPECTRUM_NAME]:
-        if str(spectrumName) == str(name):
+  def _loadReferenceSpectrumToProject(self):
 
-          for data in self.referencesDataFrame.to_dict(orient="index").values():
-            for key, value in data.items():
-              if key == SPECTRUM_NAME:
-                if str(value) == str(spectrumName) == name:
-                  print('spectrumName: ', spectrumName, 'name: ', name, 'key: ', key, 'value: ', value)
-                  spectrum = self._project.loadData(spectrumPath)
-                  dataDict = {spectrum[0]: data}
-                  self._dispatchSpectrumToProjectGroups(dataDict)
-                  self._createNewSubstance(dataDict)
-                else:
-                  pass
+    for spectrumName in self.referencesDataFrame[SPECTRUM_NAME]:
+      for path in self.fullFilePaths:
+        for item in path.split('/'):
+          if str(item).endswith('.hdf5'):
+            item = item.split('.')[0]
+          if item == spectrumName:
+            print(path,'ssss')
+            data = self._project.loadData(path)
+            if data is not None:
+              if len(data)>0:
+                spectrum = data[0]
+
+
+  def _createReferencesDataDicts(self):
+    for data in self.referencesDataFrame.to_dict(orient="index").values():
+      for key, value in data.items():
+        if key == SPECTRUM_NAME:
+          spectrum = self._project.getByPid('SP:'+str(value)+'-1')
+          if spectrum is not None:
+            dataDict = {spectrum: data}
+            self._dispatchSpectrumToProjectGroups(dataDict)
+            self._createNewSubstance(dataDict)
+
 
   def _initialiseParsingSamples(self):
     self._createSamplesDataDicts()
@@ -222,7 +247,6 @@ class ScreenExcelReader(object):
 
   def _createNewSubstance(self, dataDict):
     for spectrum, data in dataDict.items():
-      print(spectrum, 'REF SDSBDS')
       substance = self._project.newSubstance(name=spectrum.id)
       substance.referenceSpectra = [spectrum]
       self._setWrapperProperties(substance, SUBSTANCE_PROPERTIES, data)
