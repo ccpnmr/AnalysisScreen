@@ -4,7 +4,7 @@ import csv
 from collections import OrderedDict
 import pathlib
 import pandas as pd
-
+from ccpn.util.Logging import getLogger , _debug3
 ######################### Excel Headers ##################
 """The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
 Changing these will fail to set the attribute"""
@@ -87,12 +87,11 @@ class ScreenExcelReader(object):
 
 
     self.directoryPath = self._getWorkingDirectoryPath()
-    print(self.directoryPath)
     try:
       self.preferences = self._project._mainWidow.application.preferences
       self.preferences.general.dataPath = str(self.directoryPath)
     except:
-      project._logger.warning('Data Path not set in preferences')
+      _debug3(getLogger(),'Data Path not set in preferences')
 
     self.brukerDirs = self._getBrukerTopDirs()
     if self.referencesDataFrame[SpectrumType].all() == BRUKER:
@@ -214,7 +213,7 @@ class ScreenExcelReader(object):
                                   if excelHeader == header and value != 'Empty']
       if len(spectrumName)>0:
         brukerDir = [str(spectrumName[0][1])]
-        path = self._getFullBrukerFilePaths(brukerDir)
+        path = self._getFullBrukerFilePaths()
         spectrum = self._project.loadData(path[0])
         return spectrum[0]
 
@@ -261,7 +260,10 @@ class ScreenExcelReader(object):
       if property == 'synonyms':
         setattr(wrapperObject, property, (self._getDFValue(property, dataframe),))
       else:
-        setattr(wrapperObject, property, self._getDFValue(property, dataframe))
+        try:
+          setattr(wrapperObject, property, self._getDFValue(property, dataframe))
+        except Exception as e:
+          _debug3(getLogger(), msg=(e, property))
 
 
   def _getDFValue(self, header, data):
