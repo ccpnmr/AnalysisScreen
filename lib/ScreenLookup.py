@@ -72,7 +72,7 @@ def _loadScreenLookupFile(project, path:str, subType:str):
   if subType == ioFormats.CSV:
     print('Not implemented yet')
 
-  elif subType == ioFormats.XLS:
+  elif subType == ioFormats.EXCEL:
     ScreenExcelReader(project, path)
 
 
