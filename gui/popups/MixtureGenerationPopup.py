@@ -395,9 +395,10 @@ class MixtureGenerationPopup(CcpnDialog):
     # self.project.strips[0].viewBox.autoRange()
     if self.current is not None:
       currentDisplayed = self.current.strip
-      for spectrumView in currentDisplayed.spectrumViews:
-        if spectrumView is not None:
-          spectrumView.delete()
+      if currentDisplayed is not None:
+        for spectrumView in currentDisplayed.spectrumViews:
+          if spectrumView is not None:
+            spectrumView.delete()
 
 
 

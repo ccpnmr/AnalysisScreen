@@ -40,8 +40,10 @@ def scoreCompound(compoundA, compoundB, minDist, scalingFactor=1):
       if abs(shiftA - shiftB) < minDist:
         overlapCount += 1
         continue
-  return (scalingFactor * (overlapCount / len(compoundA)))
-
+  try:
+   return(scalingFactor * (overlapCount / len(compoundA)))
+  except ZeroDivisionError:
+    return 0
 
 def scoreMixture(mixture, minDist):
   score = 0
