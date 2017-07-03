@@ -22,7 +22,7 @@ def _addSGpulldowns(cls, row, SGVarNames):
     row += 1
 
 
-def _addCommonHitFinderWidgets(cls, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPL, MatchPeaksWithin,
+def _addCommonHitFinderWidgets(cls, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPL, TargPL, MatchPeaksWithin,
                                DefaultMinDist, thresholdName, defaultThreshold):
 
   isMixtureLabel = Label(cls.pipeFrame, ReferenceFromMixture, grid=(row, 0))
@@ -32,8 +32,12 @@ def _addCommonHitFinderWidgets(cls, row, ReferenceSpectrumGroup, ReferenceFromMi
                                               grid=(row, 1)))
 
   row += 1
-  peakListLabel = Label(cls.pipeFrame, RefPL, grid=(row, 0))
+  ref_peakListLabel = Label(cls.pipeFrame, RefPL, grid=(row, 0))
   setattr(cls, RefPL, Spinbox(cls.pipeFrame, value=0, max=0, grid=(row, 1)))
+
+  row += 1
+  targ_peakListLabel = Label(cls.pipeFrame, TargPL, grid=(row, 0))
+  setattr(cls, TargPL, Spinbox(cls.pipeFrame, value=0, max=1, grid=(row, 1)))
 
   row += 1
   minimumDistanceLabel = Label(cls.pipeFrame, MatchPeaksWithin, grid=(row, 0))

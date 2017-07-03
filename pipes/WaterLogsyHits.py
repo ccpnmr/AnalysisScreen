@@ -49,8 +49,9 @@ ControlSpectrumGroup   = 'WL_Control_SpectrumGroup'
 SGVarNames = [ControlSpectrumGroup, TargetSpectrumGroup, ReferenceSpectrumGroup]
 
 MatchPeaksWithin  =  'Match_Peaks_Within_(ppm)'
-RefPL = 'Reference_PeakList'
-MinEfficiency = 'Minimal_Efficiency'
+RefPLIndex = 'Reference_PeakList'
+TargetPeakListIndex = 'Target_PeakList'
+MinEfficiency = 'Minimal_Intensity_Change'
 ModeHit = 'Finding_Mode'
 
 ## defaults
@@ -91,14 +92,14 @@ class WaterLogsyHitFinderGuiPipe(GuiPipe):
     hw._addSGpulldowns(self, row, SGVarNames)
 
     row += len(SGVarNames)
-    hw._addCommonHitFinderWidgets(self, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPL, MatchPeaksWithin,
+    hw._addCommonHitFinderWidgets(self, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPLIndex, TargetPeakListIndex, MatchPeaksWithin,
                                   DefaultMinDist, MinEfficiency, DefaultEfficiency)
 
     self._updateWidgets()
 
   def _updateWidgets(self):
     self._setSpectrumGroupPullDowns(SGVarNames)
-    self._setMaxValueRefPeakList(RefPL)
+    self._setMaxValueRefPeakList(RefPLIndex)
 
 
   def _modeCallback(self, selected):
@@ -127,7 +128,7 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
                 ReferenceFromMixture:    False,
                 MatchPeaksWithin:        DefaultMinDist,
                 MinEfficiency:           MinEfficiency,
-                RefPL:                   DefaultReferencePeakList,
+                RefPLIndex:                   DefaultReferencePeakList,
                }
 
 
@@ -144,7 +145,8 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
 
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
     minimumEfficiency = float(self._kwargs[MinEfficiency])
-    nPeakList = int(self._kwargs[RefPL])
+    refPeakListIndex = int(self._kwargs[RefPLIndex])
+    targPeakListIndex = int(self._kwargs[TargetPeakListIndex])
 
     mode = self._kwargs[ModeHit]
     references = []
@@ -164,14 +166,21 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
               if referenceSpectrumGroup is not None:
                 references = referenceSpectrumGroup.spectra
 
-              hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, mode=mode, limitRange=minimumDistance)
+              hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, mode=mode, limitRange=minimumDistance,
+                                           limitIntensityChange=minimumEfficiency)
               if len(hits) > 0:
-                # _addNewHit(targetSpectrum, hits)
                 matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
-                                                 peakListIndex=nPeakList)
+                                                 refPeakListIndex=refPeakListIndex)
                 matchedRef = [i for hit in matchedRef for i in hit]  # clean up the empty sublists
-                if len(matchedRef) > 0:
-                  _addNewHit(targetSpectrum, matchedRef)
+                matchedHit = []
+                for i in matchedRef:
+                  rp, tp, pos_i = i
+                  for j in hits:
+                    rp, tp, pos_j = j
+                    if float(pos_i) == float(pos_j):
+                      matchedHit.append(i)
+                if len(matchedHit) > 0:
+                    _addNewHit(targetSpectrum, matchedHit)
 
 
     else:# if control is given. Find hits  by any mode
@@ -189,15 +198,23 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
                   references = referenceSpectrumGroup.spectra
 
               hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, wLControl=controlSpectrum,
-                                           mode=mode, limitRange=minimumDistance)
-              hits = [i for hit in hits for i in hit]  # clean up the empty sublists
+                                           mode=mode, limitRange=minimumDistance, limitIntensityChange=minimumEfficiency)
               if len(hits) > 0:
                 # _addNewHit(targetSpectrum, hits)
                 matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
-                                                 peakListIndex=nPeakList)
-                matchedRef = [i for hit in matchedRef for i in hit]  # clean up the empty sublists
-                if len(matchedRef) > 0:
-                  _addNewHit(targetSpectrum, matchedRef)
+                                                 refPeakListIndex=refPeakListIndex)
+                matchedHit = []
+                matchedRef = [i for hit in matchedRef for i in hit]
+                for i in matchedRef:
+                  rp,tp,pos_i = i
+                  for j in hits:
+                    rp, tp, pos_j = j
+                    if float(pos_i) == float(pos_j):
+                      matchedHit.append(i)
+
+                if len(matchedHit) > 0:
+                    _addNewHit(targetSpectrum, matchedHit)
+
 
     SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
     return list(set(list(spectra) + SGSpectra))

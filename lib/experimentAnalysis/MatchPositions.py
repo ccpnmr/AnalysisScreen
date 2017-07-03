@@ -74,7 +74,7 @@ def excludeFromComparing(data, excludeRegions):
 
 
 
-def matchPeaks(reference, spectrumB, limitRange, peakListIndex=0, ):
+def matchPeaks(reference, spectrumB, limitRange, refPeakListIndex=0, ):
   '''
   spectrum object type CCPN. Assumes it has a peaklist and peaks object
   :param reference: the reference spectrum object
@@ -83,22 +83,20 @@ def matchPeaks(reference, spectrumB, limitRange, peakListIndex=0, ):
   :return:Tuple of reference Peak, target Peak, position of match
   '''
 
-  referencePeakPositions = np.array([peak.position[0] for peak in reference.peakLists[peakListIndex].peaks if peak.position])
-
   allMatches = []
-
-
-  for peakB in spectrumB.peakLists[peakListIndex].peaks:
-    peakBpos = peakB.position[0]
-    matches = matchingPosition(referencePeakPositions, peakBpos+limitRange, peakBpos-limitRange)
-    referencePeaks = [peak for peak in reference.peakLists[peakListIndex].peaks if peak.position[0] in matches]
-    if referencePeaks:
-      allMatches.append((referencePeaks[0], peakB, matches))
+  if len(reference.peakLists)>refPeakListIndex:
+    referencePeakPositions = np.array([peak.position[0] for peak in reference.peakLists[refPeakListIndex].peaks if peak.position])
+    for peakB in spectrumB.peakLists[refPeakListIndex].peaks:
+      peakBpos = peakB.position[0]
+      matches = matchingPosition(referencePeakPositions, peakBpos+limitRange, peakBpos-limitRange)
+      referencePeaks = [peak for peak in reference.peakLists[refPeakListIndex].peaks if peak.position[0] in matches]
+      if referencePeaks:
+        allMatches.append((referencePeaks[0], peakB, matches))
 
   return allMatches
 
 
-def matchHitToReference(spectrumHit, referenceSpectra, limitRange=0.01, peakListIndex=1):
+def matchHitToReference(spectrumHit, referenceSpectra, limitRange=0.01, refPeakListIndex=0):
   '''
 
   :param targetHitSpectrum: spectrum calculated as hit (peak linewhidths changed compared to its control)
@@ -109,8 +107,9 @@ def matchHitToReference(spectrumHit, referenceSpectra, limitRange=0.01, peakList
   hits = []
   if referenceSpectra:
     for referenceSpectrum in referenceSpectra:
-      matches = matchPeaks(reference=referenceSpectrum, spectrumB=spectrumHit, limitRange=limitRange,
-                              peakListIndex=peakListIndex)
-      hits.append(matches)
+      if len(referenceSpectrum.peakLists) > refPeakListIndex:
+        matches = matchPeaks(reference=referenceSpectrum, spectrumB=spectrumHit, limitRange=limitRange,
+                             refPeakListIndex=refPeakListIndex)
+        hits.append(matches)
 
   return hits

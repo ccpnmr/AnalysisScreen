@@ -110,7 +110,7 @@ def __findHitsByIntensityChange(wLControlPeak, TargetPeak):
   return hits
 
 
-def __findHitsByMode(matches, matchedControl, wlT_PeakPos_filtered, mode):
+def __findHitsByMode(matches, matchedControl, wlT_PeakPos_filtered, mode, limitIntensityChange):
   hits = []
   for match in matches:
     wLControlPeak, TargetPeak, pos = match
@@ -123,8 +123,11 @@ def __findHitsByMode(matches, matchedControl, wlT_PeakPos_filtered, mode):
         else:
           if mode == IntensityChanged:
             intensityDifferences = pa.getIntensiyChange(wLControlPeak.height, TargetPeak.height)
-            if abs(intensityDifferences) > 0.0:
+            print(intensityDifferences,TargetPeak.pid, 'wLControlPeak height',wLControlPeak.height, 'wLControlPeak height', TargetPeak.height)
+            if abs(intensityDifferences) > limitIntensityChange:
               hits.append((wLControlPeak, TargetPeak, TargetPeak.position[0]))
+            else:
+              continue
 
     if mode == PositiveOnly:
       if pa.isPositive(TargetPeak.height):
@@ -148,8 +151,8 @@ def __addMissingHits(hits, wLControl, wLTarget, matchedControl):
   return hits
 
 
-def findWaterLogsyHits(wLTarget, wLControl=None, mode=PositiveOnly, isMixture=False,
-                       limitRange=0.0, excludeRegions=None):
+def findWaterLogsyHits(wLTarget, wLControl=None, mode=PositiveOnly,
+                       limitRange=0.0, limitIntensityChange=1000, excludeRegions=None):
   '''
   wLTarget: obj spectrum.   wl spectrum with target
   wlControl: obj spectrum.  wl spectrum without target or displacer
@@ -192,31 +195,16 @@ def findWaterLogsyHits(wLTarget, wLControl=None, mode=PositiveOnly, isMixture=Fa
 
   if not wLControl:  ## if not control, find Only If there are positive peaks
     hits = __positiveHits(wlT_PeakPos_filtered=wlT_PeakPos_filtered, wlT_Peaks=wlT_Peaks)
-
-    # if isMixture:
-    #   if references:
-    #     mixtureHits = __matchHitsToReferences(hits, references, limitRange)
-    #     return mixtureHits
-    #   else:
-    #     return hits
-    # else:
     return hits
 
   matches = mp.matchPeaks(reference=wLControl, spectrumB=wLTarget, limitRange=limitRange)
   matchedControl = []
   if matches:
-    hits = __findHitsByMode(matches, matchedControl, wlT_PeakPos_filtered, mode)
+    hits = __findHitsByMode(matches, matchedControl, wlT_PeakPos_filtered, mode, limitIntensityChange)
+    return hits
   if __isDifferentPeakCount(wLControl, wLTarget):
     hits = __addMissingHits(hits, wLControl, wLTarget, matchedControl)
-  # if isMixture:
-  #   if references:
-  #     mixtureHits = __matchHitsToReferences(hits, references, limitRange)
-  #     return mixtureHits
-  #   else:
-  #     print('Reference not given')
-  #     return hits
-  # else:
-  return hits
+    return hits
 
 
 

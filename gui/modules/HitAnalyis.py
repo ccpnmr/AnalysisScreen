@@ -618,6 +618,8 @@ class CustomPeakTableWidget(PeakListTableWidget):
       self.posUnitPulldown.hide()
       # self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding))
 
+
+
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea

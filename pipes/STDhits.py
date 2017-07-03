@@ -52,7 +52,8 @@ ReferenceFromMixture = 'Reference_from_Mixture'
 SGVarNames = [STD_Target_SpectrumGroup, ReferenceSpectrumGroup]
 
 MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'
-RefPL = 'Reference_PeakList'
+RefPLIndex = 'Reference_PeakList'
+TargetPeakListIndex = 'Target_PeakList'
 MinEfficiency = 'Minimal_Efficiency'
 
 ## defaults
@@ -89,7 +90,7 @@ class STDHitFinderGuiPipe(GuiPipe):
     hw._addSGpulldowns(self, row, SGVarNames)
 
     row += len(SGVarNames)
-    hw._addCommonHitFinderWidgets(self, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPL, MatchPeaksWithin, DefaultMinDist,
+    hw._addCommonHitFinderWidgets(self, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPLIndex, TargetPeakListIndex, MatchPeaksWithin, DefaultMinDist,
                                   MinEfficiency, DefaultEfficiency)
 
     self._updateWidgets()
@@ -97,7 +98,7 @@ class STDHitFinderGuiPipe(GuiPipe):
 
   def _updateWidgets(self):
     self._setSpectrumGroupPullDowns(SGVarNames)
-    self._setMaxValueRefPeakList(RefPL)
+    self._setMaxValueRefPeakList(RefPLIndex)
 
 
 
@@ -124,7 +125,8 @@ class STDHitFinder(SpectraPipe):
                 ReferenceFromMixture:       False,
                 MatchPeaksWithin:           DefaultMinDist,
                 MinEfficiency:              DefaultEfficiency,
-                RefPL:                      DefaultReferencePeakList,
+                RefPLIndex:                 DefaultReferencePeakList,
+
                }
 
 
@@ -138,7 +140,8 @@ class STDHitFinder(SpectraPipe):
     referenceFromMixture = self._kwargs[ReferenceFromMixture]
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
     minimumEfficiency = float(self._kwargs[MinEfficiency])/100
-    peakListIndex = int(self._kwargs[RefPL])
+    refPeakListIndex = int(self._kwargs[RefPLIndex])
+    targPeakListIndex = int(self._kwargs[TargetPeakListIndex])
 
     references = []
     if stdTargetSpectrumGroup is not None:
@@ -154,7 +157,7 @@ class STDHitFinder(SpectraPipe):
                 if set(referenceSpectrumGroup.spectra).issubset(spectra):
                   references = referenceSpectrumGroup.spectra #make sure references are in the input spectra
               hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance,
-                                    peakListIndex=peakListIndex,  minEfficiency=minimumEfficiency )
+                                    refPeakListIndex=refPeakListIndex,  minEfficiency=minimumEfficiency )
               hits = [i for hit in hits for i in hit] # clean up the empty sublists
               if len(hits)>0:
                 _addNewHit(stdSpectrum, hits)

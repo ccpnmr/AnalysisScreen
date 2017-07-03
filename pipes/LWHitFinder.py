@@ -54,7 +54,8 @@ ControlSpectrumGroup = 'Control_SpectrumGroup'
 SGVarNames = [ControlSpectrumGroup, TargetSpectrumGroup, ReferenceSpectrumGroup]
 
 MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'
-ReferencePeakList = 'Reference_PeakList'
+RefPLIndex = 'Reference_PeakList'
+TargetPeakListIndex = 'Target_PeakList'
 MinLWvariation = 'Minimal_LineWidth_Variation'
 
 ## defaults
@@ -89,7 +90,7 @@ class LWHitFinderGuiPipe(GuiPipe):
     row = 0
     hw._addSGpulldowns(self, row, SGVarNames)
     row += len(SGVarNames)
-    hw._addCommonHitFinderWidgets(self, row,ReferenceSpectrumGroup, ReferenceFromMixture, ReferencePeakList,
+    hw._addCommonHitFinderWidgets(self, row,ReferenceSpectrumGroup, ReferenceFromMixture, RefPLIndex, TargetPeakListIndex,
                                   MatchPeaksWithin, DefaultMinimumDistance,  MinLWvariation, DefaultMinimalLW)
     self._updateWidgets()
 
@@ -97,7 +98,7 @@ class LWHitFinderGuiPipe(GuiPipe):
   def _updateWidgets(self):
     'CCPN internal. Called from gui Pipeline when the input data has changed'
     self._setSpectrumGroupPullDowns(SGVarNames)
-    self._setMaxValueRefPeakList(ReferencePeakList)
+    self._setMaxValueRefPeakList(RefPLIndex)
 
 
 
@@ -116,9 +117,10 @@ class LWHitFinder(SpectraPipe):
   _kwargs  =   {
                ReferenceSpectrumGroup: 'spectrumGroup.pid',
                TargetSpectrumGroup:    'spectrumGroup.pid',
-               MatchPeaksWithin:         DefaultMinimumDistance,
+               MatchPeaksWithin:        DefaultMinimumDistance,
                MinLWvariation:          DefaultMinimalLW,
-               ReferencePeakList:       DefaultReferencePeakList,
+               RefPLIndex:              DefaultReferencePeakList,
+               TargetPeakListIndex:     1,
                ReferenceFromMixture: False,
                }
 
@@ -135,7 +137,8 @@ class LWHitFinder(SpectraPipe):
     targetSpectrumGroup = self._getSpectrumGroup(self._kwargs[TargetSpectrumGroup])
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
     minLWvariation = float(self._kwargs[MinLWvariation])
-    peakListIndex = int(self._kwargs[ReferencePeakList])
+    refPLIndex = int(self._kwargs[RefPLIndex])
+    targetPLIndex = int(self._kwargs[TargetPeakListIndex])
     referenceFromMixture = self._kwargs[ReferenceFromMixture]
     references = []
 
@@ -153,12 +156,12 @@ class LWHitFinder(SpectraPipe):
 
             ## 'First find hits by broadening'
             targetHits = findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=minLWvariation,
-                                            limitRange=minimumDistance, peakListIndex=peakListIndex)
+                                            limitRange=minimumDistance, targetPLIndex=1)
             targetHits = [i for hit in targetHits for i in hit]   # clean up the empty sublists
             ## 'Second match TargetPeak ToReference '
             if len(targetHits)>0:
               matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
-                                               peakListIndex=1)
+                                               refPeakListIndex=0)
               matchedRef = [i for hit in matchedRef for i in hit]  # clean up the empty sublists
               if len(matchedRef) > 0:
                 _addNewHit(targetSpectrum, matchedRef)
