@@ -27,7 +27,7 @@ class Screen(Framework):
     super().setupMenus( )
 
     menuSpec = ('Screen',[
-                         ("Pick Peaks "        , self.showPickPeakPopup),
+                         # ("Pick Peaks "        , self.showPickPeakPopup),
                          ("Generate Mixtures " , self.showMixtureGenerationPopup, [('shortcut', 'cs')]),
                          ("Mixtures Analysis " , self.showMixtureAnalysis,        [('shortcut', 'st')]),
                          ("Screening Pipeline" , self.showScreeningPipeline,      [('shortcut', 'sp')]),
