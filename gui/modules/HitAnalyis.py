@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CompoundView import CompoundView
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings, ObjectTableFilter
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.modules.PeakTable import PeakListTableWidget
@@ -306,6 +306,35 @@ class HitsAnalysis(CcpnModule):
             self._showHitInfoOnDisplay(substance)
           else:
             self._showSpectrumInfo(spectrum)
+
+
+          self._navigateToPositionOnCurrentDisplay(spectrum, peak)
+
+
+  def _navigateToPositionOnCurrentDisplay(self, spectrum, peak):
+    ''' _navigateToPositionOnCurrentDisplay keeping the same aspect ratio, plus add a colored region '''
+    from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
+
+    if self.current is not None:
+      if self.current.strip is not None:
+        plotWidget = self.current.strip.plotWidget
+        for item in plotWidget.items():
+          if isinstance(item, LinearRegionsPlot):
+            plotWidget.removeItem(item)
+        for i in  self.current.strip.spectrumViews:
+          if i is not None:
+            i.delete()
+        spectrumDisplay = self.current.strip.spectrumDisplay
+        if spectrumDisplay is not None:
+          spectrumDisplay.displaySpectrum(spectrum)
+          if self.current.spectrumHit.spectrum is not None:
+            spectrumDisplay.displaySpectrum(self.current.spectrumHit.spectrum)
+          widths = _getCurrentZoomRatio(self.current.strip.viewBox.viewRange())
+          navigateToPositionInStrip(strip=self.current.strip, positions=peak.position, widths=widths)
+          region = LinearRegionsPlot(values=[peak.position[0]-0.05, peak.position[0]+0.05],
+                                     movable=False, orientation='v' , brush = (0, 111, 20, 100))
+          plotWidget.addItem(region)
+
 
 
   def _showSpectrumInfo(self, spectrum):

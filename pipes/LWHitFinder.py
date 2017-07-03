@@ -170,7 +170,7 @@ class LWHitFinder(SpectraPipe):
                 for j in targetHits:
                   rp, tp, pos_j = j
                   if abs(float(pos_i) - float(pos_j)) <= 0.01:
-                    matchedHit.append(i)
+                    matchedHit.append(j)
 
               if len(matchedHit) > 0:
                 _addNewHit(targetSpectrum, matchedHit)
