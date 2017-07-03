@@ -157,14 +157,25 @@ class LWHitFinder(SpectraPipe):
             ## 'First find hits by broadening'
             targetHits = findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=minLWvariation,
                                             limitRange=minimumDistance, targetPLIndex=1)
-            targetHits = [i for hit in targetHits for i in hit]   # clean up the empty sublists
+            # targetHits = [i for hit in targetHits for i in hit]   # clean up the empty sublists
             ## 'Second match TargetPeak ToReference '
             if len(targetHits)>0:
               matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
                                                refPeakListIndex=0)
-              matchedRef = [i for hit in matchedRef for i in hit]  # clean up the empty sublists
-              if len(matchedRef) > 0:
-                _addNewHit(targetSpectrum, matchedRef)
+
+              matchedHit = []
+              matchedRef = [i for hit in matchedRef for i in hit]
+              for i in matchedRef:
+                rp, tp, pos_i = i
+                for j in targetHits:
+                  rp, tp, pos_j = j
+                  if abs(float(pos_i) - float(pos_j)) <= 0.01:
+                    matchedHit.append(i)
+
+              if len(matchedHit) > 0:
+                _addNewHit(targetSpectrum, matchedHit)
+
+
 
     SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
     return list(set(list(spectra) + SGSpectra))

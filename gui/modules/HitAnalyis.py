@@ -458,26 +458,6 @@ class HitsAnalysis(CcpnModule):
      return {'Link to a Substance to display contents': ''}
 
 
-  # def _getSpectrumHitInfoToDisplay(self, spectrumHit):
-  #   ''' Documentation '''
-  #
-  #   if spectrumHit is not None:
-  #     hitInfo = {
-  #               'Score:  ':spectrumHit.figureOfMerit,
-  #               'NormalisedChange: ':spectrumHit.normalisedChange,
-  #               'concentration:  ':spectrumHit.concentration,
-  #               'concentrationError: ':spectrumHit.concentrationError,
-  #               'comment:  ':spectrumHit.comment,
-  #               }
-  #     return hitInfo
-  #   else:
-  #     return {'Add new hit to display contents': ''}
-
-
-
-
-
-
   def _moveNextRow(self, table):
     ''' Documentation '''
 
@@ -485,15 +465,11 @@ class HitsAnalysis(CcpnModule):
     if len(table.objects) > 0:
       if len(self.currentRowPosition)>0:
           newPosition = self.currentRowPosition[0]+1
-          print(newPosition, 'newPosition ')
           table.selectRow(newPosition)
           lastRow = len(table.objects) - 1
-          print(lastRow, 'lastRow ')
           if newPosition >= len(table.objects):
-            print(newPosition, 'newPosition == -1 ')
             table.selectRow(0)
           else:
-            print(newPosition, 'newPosition != -1 ')
             table.selectRow(newPosition)
       else:
         try:
