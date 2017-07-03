@@ -45,6 +45,7 @@ Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
 ListWidgetHeaderColor = QtGui.QColor('Red')
+HitRegion = (0, 111, 20, 100)
 
 ReferenceLabel = 'Reference Details: '
 ALL_ExperimentTypes = 'All'
@@ -96,8 +97,10 @@ class HitsAnalysis(CcpnModule):
     self.minusIcon = Icon('icons/minus')
     self.settingIcon = Icon('icons/applications-system')
     self.exportIcon = Icon('icons/export')
+    self._showHitRegion = True
     self._createWidgets()
     self._createSettingsWidgets()
+
 
     # set notifier
     if self.project is not None:
@@ -243,11 +246,23 @@ class HitsAnalysis(CcpnModule):
                                                             widget=self.referenceWidgetsFrame),
                                            grid=(row, 0))
     row +=1
-    self.substanceDetailsCheckbox = CheckBox(self.settingsWidget, text='Hide Substance Details', checked=False,
+    self.substanceDetailsCheckbox = CheckBox(self.settingsWidget, text='Hide Substance Details', checked=self._showHitRegion,
                                            callback=partial(self._hideShowWidgetFromCheckBox,
                                                             widget= self.substanceDetailsFrame),
                                            grid=(row,0))
+    row += 1
+    self.hitRegionsCheckbox = CheckBox(self.settingsWidget, text='Show Hit Regions ', checked=True,
+                                             callback=self._magageHitRegions,
+                                             grid=(row, 0))
 
+  def _magageHitRegions(self):
+    if self.sender() is not None:
+      if self.sender().isChecked():
+        self._showHitRegion = True
+      else:
+        self._showHitRegion = False
+        if self.current.strip is not None:
+          self._deleteHitRegionFromStrip(self.current.strip.plotWidget)
 
   def _hideShowWidgetFromCheckBox(self, widget):
     '''Specific to hide a widget from a checkbox callback  '''
@@ -318,23 +333,32 @@ class HitsAnalysis(CcpnModule):
     if self.current is not None:
       if self.current.strip is not None:
         plotWidget = self.current.strip.plotWidget
-        for item in plotWidget.items():
-          if isinstance(item, LinearRegionsPlot):
-            plotWidget.removeItem(item)
-        for i in  self.current.strip.spectrumViews:
-          if i is not None:
-            i.delete()
+        self._deleteHitRegionFromStrip(plotWidget)
+        self._clearSpectrumViews()
         spectrumDisplay = self.current.strip.spectrumDisplay
         if spectrumDisplay is not None:
           spectrumDisplay.displaySpectrum(spectrum)
           if self.current.spectrumHit.spectrum is not None:
             spectrumDisplay.displaySpectrum(self.current.spectrumHit.spectrum)
-          widths = _getCurrentZoomRatio(self.current.strip.viewBox.viewRange())
-          navigateToPositionInStrip(strip=self.current.strip, positions=peak.position, widths=widths)
-          region = LinearRegionsPlot(values=[peak.position[0]-0.05, peak.position[0]+0.05],
-                                     movable=False, orientation='v' , brush = (0, 111, 20, 100))
-          plotWidget.addItem(region)
+          if self._showHitRegion:
+            widths = _getCurrentZoomRatio(self.current.strip.viewBox.viewRange())
+            navigateToPositionInStrip(strip=self.current.strip, positions=peak.position, widths=widths)
+            region = LinearRegionsPlot(values=[peak.position[0]-0.05, peak.position[0]+0.05],
+                                       movable=False, orientation='v', brush=HitRegion)
+            plotWidget.addItem(region)
 
+  def _clearSpectrumViews(self):
+    if self.current is not None:
+      if self.current.strip is not None:
+        for i in self.current.strip.spectrumViews:
+          if i is not None:
+            i.delete()
+
+  def _deleteHitRegionFromStrip(self, plotWidget):
+    if plotWidget is not None:
+      for item in plotWidget.items():
+        if isinstance(item, LinearRegionsPlot):
+          plotWidget.removeItem(item)
 
 
   def _showSpectrumInfo(self, spectrum):
