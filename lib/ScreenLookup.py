@@ -127,7 +127,6 @@ class ScreenExcelReader(object):
     for spectrumName in self.referencesDataFrame[SPECTRUM_NAME]:
       path = self.directoryPath + '/' + str(spectrumName)+'.hdf5'
       paths.append(str(path))
-    print(paths)
     return paths
 
   def _getFullBrukerFilePaths(self):

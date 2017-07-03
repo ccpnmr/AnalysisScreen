@@ -123,7 +123,6 @@ def __findHitsByMode(matches, matchedControl, wlT_PeakPos_filtered, mode, limitI
         else:
           if mode == IntensityChanged:
             intensityDifferences = pa.getIntensiyChange(wLControlPeak.height, TargetPeak.height)
-            print(intensityDifferences,TargetPeak.pid, 'wLControlPeak height',wLControlPeak.height, 'wLControlPeak height', TargetPeak.height)
             if abs(intensityDifferences) > limitIntensityChange:
               hits.append((wLControlPeak, TargetPeak, TargetPeak.position[0]))
             else:

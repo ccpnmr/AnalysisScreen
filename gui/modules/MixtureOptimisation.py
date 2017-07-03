@@ -68,10 +68,8 @@ class SimulatedAnnealingWidgets(Frame):
     self.iterationSpinbox.setValue(iterations)
 
     if self.coolingMethod == 'Linear':
-      print(self.coolingMethod)
       self.coolingMethodRadiobutton.radioButtons[1].setChecked(True)
     else:
-      print(self.coolingMethod)
       self.coolingMethodRadiobutton.radioButtons[0].setChecked(True)
 
     self._addWidgetsToLayout()

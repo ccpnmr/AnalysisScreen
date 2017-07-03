@@ -82,8 +82,7 @@ def findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=0.01, limitR
         msg, value = comparePeakArea(referencePeak.lineWidths[0], targetPeak.lineWidths[0], minimalDiff)
         if msg == INCREASED:
           peakHits.append(match)
-  for peakHit in peakHits:
-    print(peakHit)
+
   return peakHits
 
 

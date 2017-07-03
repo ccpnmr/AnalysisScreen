@@ -156,7 +156,6 @@ class STDHitFinder(SpectraPipe):
               if referenceSpectrumGroup is not None:
                 if set(referenceSpectrumGroup.spectra).issubset(spectra):
                   references = referenceSpectrumGroup.spectra #make sure references are in the input spectra
-            print(references)
             hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance,
                                   refPeakListIndex=refPeakListIndex,  minEfficiency=minimumEfficiency )
             hits = [i for hit in hits for i in hit] # clean up the empty sublists

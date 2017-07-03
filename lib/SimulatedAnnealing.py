@@ -111,7 +111,6 @@ def calculateOverlapCount(compoundA, mixture, minimalOverlap):
 
 def _calculateSingleCompoundScore(compoundA, mixture, minimalOverlap):
   for mix, compounds in mixture.items():
-    print(mix)
     for compound in compounds:
       overlaped = [peakA for peak in compound[1] for peakA in compoundA[1] if abs(peak - peakA) <= 0.01]
       scoring = len(overlaped) / len(compoundA[1])
