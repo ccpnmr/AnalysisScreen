@@ -36,6 +36,8 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.modules.PeakTable import PeakListTableWidget
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.FileDialog import FileDialog
 
 from functools import partial
 from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import REFERENCEPEAKLIST, TARGETPEAKLIST
@@ -106,6 +108,7 @@ class HitsAnalysis(CcpnModule):
     if self.project is not None:
       self._spectrumHitNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE],
                                            'SpectrumHit', self._spectrumHitNotifierCallback)
+
   def _createWidgets(self):
     ''' Documentation '''
 
@@ -254,6 +257,10 @@ class HitsAnalysis(CcpnModule):
     self.hitRegionsCheckbox = CheckBox(self.settingsWidget, text='Show Hit Regions ', checked=True,
                                              callback=self._magageHitRegions,
                                              grid=(row, 0))
+    row += 1
+    self.exportButton = Button(self.settingsWidget, text='Export hits...', icon=self.exportIcon,
+                                       callback=self._exportHitsToXlsx, hAlign='l',
+                                       grid=(row, 0))
 
   def _magageHitRegions(self):
     if self.sender() is not None:
@@ -305,6 +312,7 @@ class HitsAnalysis(CcpnModule):
            #NB HACK until we have linkedPeak!!
           if peak.annotation is not None:
             matchedPeak = self.project.getByPid(peak.annotation)
+            peak._linkedPeak = matchedPeak
       if matchedPeak is not None:
         self._populateReferencePeakTable(matchedPeak)
 
@@ -624,6 +632,43 @@ class HitsAnalysis(CcpnModule):
       self.hitTable.setObjects(hits)
     else:
       self.hitTable.setObjects([])
+
+  def _exportHitsToXlsx(self):
+    ''' Export a simple xlxs file from the results '''
+    dataFrame = self._createHitsDataFrame()
+
+    fType = 'XLSX (*.xlsx)'
+    dialog = FileDialog
+    filePath = dialog.getSaveFileName(self, filter=fType)
+    dataFrame.to_excel(filePath, sheet_name='Hits', index=False)
+
+  def _createHitsDataFrame(self):
+    from pandas import DataFrame
+
+    hitDic = {}
+
+    for hit in self.project.spectrumHits:
+      referenceSubstances = []
+      spectrumRefNames = []
+      if hit is not None:
+        for pl in hit.spectrum.peakLists:
+          if pl is not None:
+            if pl.isSimulated and pl.title == TARGETPEAKLIST:
+              for peak in pl.peaks:
+                linkedPeak = self.project.getByPid(peak.annotation)
+                if linkedPeak is not None:
+                  peak._linkedPeak = linkedPeak
+                  spectrumRef = linkedPeak.peakList.spectrum
+                  substanceRef =  spectrumRef.referenceSubstance
+                  if substanceRef is not None:
+                    referenceSubstances.append(substanceRef.name)
+                  spectrumRefNames.append(spectrumRef.name)
+      if len(referenceSubstances)>0:
+        hitDic.update({hit.substanceName: referenceSubstances})
+      else:
+        hitDic.update({hit: spectrumRefNames})
+    ps = DataFrame(list(hitDic.items()),  columns=['Spectrum Hits','References'])
+    return ps
 
 
   def _spectrumHitNotifierCallback(self, *kw):
