@@ -156,12 +156,12 @@ class LWHitFinder(SpectraPipe):
 
             ## 'First find hits by broadening'
             targetHits = findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=minLWvariation,
-                                            limitRange=minimumDistance, targetPLIndex=1)
+                                            limitRange=minimumDistance, targetPLIndex=targetPLIndex)
             # targetHits = [i for hit in targetHits for i in hit]   # clean up the empty sublists
             ## 'Second match TargetPeak ToReference '
             if len(targetHits)>0:
               matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
-                                               refPeakListIndex=0)
+                                               refPeakListIndex=refPLIndex)
 
               matchedHit = []
               matchedRef = [i for hit in matchedRef for i in hit]
