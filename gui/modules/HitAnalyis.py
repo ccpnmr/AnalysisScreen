@@ -162,7 +162,7 @@ class HitsAnalysis(CcpnModule):
                                           self._deleteHit,
                                           partial(self._setHitIsConfirmed,False),
                                           partial(self._setHitIsConfirmed,True),
-                                          partial(self._movePreviousRow, self.hitTable)],
+                                          partial(self._moveNextRow, self.hitTable)],
                                icons=[self.previousIcon, self.minusIcon, self.rejectIcon, self.acceptIcon,self.nextIcon],
                                tipTexts=[None, None, None, None, None],
                                direction='H', vAlign='b',
@@ -181,7 +181,7 @@ class HitsAnalysis(CcpnModule):
     self.peakButtons = ButtonList(self.peakHitWidgetsFrame, texts=['', '', '', ],
                                  callbacks=[partial(self._movePreviousRow,self.targetPeakTable),
                                             partial(self._deletePeaks,self.targetPeakTable) ,
-                                            partial(self._movePreviousRow,self.targetPeakTable)],
+                                            partial(self._moveNextRow,self.targetPeakTable)],
                                  icons=[self.previousIcon, self.minusIcon, self.nextIcon],
                                  tipTexts=[None, None,  None],
                                  direction='H', vAlign='b',
@@ -482,12 +482,24 @@ class HitsAnalysis(CcpnModule):
     ''' Documentation '''
 
     self.currentRowPosition = table.getSelectedRows()
-    if len(self.currentRowPosition)>0:
-      newPosition = self.currentRowPosition[0]+1
-      table.selectRow(newPosition)
-      lastRow = len(self.project.spectrumHits)
-      if newPosition == lastRow:
-        table.selectRow(0)
+    if len(table.objects) > 0:
+      if len(self.currentRowPosition)>0:
+          newPosition = self.currentRowPosition[0]+1
+          print(newPosition, 'newPosition ')
+          table.selectRow(newPosition)
+          lastRow = len(table.objects) - 1
+          print(lastRow, 'lastRow ')
+          if newPosition >= len(table.objects):
+            print(newPosition, 'newPosition == -1 ')
+            table.selectRow(0)
+          else:
+            print(newPosition, 'newPosition != -1 ')
+            table.selectRow(newPosition)
+      else:
+        try:
+          table.selectRow(0)
+        except:
+          pass
 
 
 
@@ -497,11 +509,12 @@ class HitsAnalysis(CcpnModule):
     self.currentRowPosition = table.getSelectedRows()
     if len(self.currentRowPosition) > 0:
       newPosition = self.currentRowPosition[0]-1
-      lastRow = len(self.project.spectrumHits)-1
-      if newPosition == -1:
-        table.selectRow(lastRow)
-      else:
-        table.selectRow(newPosition)
+      if len(table.objects)>0:
+        lastRow = len(table.objects)-1
+        if newPosition == -1:
+          table.selectRow(lastRow)
+        else:
+          table.selectRow(newPosition)
 
 
   def _populateInfoList(self, name, value):
