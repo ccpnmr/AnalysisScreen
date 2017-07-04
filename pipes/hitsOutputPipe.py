@@ -24,6 +24,18 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 
 
+
+#################################################
+#######   NOT IMPLEMENTED YET      ##############
+#################################################
+
+
+
+
+
+
+
+
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -51,10 +63,6 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 ## PipeName
 PipeName = 'Output Hits'
 
-########################################################################################################################
-##########################################      ALGORITHM       ########################################################
-########################################################################################################################
-
 
 
 ########################################################################################################################
@@ -75,14 +83,7 @@ class OutputHitsGuiPipe(GuiPipe):
     self.parent = parent
     OutputHitsGuiPipe._alreadyOpened = True
 
-    row = 0
 
-
-    self._updateWidgets()
-
-
-  def _updateWidgets(self):
-    pass
 
 
   def _closeBox(self):

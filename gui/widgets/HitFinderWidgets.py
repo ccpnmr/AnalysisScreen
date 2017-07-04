@@ -10,8 +10,18 @@ def _disableReferenceSG(cls, referenceSpectrumGroup):
   checkBox  = cls.sender()
   if pulldown is not None and checkBox is not None:
     if checkBox.isChecked():
+      pulldown.setData([])
       pulldown.setEnabled(False)
     else:
+      if cls is not None:
+        if cls.spectrumGroups is not None:
+          data = [sg.pid for sg in cls.spectrumGroups]
+          if len(data)>0:
+            pulldown.setData(data)
+          else:
+            pulldown.setData(texts=[cls._pulldownSGHeaderText],
+                             icons=[cls._warningIcon])
+
       pulldown.setEnabled(True)
 
 def _addSGpulldowns(cls, row, SGVarNames):
@@ -22,7 +32,7 @@ def _addSGpulldowns(cls, row, SGVarNames):
     row += 1
 
 
-def _addCommonHitFinderWidgets(cls, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPL, TargPL, MatchPeaksWithin,
+def _addCommonHitFinderWidgets(cls, row, ReferenceSpectrumGroup, ReferenceFromMixture, MatchPeaksWithin,
                                DefaultMinDist, thresholdName, defaultThreshold):
 
   isMixtureLabel = Label(cls.pipeFrame, ReferenceFromMixture, grid=(row, 0))
@@ -30,14 +40,6 @@ def _addCommonHitFinderWidgets(cls, row, ReferenceSpectrumGroup, ReferenceFromMi
                                               callback=partial(_disableReferenceSG, cls, ReferenceSpectrumGroup
                                                                ),
                                               grid=(row, 1)))
-
-  row += 1
-  ref_peakListLabel = Label(cls.pipeFrame, RefPL, grid=(row, 0))
-  setattr(cls, RefPL, Spinbox(cls.pipeFrame, value=0, max=0, grid=(row, 1)))
-
-  row += 1
-  targ_peakListLabel = Label(cls.pipeFrame, TargPL, grid=(row, 0))
-  setattr(cls, TargPL, Spinbox(cls.pipeFrame, value=0, max=10, grid=(row, 1)))
 
   row += 1
   minimumDistanceLabel = Label(cls.pipeFrame, MatchPeaksWithin, grid=(row, 0))

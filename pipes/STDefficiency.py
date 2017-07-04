@@ -34,6 +34,7 @@ from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.AnalysisScreen.lib.experimentAnalysis.STD import _calculatePeakEffiency
+from ccpn.util.Logging import getLogger , _debug3
 
 ########################################################################################################################
 ###   Attributes:
@@ -51,7 +52,7 @@ MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'
 
 ## defaults
 DefaultMinDist = 0.01
-DefaultReferencePeakList = 0
+DefaultPeakListIndex = -1
 
 ## PipeName
 PipeName = 'STD Efficiency'
@@ -82,10 +83,6 @@ class STDEfficiencyGuiPipe(GuiPipe):
     hw._addSGpulldowns(self, row, SGVarNames)
 
     row += len(SGVarNames)
-    peakListLabel = Label(self.pipeFrame, RefPL, grid=(row, 0))
-    setattr(self, RefPL, Spinbox(self.pipeFrame, value=0, max=0, grid=(row, 1)))
-
-    row += 1
     minimumDistanceLabel = Label(self.pipeFrame, MatchPeaksWithin, grid=(row, 0))
     setattr(self, MatchPeaksWithin, DoubleSpinbox(self.pipeFrame, value=DefaultMinDist,
                                                  step=DefaultMinDist, min=0.01, grid=(row, 1)))
@@ -112,7 +109,6 @@ class STDEfficiencyPipe(SpectraPipe):
                 OnResonanceSpectrumGroup:  'OnResonanceSpectrumGroup.pid',
                 STDSpectrumGroup:          'STDSpectrumGroup.pid',
                 MatchPeaksWithin:          DefaultMinDist,
-                RefPL:                     DefaultReferencePeakList,
                }
 
 
@@ -127,19 +123,20 @@ class STDEfficiencyPipe(SpectraPipe):
     onResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OnResonanceSpectrumGroup])
 
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
-    nPeakList = int(self._kwargs[RefPL])
 
 
     if None in [stdSpectrumGroup, offResonanceSpectrumGroup, onResonanceSpectrumGroup]:
-      # TODO add log message
+      getLogger().warning('Aborted: SpectrumGroup spectra contains illegal values (None)')
       return
     if len(stdSpectrumGroup.spectra) == len(offResonanceSpectrumGroup.spectra) == len(onResonanceSpectrumGroup.spectra):
       for stdSpectrum, offResonanceSpectrum, onResonanceSpectrum in zip(
           stdSpectrumGroup.spectra, offResonanceSpectrumGroup.spectra,onResonanceSpectrumGroup.spectra):
 
-        _calculatePeakEffiency(stdSpectrum, onResonanceSpectrum, offResonanceSpectrum, n_peakList=nPeakList,
+        _calculatePeakEffiency(stdSpectrum, onResonanceSpectrum, offResonanceSpectrum, n_peakList=DefaultPeakListIndex,
                                limitRange=minimumDistance)
-        # TODO add log message of efficiency
+      self.project._logger.info('Peak efficiency calculated and stored in peak "figureOfMerit" ')
+    else:
+      getLogger().warning('Aborted: SpectrumGroups contain different lenght of spectra.')
 
     return set(spectra)
 

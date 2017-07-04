@@ -48,7 +48,8 @@ from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit, _getRe
 
 ## Widget variables and/or _kwargs keys
 ReferenceSpectrumGroup = 'Reference_SpectrumGroup'
-ReferenceFromMixture = 'Reference_from_Mixture'
+
+SCasRefs = 'Use_SampleComponents_as_References'
 TargetSpectrumGroup = 'Target_SpectrumGroup'
 ControlSpectrumGroup = 'Control_SpectrumGroup'
 SGVarNames = [ControlSpectrumGroup, TargetSpectrumGroup, ReferenceSpectrumGroup]
@@ -60,7 +61,7 @@ MinLWvariation = 'Minimal_LineWidth_Variation'
 
 ## defaults
 DefaultMinimalLW = 0.05
-DefaultReferencePeakList = 0
+DefaultPeakListIndex = -1
 DefaultMinimumDistance = 0.01
 
 ## PipeName
@@ -90,16 +91,14 @@ class LWHitFinderGuiPipe(GuiPipe):
     row = 0
     hw._addSGpulldowns(self, row, SGVarNames)
     row += len(SGVarNames)
-    hw._addCommonHitFinderWidgets(self, row,ReferenceSpectrumGroup, ReferenceFromMixture, RefPLIndex, TargetPeakListIndex,
-                                  MatchPeaksWithin, DefaultMinimumDistance,  MinLWvariation, DefaultMinimalLW)
+    hw._addCommonHitFinderWidgets(self, row, ReferenceSpectrumGroup, SCasRefs,
+                                  MatchPeaksWithin, DefaultMinimumDistance, MinLWvariation, DefaultMinimalLW)
     self._updateWidgets()
 
 
   def _updateWidgets(self):
     'CCPN internal. Called from gui Pipeline when the input data has changed'
     self._setSpectrumGroupPullDowns(SGVarNames)
-    self._setMaxValueRefPeakList(RefPLIndex)
-    getattr(self, TargetPeakListIndex).setValue(1)
 
 
 
@@ -120,9 +119,8 @@ class LWHitFinder(SpectraPipe):
                TargetSpectrumGroup:    'spectrumGroup.pid',
                MatchPeaksWithin:        DefaultMinimumDistance,
                MinLWvariation:          DefaultMinimalLW,
-               RefPLIndex:              DefaultReferencePeakList,
                TargetPeakListIndex:     1,
-               ReferenceFromMixture: False,
+               SCasRefs:                False,
                }
 
 
@@ -138,9 +136,7 @@ class LWHitFinder(SpectraPipe):
     targetSpectrumGroup = self._getSpectrumGroup(self._kwargs[TargetSpectrumGroup])
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
     minLWvariation = float(self._kwargs[MinLWvariation])
-    refPLIndex = int(self._kwargs[RefPLIndex])
-    targetPLIndex = int(self._kwargs[TargetPeakListIndex])
-    referenceFromMixture = self._kwargs[ReferenceFromMixture]
+    sampleComponents_as_References = self._kwargs[SCasRefs]
     references = []
 
     if controlSpectrumGroup and targetSpectrumGroup is not None:
@@ -149,32 +145,33 @@ class LWHitFinder(SpectraPipe):
           if targetSpectrum:
             if targetSpectrum.experimentType is None:
               targetSpectrum.experimentType = 'H'
-            if referenceFromMixture:
+            if sampleComponents_as_References:
               references = _getReferencesFromSample(targetSpectrum)
             else:
               if referenceSpectrumGroup is not None:
                 references = referenceSpectrumGroup.spectra
 
             ## 'First find hits by broadening'
-            targetHits = findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=minLWvariation,
-                                            limitRange=minimumDistance, targetPLIndex=targetPLIndex)
-            # targetHits = [i for hit in targetHits for i in hit]   # clean up the empty sublists
-            ## 'Second match TargetPeak ToReference '
-            if len(targetHits)>0:
-              matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
-                                               refPeakListIndex=refPLIndex)
+            if len(controlSpectrum.peakLists) > 0:
+              targetHits = findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=minLWvariation,
+                                              limitRange=minimumDistance, targetPLIndex=DefaultPeakListIndex)
+              ## 'Second match TargetPeak ToReference '
+              if len(targetHits)>0:
+                if len(targetSpectrum.peakLists) > 0:
+                  matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
+                                                   refPeakListIndex=DefaultPeakListIndex) #1
 
-              matchedHit = []
-              matchedRef = [i for hit in matchedRef for i in hit]
-              for i in matchedRef:
-                rp, tp, pos_i = i
-                for j in targetHits:
-                  rp, tp, pos_j = j
-                  if abs(float(pos_i) - float(pos_j)) <= 0.01:
-                    matchedHit.append(j)
+                  matchedHit = []
+                  matchedRef = [i for hit in matchedRef for i in hit]
+                  for i in matchedRef:
+                    rp, tp, pos_i = i
+                    for j in targetHits:
+                      rp, tp, pos_j = j
+                      if abs(float(pos_i) - float(pos_j)) <= 0.01:
+                        matchedHit.append(j)
 
-              if len(matchedHit) > 0:
-                _addNewHit(targetSpectrum, matchedHit)
+                  if len(matchedHit) > 0:
+                    _addNewHit(targetSpectrum, matchedHit)
 
 
 

@@ -26,17 +26,13 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.AnalysisScreen.lib.experimentAnalysis.STD import _find_STD_Hits
 from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit, _getReferencesFromSample
+from ccpn.util.Logging import getLogger , _debug3
 
 ########################################################################################################################
 ###   Attributes:
@@ -48,7 +44,7 @@ from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit, _getRe
 ReferenceSpectrumGroup = 'Reference_SpectrumGroup'
 STD_Control_SpectrumGroup = 'STD_Control_SpectrumGroup'
 STD_Target_SpectrumGroup = 'STD_Target_SpectrumGroup'
-ReferenceFromMixture = 'Reference_from_Mixture'
+SC_as_Refs = 'Use_SampleComponents_as_References'
 SGVarNames = [STD_Target_SpectrumGroup, ReferenceSpectrumGroup]
 
 MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'
@@ -59,7 +55,7 @@ MinEfficiency = 'Minimal_Efficiency'
 ## defaults
 DefaultEfficiency = 7
 DefaultMinDist = 0.01
-DefaultReferencePeakList = 0
+DefaultPeakListIndex = -1
 
 ## PipeName
 PipeName = 'STD Hits'
@@ -90,16 +86,15 @@ class STDHitFinderGuiPipe(GuiPipe):
     hw._addSGpulldowns(self, row, SGVarNames)
 
     row += len(SGVarNames)
-    hw._addCommonHitFinderWidgets(self, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPLIndex, TargetPeakListIndex, MatchPeaksWithin, DefaultMinDist,
+    hw._addCommonHitFinderWidgets(self, row, ReferenceSpectrumGroup, SC_as_Refs,
+                                  MatchPeaksWithin, DefaultMinDist,
                                   MinEfficiency, DefaultEfficiency)
 
-    getattr(self,TargetPeakListIndex).setEnabled(False)
     self._updateWidgets()
 
 
   def _updateWidgets(self):
     self._setSpectrumGroupPullDowns(SGVarNames)
-    self._setMaxValueRefPeakList(RefPLIndex)
 
 
 
@@ -123,10 +118,9 @@ class STDHitFinder(SpectraPipe):
                 ReferenceSpectrumGroup:     'spectrumGroup.pid',
                 STD_Control_SpectrumGroup:  'spectrumGroup.pid',
                 STD_Target_SpectrumGroup:   'spectrumGroup.pid',
-                ReferenceFromMixture:       False,
+                SC_as_Refs:       False,
                 MatchPeaksWithin:           DefaultMinDist,
                 MinEfficiency:              DefaultEfficiency,
-                RefPLIndex:                 DefaultReferencePeakList,
 
                }
 
@@ -138,11 +132,10 @@ class STDHitFinder(SpectraPipe):
     '''
     referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
     stdTargetSpectrumGroup = self._getSpectrumGroup(self._kwargs[STD_Target_SpectrumGroup])
-    referenceFromMixture = self._kwargs[ReferenceFromMixture]
+    sampleComponents_as_References = self._kwargs[SC_as_Refs]
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
     minimumEfficiency = float(self._kwargs[MinEfficiency])/100
-    refPeakListIndex = int(self._kwargs[RefPLIndex])
-    targPeakListIndex = int(self._kwargs[TargetPeakListIndex])
+
 
     references = []
     if stdTargetSpectrumGroup is not None:
@@ -151,17 +144,21 @@ class STDHitFinder(SpectraPipe):
           if stdSpectrum:
             if stdSpectrum.experimentType is None:
               stdSpectrum.experimentType = 'STD.H'
-            if referenceFromMixture:
+            if sampleComponents_as_References:
               references = _getReferencesFromSample(stdSpectrum)
             else:
               if referenceSpectrumGroup is not None:
                 if set(referenceSpectrumGroup.spectra).issubset(spectra):
                   references = referenceSpectrumGroup.spectra #make sure references are in the input spectra
-            hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance,
-                                  refPeakListIndex=refPeakListIndex,  minEfficiency=minimumEfficiency )
-            hits = [i for hit in hits for i in hit] # clean up the empty sublists
-            if len(hits)>0:
-              _addNewHit(stdSpectrum, hits)
+            if len(stdSpectrum.peakLists)>0:
+              hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance,
+                                    refPeakListIndex=DefaultPeakListIndex,  minEfficiency=minimumEfficiency )
+              hits = [i for hit in hits for i in hit] # clean up the empty sublists
+              if len(hits)>0:
+                _addNewHit(stdSpectrum, hits)
+
+    else:
+      getLogger().warning('Aborted: STD SpectrumGroup not found')
 
     SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
     return set(list(spectra)+SGSpectra)
