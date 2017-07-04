@@ -47,7 +47,7 @@ Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
 ListWidgetHeaderColor = QtGui.QColor('Red')
-HitRegion = (0, 111, 20, 100)
+
 
 ReferenceLabel = 'Reference Details: '
 ALL_ExperimentTypes = 'All'
@@ -352,7 +352,7 @@ class HitsAnalysis(CcpnModule):
             widths = _getCurrentZoomRatio(self.current.strip.viewBox.viewRange())
             navigateToPositionInStrip(strip=self.current.strip, positions=peak.position, widths=widths)
             region = LinearRegionsPlot(values=[peak.position[0]-0.05, peak.position[0]+0.05],
-                                       movable=False, orientation='v', brush=HitRegion)
+                                       movable=False, orientation='v', colour='red')
             plotWidget.addItem(region)
 
   def _clearSpectrumViews(self):
