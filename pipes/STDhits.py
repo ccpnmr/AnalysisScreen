@@ -93,6 +93,7 @@ class STDHitFinderGuiPipe(GuiPipe):
     hw._addCommonHitFinderWidgets(self, row, ReferenceSpectrumGroup, ReferenceFromMixture, RefPLIndex, TargetPeakListIndex, MatchPeaksWithin, DefaultMinDist,
                                   MinEfficiency, DefaultEfficiency)
 
+    getattr(self,TargetPeakListIndex).setEnabled(False)
     self._updateWidgets()
 
 
@@ -163,7 +164,7 @@ class STDHitFinder(SpectraPipe):
               _addNewHit(stdSpectrum, hits)
 
     SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
-    return list(set(list(spectra)+SGSpectra))
+    return set(list(spectra)+SGSpectra)
 
 
 STDHitFinder.register() # Registers the pipe in the pipeline

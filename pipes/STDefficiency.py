@@ -141,7 +141,7 @@ class STDEfficiencyPipe(SpectraPipe):
                                limitRange=minimumDistance)
         # TODO add log message of efficiency
 
-    return spectra
+    return set(spectra)
 
 STDEfficiencyPipe.register() # Registers the pipe in the pipeline
 

@@ -99,6 +99,7 @@ class LWHitFinderGuiPipe(GuiPipe):
     'CCPN internal. Called from gui Pipeline when the input data has changed'
     self._setSpectrumGroupPullDowns(SGVarNames)
     self._setMaxValueRefPeakList(RefPLIndex)
+    getattr(self, TargetPeakListIndex).setValue(1)
 
 
 
@@ -178,7 +179,7 @@ class LWHitFinder(SpectraPipe):
 
 
     SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
-    return list(set(list(spectra) + SGSpectra))
+    return set(list(spectra) + SGSpectra)
 
 LWHitFinder.register() # Registers the pipe in the pipeline
 

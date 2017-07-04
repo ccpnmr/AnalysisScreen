@@ -37,7 +37,7 @@ def _addCommonHitFinderWidgets(cls, row, ReferenceSpectrumGroup, ReferenceFromMi
 
   row += 1
   targ_peakListLabel = Label(cls.pipeFrame, TargPL, grid=(row, 0))
-  setattr(cls, TargPL, Spinbox(cls.pipeFrame, value=1, max=1, grid=(row, 1)))
+  setattr(cls, TargPL, Spinbox(cls.pipeFrame, value=0, max=10, grid=(row, 1)))
 
   row += 1
   minimumDistanceLabel = Label(cls.pipeFrame, MatchPeaksWithin, grid=(row, 0))
