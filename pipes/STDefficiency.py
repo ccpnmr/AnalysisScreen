@@ -70,7 +70,8 @@ PipeName = 'STD Efficiency'
 
 class STDEfficiencyGuiPipe(GuiPipe):
 
-  preferredPipe = True
+  preferredPipe = False
+  applicationSpecificPipe = True
   pipeName = PipeName
 
 

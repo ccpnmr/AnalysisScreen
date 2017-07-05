@@ -79,8 +79,8 @@ PipeName = 'LW Broadening Hit Finder'
 
 
 class LWHitFinderGuiPipe(GuiPipe):
-
-  preferredPipe = True
+  preferredPipe = False
+  applicationSpecificPipe = True
   pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):

@@ -76,7 +76,8 @@ def _createSTDs(project, offResonanceSpectrumGroup, onResonanceSpectrumGroup):
 
 class STDCreatorGuiPipe(GuiPipe):
 
-  preferredPipe = True
+  preferredPipe = False
+  applicationSpecificPipe = True
   pipeName = PipeName
 
 

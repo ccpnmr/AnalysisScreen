@@ -75,7 +75,8 @@ PipeName = 'WaterLogsy Hits'
 
 class WaterLogsyHitFinderGuiPipe(GuiPipe):
 
-  preferredPipe = True
+  preferredPipe = False
+  applicationSpecificPipe = True
   pipeName = PipeName
 
 

@@ -71,8 +71,9 @@ PipeName = 'Output Hits'
 
 
 class OutputHitsGuiPipe(GuiPipe):
-
-  preferredPipe = True
+  
+  preferredPipe = False
+  applicationSpecificPipe = True
   pipeName = PipeName
   _alreadyOpened = False
 

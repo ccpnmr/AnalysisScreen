@@ -73,7 +73,8 @@ PipeName = 'STD Hits'
 
 class STDHitFinderGuiPipe(GuiPipe):
 
-  preferredPipe = True
+  preferredPipe = False
+  applicationSpecificPipe = True
   pipeName = PipeName
 
 
