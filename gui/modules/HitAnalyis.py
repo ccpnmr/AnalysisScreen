@@ -31,7 +31,7 @@ from ccpn.ui.gui.widgets.CompoundView import CompoundView
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings, ObjectTableFilter
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.modules.PeakTable import PeakListTableWidget
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
