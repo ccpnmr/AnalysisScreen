@@ -327,10 +327,10 @@ class MixtureAnalysis(CcpnModule):
     currentMixture = self.scoringTable.getCurrentObject()
     self.contextMenu = Menu('', self, isFloatWidget=True)
     self.contextMenu.addItem("", callback=None)
-    self.leftListWidget = ListWidget(self, contextMenu=False)
+    self.leftListWidget = ListWidget(self, contextMenu=False, copyDrop=False)
 
 
-    self.rightListWidget = ListWidget(self, contextMenu=True)
+    self.rightListWidget = ListWidget(self, contextMenu=False, copyDrop=False)
     self.calculateButtons = ButtonList(self, texts = ['Reset','Predict','Apply'],
                                        callbacks=[self._resetMixtureScore, self._predictScores, self._createNewMixture],
                                        tipTexts=[None,'CLick to predict new mixtures',None], direction='h', hAlign='r')
@@ -363,8 +363,6 @@ class MixtureAnalysis(CcpnModule):
     self.warningLabel.hide()
     self.leftListWidget.contextMenuItem = 'Not Implemented Yet'
 
-  def _rightClickListWidget(self):
-      print(self.sender())
 
   def _populateLeftListWidget(self):
     ''' fills the left widget with spectra scores from the selected mixture on the scoring table '''
@@ -456,7 +454,6 @@ class MixtureAnalysis(CcpnModule):
     for item in itemsRightWidgetList:
       itemText = item.text()
       text, space, value = itemText.partition(' ')
-      print('text, space, value ', text, space, value)
       rightSpectrum = self.project.getByPid(text)
       if rightSpectrum is not None:
         rightSpectra.append(rightSpectrum)

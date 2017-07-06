@@ -180,7 +180,6 @@ def _setSampleComponentScores(project,sample, mixtureCompounds, minDist):
     overlaped = calculateOverlapCount(compoundPeakList, compoundsToCompare, minDist)
 
     if overlaped is None:
-      print(compoundName, 'No Overlapped peaks found')
       newSampleComponent.score = 0
 
     else:
