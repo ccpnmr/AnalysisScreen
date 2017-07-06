@@ -52,13 +52,13 @@ def comparePeakArea(areaA, areaB, minimalDiff):
   :return: the diff of PeakB-PeakA if greater then minimalDiff
   'that means that there has been a Broadening event of the area'
   '''
-
-  diff = areaB - areaA
-  if abs(diff) >= minimalDiff:
-    if diff > 0:
-      return INCREASED, diff
-    else:
-      return DECREASED, diff
+  if areaA is not None and areaB is not None:
+    diff = areaB - areaA
+    if abs(diff) >= minimalDiff:
+      if diff > 0:
+        return INCREASED, diff
+      else:
+        return DECREASED, diff
   return BELOWTRESHOLD, 0
 
 

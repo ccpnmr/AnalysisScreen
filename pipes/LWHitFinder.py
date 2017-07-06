@@ -33,6 +33,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 
 #### NON GUI IMPORTS
+import numpy as np
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.AnalysisScreen.lib.experimentAnalysis.LineBroadening import findBroadenedPeaks
 from ccpn.AnalysisScreen.lib.experimentAnalysis.MatchPositions import  matchHitToReference
@@ -164,11 +165,17 @@ class LWHitFinder(SpectraPipe):
                   matchedHit = []
                   matchedRef = [i for hit in matchedRef for i in hit]
                   for i in matchedRef:
-                    rp, tp, pos_i = i
-                    for j in targetHits:
-                      rp, tp, pos_j = j
-                      if abs(float(pos_i) - float(pos_j)) <= 0.01:
-                        matchedHit.append(j)
+                    if len(i) == 3:
+                      rp, tp, pos_i = i
+                      for j in targetHits:
+                        if len(j) == 3:
+                          rp, tp, pos_j = j
+                          if type(pos_i) is np.ndarray:
+                            pos_i = pos_i.ravel()
+                            if len(pos_i)>0:
+                              pos_i = pos_i[-1]
+                          if abs(float(pos_i) - float(pos_j)) <= 0.01:
+                            matchedHit.append(i)
 
                   if len(matchedHit) > 0:
                     _addNewHit(targetSpectrum, matchedHit)

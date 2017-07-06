@@ -23,8 +23,12 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 # Start of code
 #=========================================================================================
 
+
+from ccpn.util.Logging import getLogger
+
 TARGETPEAKLIST = 'Target PeakList'
 REFERENCEPEAKLIST = 'Reference PeakList'
+
 
 
 def _getReferencesFromSample(spectrum):
@@ -53,7 +57,12 @@ def _addNewHit(spectrum, hits):
   """
   project = spectrum.project
   efficiencies = []
-  spectrumHit = spectrum.newSpectrumHit(substanceName=spectrum.name)
+  try:
+    spectrumHit = spectrum.newSpectrumHit(substanceName=spectrum.name)
+  except Exception as e:
+    getLogger().warning('Could not create pre-existing spectrumHit name ')
+    return
+
   newTargetPeakList = spectrum.newPeakList(title=TARGETPEAKLIST, isSimulated=True, comment='PeakList containing peak hits')
 
 

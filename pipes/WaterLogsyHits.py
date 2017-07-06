@@ -31,6 +31,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 
 #### NON GUI IMPORTS
+import numpy as np
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.AnalysisScreen.lib.experimentAnalysis import WaterLogsy as wl
 from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit, _getReferencesFromSample
@@ -172,13 +173,19 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
                   matchedRef = [i for hit in matchedRef for i in hit]  # clean up the empty sublists
                   matchedHit = []
                   for i in matchedRef:
-                    rp, tp, pos_i = i
-                    for j in hits:
-                      rp, tp, pos_j = j
-                      if float(pos_i) == float(pos_j):
-                        matchedHit.append(i)
-                  if len(matchedHit) > 0:
-                      _addNewHit(targetSpectrum, matchedHit)
+                    if len(i) == 3:
+                      rp,tp,pos_i = i
+                      for j in hits:
+                        if len(j) == 3:
+                          rp, tp, pos_j = j
+                          if type(pos_i) is np.ndarray:
+
+                            pos_i = pos_i.ravel()
+                            if len(pos_i)>0:
+                              pos_i = pos_i[-1]
+
+                          if float(pos_j) == float(pos_i):
+                            matchedHit.append(i)
 
 
     else:# if control is given. Find hits  by any mode
@@ -204,11 +211,19 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
                   matchedHit = []
                   matchedRef = [i for hit in matchedRef for i in hit]
                   for i in matchedRef:
-                    rp,tp,pos_i = i
-                    for j in hits:
-                      rp, tp, pos_j = j
-                      if float(pos_i) == float(pos_j):
-                        matchedHit.append(i)
+                    if len(i) == 3:
+                      rp,tp,pos_i = i
+                      for j in hits:
+                        if len(j) == 3:
+                          rp, tp, pos_j = j
+                          if type(pos_i) is np.ndarray:
+
+                            pos_i = pos_i.ravel()
+                            if len(pos_i)>0:
+                              pos_i = pos_i[-1]
+
+                          if float(pos_j) == float(pos_i):
+                            matchedHit.append(i)
 
                   if len(matchedHit) > 0:
                       _addNewHit(targetSpectrum, matchedHit)
