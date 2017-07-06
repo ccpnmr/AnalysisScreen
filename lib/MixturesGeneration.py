@@ -103,9 +103,10 @@ def _getCompounds(spectra):
         peakLists.append(spectrum.peakLists[0])
 
   for peakList in peakLists:
-    name, space, value = str(peakList.id).partition('-')
-    compound = [name, [peak.position[0] for peak in peakList.peaks]]
-    compounds.append(compound)
+    if peakList is not None:
+      name = peakList.spectrum.name
+      compound = [name, [peak.position[0] for peak in peakList.peaks]]
+      compounds.append(compound)
   return compounds
 
 def _generateMixtures(project, spectra, method, methodParam, mode, n, minDistance):
@@ -175,6 +176,7 @@ def _setSampleComponentScores(project,sample, mixtureCompounds, minDist):
 
   for compound in mixtureCompounds:
     compoundName, compoundPeakList = compound
+    print(compoundName, '@@@')
     newSampleComponent = sample.newSampleComponent(name=(str(compoundName)))
     compoundsToCompare = [c[1] for c in mixtureCompounds if c[0] != compoundName]
     overlaped = calculateOverlapCount(compoundPeakList, compoundsToCompare, minDist)
