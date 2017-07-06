@@ -232,11 +232,12 @@ class MixtureAnalysis(CcpnModule):
           spectrum = sampleComponent.substance.referenceSpectra[0]
         else:
           spectrum = self.project.getByPid('SP:' + str(sampleComponent.substance.name))
-        self.componentButton = Button(self, text=spectrum.id)#,toggle=True)
-        self.componentButton.clicked.connect(partial(self._toggleComponentButton, spectrum, sample, self.componentButton))
-        # self.componentButton.setChecked(False)
-        self.componentButton.setFixedHeight(40)
-        self.toolBarComponents.addWidget(self.componentButton)
+        if spectrum is not None:
+          self.componentButton = Button(self, text=spectrum.id)#,toggle=True)
+          self.componentButton.clicked.connect(partial(self._toggleComponentButton, spectrum, sample, self.componentButton))
+          # self.componentButton.setChecked(False)
+          self.componentButton.setFixedHeight(40)
+          self.toolBarComponents.addWidget(self.componentButton)
 
 
 
@@ -690,33 +691,33 @@ class MixtureAnalysis(CcpnModule):
           if spectrum is not None:
             currentDisplay.displaySpectrum(spectrum)
 
-  def _navigateToPosition(self, peaks):
-    ''' for a given peak, it navigates to the peak position on the display  '''
-
-    from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
-    displayed = self.project.strips[0].spectrumDisplay
-
-    self.mainWindow.clearMarks()
-    for peak in peaks:
-      navigateToPeakPosition(self.project, peak=peak, selectedDisplays=[displayed.pid], markPositions=True)
 
   def _clearDisplayView(self):
     ''' Deletes all the spectra from the display '''
-    if len(self.project.strips)>0:
-      self.currentDisplayed = self.project.strips[0]
+    if self.current.strip is None:
+      if len(self.project.strips)>0:
+        self.currentDisplayed =  self.project.strips[0]
+        self.current.strip = self.currentDisplayed
+        self.current.strip.plotWidget.autoRange()
+      else:
+        self.currentDisplayed=self._openNewDisplay()
+        self._closeBlankDisplay()
     else:
-      self.currentDisplayed=self._openNewDisplay()
-      self._closeBlankDisplay()
-
+      self.currentDisplayed = self.current.strip
     for spectrumView in self.currentDisplayed.spectrumViews:
       spectrumView.delete()
     return self.currentDisplayed
 
   def _openNewDisplay(self):
     ''' opens a new spectrum display '''
-    spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
-    self.moduleArea.moveModule(spectrumDisplay.module, position='top', neighbor=self)
-    return spectrumDisplay
+
+    if len(self.project.spectra)>0:
+      spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
+      if len(spectrumDisplay.strips)>0:
+        self.current.strip = spectrumDisplay.strips[0]
+        self.current.strip.plotWidget.autoRange()
+      self.moduleArea.moveModule(spectrumDisplay.module, position='top', neighbor=self)
+      return spectrumDisplay
 
   def _closeBlankDisplay(self):
     ''' deletes a module display if present one '''
