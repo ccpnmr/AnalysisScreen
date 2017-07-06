@@ -698,7 +698,7 @@ class CustomPeakTableWidget(PeakListTableWidget):
 
     if application is not None:
       PeakListTableWidget.__init__(self, parent=parent, moduleParent=moduleParent, application=application,
-                                   peakList=peakList, updateSettingsWidgets=False, **kwds)
+                                   peakList=peakList, **kwds)
 
       self.pLwidget.hide()
       self.posUnitPulldownLabel.hide()
