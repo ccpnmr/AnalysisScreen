@@ -176,7 +176,6 @@ def _setSampleComponentScores(project,sample, mixtureCompounds, minDist):
 
   for compound in mixtureCompounds:
     compoundName, compoundPeakList = compound
-    print(compoundName, '@@@')
     newSampleComponent = sample.newSampleComponent(name=(str(compoundName)))
     compoundsToCompare = [c[1] for c in mixtureCompounds if c[0] != compoundName]
     overlaped = calculateOverlapCount(compoundPeakList, compoundsToCompare, minDist)
