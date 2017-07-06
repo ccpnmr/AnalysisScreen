@@ -6,7 +6,8 @@ from collections import defaultdict
 from itertools import chain, combinations
 from collections import OrderedDict
 from ccpn.AnalysisScreen.lib.SimulatedAnnealing import randomDictMixtures, iterateAnnealing, getOverlappedCount , scoreMixture, calculateOverlapCount
-
+from ccpn.util.Logging import getLogger
+from ccpn.core.Spectrum import Spectrum
 
 def _initialiseMixtures(params):
 
@@ -22,16 +23,20 @@ def _initialiseMixtures(params):
   pickFilter = _getFilter(params)
   pickFilterMode = _getFilterMode(params)
   ignoredRegions = _getIgnoredRegions(params)
-  project = _getProjectFromSpectrum(spectra[0])
-  currentVirtualSamples = _getCurrentVirtualSamples(project)
-  if peaksAreTopick:
-    _pickPeaks(spectra, pickFilter, pickFilterMode, ignoredRegions, noiseLevel)
+  if len(spectra)>0:
+    project = _getProjectFromSpectrum(spectra[0])
+    currentVirtualSamples = _getCurrentVirtualSamples(project)
+    if peaksAreTopick:
+      _pickPeaks(spectra, pickFilter, pickFilterMode, ignoredRegions, noiseLevel)
 
-  if replaceMixtures:
-    _deleteMixtures(currentVirtualSamples)
-    _generateMixtures(project,spectra, calculationMethod, simulatedAnnealingParm, mode, modeNumber, minimalDistance,)
+    if replaceMixtures:
+      _deleteMixtures(currentVirtualSamples)
+      _generateMixtures(project, spectra, calculationMethod, simulatedAnnealingParm, mode, modeNumber, minimalDistance, )
+    else:
+      _generateMixtures(project, spectra, calculationMethod, simulatedAnnealingParm, mode, modeNumber, minimalDistance)
   else:
-    _generateMixtures(project,spectra, calculationMethod, simulatedAnnealingParm, mode, modeNumber, minimalDistance)
+    getLogger().warning('No spectra found')
+    return
 
 
 def _getCalculationMethod(params):
@@ -91,7 +96,12 @@ def _deleteMixtures(currentMixtures):
 
 def _getCompounds(spectra):
   compounds = []
-  peakLists = [s.peakLists[0] for s in spectra]
+  peakLists = []
+  for spectrum in spectra:
+    if isinstance(spectrum, Spectrum):
+      if len(spectrum.peakLists)>0:
+        peakLists.append(spectrum.peakLists[0])
+
   for peakList in peakLists:
     name, space, value = str(peakList.id).partition('-')
     compound = [name, [peak.position[0] for peak in peakList.peaks]]

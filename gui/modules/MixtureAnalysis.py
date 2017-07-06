@@ -373,15 +373,17 @@ class MixtureAnalysis(CcpnModule):
     if sample is not None:
       self.leftMixtureLineEdit.setText(str(sample.name))
       color = QtGui.QColor('Red')
-      header = QtGui.QListWidgetItem(str(sample.id))
+      header = QtGui.QListWidgetItem(str(sample.pid))
       header.setFlags(QtCore.Qt.NoItemFlags)
       header.setTextColor(color)
       self.leftListWidget.addItem(header)
       for sampleComponent in sample.sampleComponents:
         if sampleComponent.substance is not None:
-          # spectrum = sampleComponent.substance.referenceSpectra[0]
-          item = QtGui.QListWidgetItem(str(sampleComponent.name) + ' Single Score = ' + str(sampleComponent.score))
-          self.leftListWidget.addItem(item)
+          if len(sampleComponent.substance.referenceSpectra)>0:
+            spectrum = sampleComponent.substance.referenceSpectra[0]
+            if spectrum is not None:
+              item = QtGui.QListWidgetItem(str(spectrum.pid) + ' Single Score = ' + str(sampleComponent.score))
+              self.leftListWidget.addItem(item)
 
 
         #   self.leftListWidget.addItem(item)
@@ -433,9 +435,12 @@ class MixtureAnalysis(CcpnModule):
       header.setTextColor(color)
       self.rightListWidget.addItem(header)
       for sampleComponent in sample.sampleComponents:
-        # spectrum = sampleComponent.substance.referenceSpectra[0]
-        item = QtGui.QListWidgetItem(str(sampleComponent.name) + ' Single Score = ' + str(sampleComponent.score))
-        self.rightListWidget.addItem(item)
+        if sampleComponent.substance is not None:
+          if len(sampleComponent.substance.referenceSpectra)>0:
+            spectrum = sampleComponent.substance.referenceSpectra[0]
+            if spectrum is not None:
+              item = QtGui.QListWidgetItem(str(spectrum.pid) + ' Single Score = ' + str(sampleComponent.score))
+              self.rightListWidget.addItem(item)
       self.rightListWidget.currentItemChanged.connect(self._getListWidgetItems)
 
       self.connect(self.rightListWidget, QtCore.SIGNAL("dropped"), self._itemsDropped)
@@ -451,7 +456,8 @@ class MixtureAnalysis(CcpnModule):
     for item in itemsRightWidgetList:
       itemText = item.text()
       text, space, value = itemText.partition(' ')
-      rightSpectrum = self.project.getByPid('SP:'+text)
+      print('text, space, value ', text, space, value)
+      rightSpectrum = self.project.getByPid(text)
       if rightSpectrum is not None:
         rightSpectra.append(rightSpectrum)
 
@@ -464,7 +470,7 @@ class MixtureAnalysis(CcpnModule):
       itemText = item.text()
 
       text, space, value = itemText.partition(' ')
-      leftSpectrum = self.project.getByPid('SP:'+text)
+      leftSpectrum = self.project.getByPid(text)
       if leftSpectrum is not None:
         leftSpectra.append(leftSpectrum)
 
