@@ -5,8 +5,8 @@
 #  all in
 import  glob
 import pandas as pd
-output_path='/Users/luca/Desktop/demoDatasetHDF5/'
-input_paths = glob.glob("/Users/luca/Desktop/demoDataset/*.csv")
+output_path='/Users/luca/Desktop/'
+input_paths = glob.glob("/Users/luca/Desktop/*.csv")
 
 
 for path in input_paths:
