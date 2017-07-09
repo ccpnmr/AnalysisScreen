@@ -104,7 +104,11 @@ def _getCompounds(spectra):
 
   for peakList in peakLists:
     if peakList is not None:
-      name = peakList.spectrum.name
+      spectrum = peakList.spectrum
+      if spectrum.referenceSubstance is not None:
+        name = spectrum.referenceSubstance.name
+      else:
+        name = spectrum.name
       compound = [name, [peak.position[0] for peak in peakList.peaks]]
       compounds.append(compound)
   return compounds
