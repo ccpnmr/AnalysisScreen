@@ -31,8 +31,8 @@ from ccpn.AnalysisScreen.AnalysisScreen import Screen as Application
 from ccpn.framework.Version import applicationVersion
 
 if __name__ == '__main__':
-  from ccpn.util.GitTools import getAllRepositoriesGitCommit
-  applicationVersion = 'development: {AnalysisScreen:.8s}'.format(**getAllRepositoriesGitCommit())
+  # from ccpn.util.GitTools import getAllRepositoriesGitCommit
+  # applicationVersion = 'development: {AnalysisScreen:.8s}'.format(**getAllRepositoriesGitCommit())
 
   # argument parser
   parser = Framework.defineProgramArguments()
