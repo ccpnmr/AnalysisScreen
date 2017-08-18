@@ -134,102 +134,60 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
   def runPipe(self, spectra):
     '''
     :param spectra: inputData
-    :return: aligned spectra
+    :return: spectra. Add Hits to project
     '''
-    # TODO FIXME REWRITE THIS FUNCTION ASAP 4/07/2017 !!!!!
     referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
     wLcontrolSpectrumGroup = self._getSpectrumGroup(self._kwargs[ControlSpectrumGroup])
     wLtargetSpectrumGroup = self._getSpectrumGroup(self._kwargs[TargetSpectrumGroup])
-    sampleComponents_as_References = self._kwargs[SCasRef]
-
     minimumDistance = float(self._kwargs[MatchPeaksWithin])
-    minimumEfficiency = float(self._kwargs[MinEfficiency])
-
-    mode = self._kwargs[ModeHit]
     references = []
+    if wLtargetSpectrumGroup is not None:
+      targetSpectra = wLtargetSpectrumGroup.spectra
+      if wLcontrolSpectrumGroup is None:  # if no control is given. Find hits just by positive peaks in the target spectrum
+        controlSpectra = [None] * len(targetSpectra)
+        mode = wl.PositiveOnly
+      else:
+        controlSpectra = wLcontrolSpectrumGroup.spectra
+        mode = self._kwargs[ModeHit]
 
-    if wLcontrolSpectrumGroup is None: # if no control is given. Find hits just by positive peaks in the target spectrum
-      mode = wl.PositiveOnly
-
-      if wLtargetSpectrumGroup is not None:
-        for targetSpectrum in wLtargetSpectrumGroup.spectra:
-          if targetSpectrum is not None:
-            if targetSpectrum.experimentType is None:
-              targetSpectrum.experimentType = 'Water-LOGSY.H'
-
-            if sampleComponents_as_References:
-              references = _getReferencesFromSample(targetSpectrum)
-            else:
-              if referenceSpectrumGroup is not None:
-                references = referenceSpectrumGroup.spectra
-
-              hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, mode=mode, limitRange=minimumDistance,
-                                           limitIntensityChange=minimumEfficiency)
-              if len(hits) > 0:
-                if len(targetSpectrum.peakLists)>0:
-                  matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
-                                                 refPeakListIndex=DefaultPeakListIndex)
-                  matchedRef = [i for hit in matchedRef for i in hit]  # clean up the empty sublists
-                  matchedHit = []
-                  for i in matchedRef:
-                    if len(i) == 3:
-                      rp,tp,pos_i = i
-                      for j in hits:
-                        if len(j) == 3:
-                          rp, tp, pos_j = j
-                          if type(pos_i) is np.ndarray:
-
-                            pos_i = pos_i.ravel()
-                            if len(pos_i)>0:
-                              pos_i = pos_i[-1]
-
-                          if float(pos_j) == float(pos_i):
-                            matchedHit.append(i)
-
-
-    else:# if control is given. Find hits  by any mode
-      if wLtargetSpectrumGroup is not None:
-        if len(wLtargetSpectrumGroup.spectra) == len(wLcontrolSpectrumGroup.spectra):
-          for targetSpectrum, controlSpectrum in zip(wLtargetSpectrumGroup.spectra, wLcontrolSpectrumGroup.spectra):
-            if targetSpectrum is not None:
-              if targetSpectrum.experimentType is None:
-                targetSpectrum.experimentType = 'Water-LOGSY.H'
-
-              if sampleComponents_as_References:
-                references = _getReferencesFromSample(targetSpectrum)
-              else:
-                if referenceSpectrumGroup is not None:
-                  references = referenceSpectrumGroup.spectra
-
-              hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, wLControl=controlSpectrum,
-                                           mode=mode, limitRange=minimumDistance, limitIntensityChange=minimumEfficiency)
-              if len(hits) > 0:
-                if len(targetSpectrum.peakLists) > 0:
-                  matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
-                                                   refPeakListIndex=DefaultPeakListIndex)
-                  matchedHit = []
-                  matchedRef = [i for hit in matchedRef for i in hit]
-                  for i in matchedRef:
-                    if len(i) == 3:
-                      rp,tp,pos_i = i
-                      for j in hits:
-                        if len(j) == 3:
-                          rp, tp, pos_j = j
-                          if type(pos_i) is np.ndarray:
-
-                            pos_i = pos_i.ravel()
-                            if len(pos_i)>0:
-                              pos_i = pos_i[-1]
-
-                          if float(pos_j) == float(pos_i):
-                            matchedHit.append(i)
-
-                  if len(matchedHit) > 0:
-                      _addNewHit(targetSpectrum, matchedHit)
-
+      if len(controlSpectra) == len(targetSpectra):
+        for targetSpectrum, controlSpectrum in zip(targetSpectra, controlSpectra):
+          if targetSpectrum.experimentType is None:
+            targetSpectrum.experimentType = 'Water-LOGSY.H'
+          if self._kwargs[SCasRef]: # sampleComponents as References
+            references = _getReferencesFromSample(targetSpectrum)
+          else:
+            if referenceSpectrumGroup is not None:
+              references = referenceSpectrumGroup.spectra
+          hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, wLControl=controlSpectrum,
+                mode=mode, limitRange=minimumDistance, limitIntensityChange=float(self._kwargs[MinEfficiency]))
+          self._filterNewHits(hits, targetSpectrum, references, minimumDistance)
 
     SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
     return set(list(spectra) + SGSpectra)
+
+  def _filterNewHits(self, hits, targetSpectrum, references, minimumDistance):
+    if len(hits) > 0:
+      if len(targetSpectrum.peakLists) > 0:
+        matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
+                                         refPeakListIndex=DefaultPeakListIndex)
+        matchedRef = [i for hit in matchedRef for i in hit]  # clean up the empty sublists
+        matchedHit = []
+        for i in matchedRef:
+          if len(i) == 3:
+            rp, tp, pos_i = i
+            for j in hits:
+              if len(j) == 3:
+                rp, tp, pos_j = j
+                if type(pos_i) is np.ndarray:
+                  pos_i = pos_i.ravel()
+                  if len(pos_i) > 0:
+                    pos_i = pos_i[-1]
+
+                if float(pos_j) == float(pos_i):
+                  matchedHit.append(i)
+        if len(matchedHit) > 0:
+          _addNewHit(targetSpectrum, matchedHit)
 
 WaterLogsyHitFinderPipe.register() # Registers the pipe in the pipeline
 
