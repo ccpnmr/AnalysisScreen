@@ -65,7 +65,7 @@ DefaultPeakListIndex = -1
 DefaultMinimumDistance = 0.01
 
 ## PipeName
-PipeName = 'LW Broadening Hit Finder'
+PipeName = 'Peak Broadening Hit Finder'
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -78,13 +78,13 @@ PipeName = 'LW Broadening Hit Finder'
 ########################################################################################################################
 
 
-class LWHitFinderGuiPipe(GuiPipe):
+class PeakBroadeningFinderGuiPipe(GuiPipe):
   preferredPipe = False
   applicationSpecificPipe = True
   pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
-    super(LWHitFinderGuiPipe, self)
+    super(PeakBroadeningFinderGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
 
@@ -109,9 +109,9 @@ class LWHitFinderGuiPipe(GuiPipe):
 
 
 
-class LWHitFinder(SpectraPipe):
+class PeakBroadeningFinder(SpectraPipe):
 
-  guiPipe = LWHitFinderGuiPipe
+  guiPipe = PeakBroadeningFinderGuiPipe
   pipeName = PipeName
 
   _kwargs  =   {
@@ -184,6 +184,6 @@ class LWHitFinder(SpectraPipe):
     SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
     return set(list(spectra) + SGSpectra)
 
-LWHitFinder.register() # Registers the pipe in the pipeline
+PeakBroadeningFinder.register() # Registers the pipe in the pipeline
 
 
