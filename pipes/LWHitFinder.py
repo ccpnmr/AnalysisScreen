@@ -57,10 +57,10 @@ SGVarNames = [ControlSpectrumGroup, TargetSpectrumGroup, ReferenceSpectrumGroup]
 MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'
 RefPLIndex = 'Reference_PeakList'
 TargetPeakListIndex = 'Target_PeakList'
-MinLWvariation = 'Minimal_LineWidth_Variation'
+MinLWvariation = 'Minimal_Volume_Variation(Ratio)'
 
 ## defaults
-DefaultMinimalLW = 0.05
+DefaultMinimalLW = 0.50
 DefaultPeakListIndex = -1
 DefaultMinimumDistance = 0.01
 

@@ -42,33 +42,54 @@ def _getPeaksObj(spectrum, peakListIndex=0):
 
 
 # - compare area for the peak
+# def comparePeakArea(areaA, areaB, minimalDiff):
+#   '''
+#
+#   :param areaA: Reference peak Area -> float
+#   :param areaB: Target peak Area -> float
+#   :param minimalDiff: threshold of difference
+#   :return: the diff of PeakB-PeakA if greater then minimalDiff
+#   'that means that there has been a Broadening event of the area'
+#   '''
+#   if areaA is not None and areaB is not None:
+#     diff = areaB - areaA
+#     if abs(diff) >= minimalDiff:
+#       if diff > 0:
+#         return INCREASED, diff
+#       else:
+#         return DECREASED, diff
+#   return BELOWTRESHOLD, 0
+
 def comparePeakArea(areaA, areaB, minimalDiff):
   '''
 
   :param areaA: Reference peak Area -> float
   :param areaB: Target peak Area -> float
   :param minimalDiff: threshold of difference
-  :return: the diff of PeakB-PeakA if greater then minimalDiff
+  :return: the ratio of PeakB-PeakA if greater then minimalDiff
   'that means that there has been a Broadening event of the area'
   '''
   if areaA is not None and areaB is not None:
-    diff = areaB - areaA
-    if abs(diff) >= minimalDiff:
-      if diff > 0:
-        return INCREASED, diff
-      else:
-        return DECREASED, diff
-  return BELOWTRESHOLD, 0
+    diff = abs(areaB - areaA)
+    ratio = diff/areaB
 
+    if ratio >= minimalDiff:
+      return ratio
+    else:
+      return 0.0
+  return 0.0
 
-def findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=0.01, limitRange=0.01, targetPLIndex=1):
+def findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=0.5, limitRange=0.01, targetPLIndex=1):
   '''
   :param spectrumA:  Reference spectrum  -> object
   :param spectrumB:  Target spectrum object -> object
-  :param minimalDiff:  minimalDiff: threshold of difference for each peak to be considered a broadening -> float
+  :param minimalDiff:  minimalDiff: threshold of difference for each peak to be considered a broadening -> float (0 to 1)
   :param limitRange: ppm range where to find a matching peak
   :param targetPLIndex : peakList with linewidhts
   :return: list of peaks who recorded a broadening event
+  
+  Ratio for broadening = abs(controlPeakArea - targetPeakArea) / targetPeakArea
+  
   '''
 
   peakHits = []
@@ -77,9 +98,10 @@ def findBroadenedPeaks(controlSpectrum, targetSpectrum, minimalDiff=0.01, limitR
   for match in matches:
     referencePeak, targetPeak, pos = match
     if referencePeak.lineWidths and targetPeak.lineWidths is not None:
-      if len(referencePeak.lineWidths) > 0 and len(targetPeak.lineWidths) > 0:
-        msg, value = comparePeakArea(referencePeak.lineWidths[0], targetPeak.lineWidths[0], minimalDiff)
-        if msg == INCREASED:
+      # if len(referencePeak.lineWidths) > 0 and len(targetPeak.lineWidths) > 0:
+      if referencePeak.volume and targetPeak.volume:
+        value = comparePeakArea(referencePeak.volume, targetPeak.volume, minimalDiff)
+        if value >= minimalDiff:
           peakHits.append(match)
 
   return peakHits
