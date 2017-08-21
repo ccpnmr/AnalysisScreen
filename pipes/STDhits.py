@@ -44,7 +44,7 @@ ReferenceSpectrumGroup = 'Reference_SpectrumGroup'
 STD_Control_SpectrumGroup = 'STD_Control_SpectrumGroup'
 STD_Target_SpectrumGroup = 'STD_Target_SpectrumGroup'
 SC_as_Refs = 'Use_SampleComponents_as_References'
-SGVarNames = [STD_Target_SpectrumGroup, ReferenceSpectrumGroup]
+SGVarNames = [STD_Control_SpectrumGroup, STD_Target_SpectrumGroup, ReferenceSpectrumGroup]
 
 MatchPeaksWithin = 'Match_Peaks_Within_(ppm)'
 RefPLIndex = 'Reference_PeakList'
@@ -94,7 +94,7 @@ class STDHitFinderGuiPipe(GuiPipe):
 
 
   def _updateWidgets(self):
-    self._setSpectrumGroupPullDowns(SGVarNames)
+    self._setSpectrumGroupPullDowns(SGVarNames, headerText='None',headerEnabled=True,)
 
 
 
@@ -130,6 +130,7 @@ class STDHitFinder(SpectraPipe):
     :param spectra: inputData
     :return: same spectra after finding hits. The spectra should be the same
     '''
+    controlSpectrumGroup = self._getSpectrumGroup(self._kwargs[STD_Control_SpectrumGroup])
     referenceSpectrumGroup = self._getSpectrumGroup(self._kwargs[ReferenceSpectrumGroup])
     stdTargetSpectrumGroup = self._getSpectrumGroup(self._kwargs[STD_Target_SpectrumGroup])
     sampleComponents_as_References = self._kwargs[SC_as_Refs]
@@ -140,7 +141,11 @@ class STDHitFinder(SpectraPipe):
     references = []
     if stdTargetSpectrumGroup is not None:
       if set(stdTargetSpectrumGroup.spectra).issubset(spectra): # make sure spectrumGroup.spectra are in the input spectra
-        for stdSpectrum in stdTargetSpectrumGroup.spectra:
+        if controlSpectrumGroup is None:
+          controlSpectra = [None]*len(stdTargetSpectrumGroup.spectra)
+        else:
+          controlSpectra = controlSpectrumGroup.spectra
+        for stdSpectrum, controlSTD in zip(stdTargetSpectrumGroup.spectra,controlSpectra) :
           if stdSpectrum:
             if stdSpectrum.experimentType is None:
               stdSpectrum.experimentType = 'STD.H'
@@ -151,17 +156,48 @@ class STDHitFinder(SpectraPipe):
                 if set(referenceSpectrumGroup.spectra).issubset(spectra):
                   references = referenceSpectrumGroup.spectra #make sure references are in the input spectra
             if len(stdSpectrum.peakLists)>0:
-              hits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance,
+              listsTargetHits = _find_STD_Hits(stdSpectrum=stdSpectrum,referenceSpectra=references, limitRange=minimumDistance,
                                     refPeakListIndex=DefaultPeakListIndex,  minEfficiency=minimumEfficiency )
-              hits = [i for hit in hits for i in hit] # clean up the empty sublists
-              if len(hits)>0:
-                _addNewHit(stdSpectrum, hits)
+
+              if controlSTD is not None:
+                listsControlHits = _find_STD_Hits(stdSpectrum=controlSTD, referenceSpectra=references,
+                                          limitRange=minimumDistance,
+                                          refPeakListIndex=DefaultPeakListIndex, minEfficiency=minimumEfficiency)
+
+              targetHits = [i for hit in listsTargetHits for i in hit] # clean up the empty sublists
+              controlHits = [i for hit in listsControlHits for i in hit]  # clean up the empty sublists
+
+              filteredHits = self._filterFalsePositiveHits(targetHits, controlHits)
+
+              if len(filteredHits)>0:
+                _addNewHit(stdSpectrum, filteredHits)
 
     else:
       getLogger().warning('Aborted: STD SpectrumGroup not found')
 
     SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
     return set(list(spectra)+SGSpectra)
+
+
+
+  def _filterFalsePositiveHits(self, targetHits, controlHits, limitRange=0.01):
+    ''' 
+    Checks if the same hit is present in the control spectrum
+    '''
+    falsePositivePositions = set()
+    falsePositives = []
+
+    for controlHit in controlHits:
+      if len(controlHit) == 3:
+        referencePeak, controlPeak, controlPosition = controlHit
+        falsePositivePositions.update((controlPosition[0][0],))
+
+    for falsePositivePosition in list(falsePositivePositions):
+      falsePositives += [ hit for hit in targetHits if abs(falsePositivePosition-hit[2][0][0]) <= limitRange]
+
+    targetHits = [hit for hit in targetHits if hit not in falsePositives ]
+    return targetHits
+
 
 
 STDHitFinder.register() # Registers the pipe in the pipeline

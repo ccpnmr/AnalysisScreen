@@ -66,7 +66,26 @@ def _find_STD_Hits(stdSpectrum, referenceSpectra:list, refPeakListIndex=0,limitR
       else:
         hits.append(matches)
   return hits
-#
+
+def _findFalsePositiveHits(targetHits, controlHits, limitRange=0.01):
+
+  '''
+  :param targetHits: list of peaks considered hit on the target spectrum 
+  :param controlHits: list of peaks considered hit on the control spectrum 
+  :param limitRange: limit in ppm to match two peaks as identical
+  :return: Checks hits in the control spectrum and target spectrum.
+           If the same peak appears in both, then flag the target hit as false positive
+  '''
+  falsePositivePeaks = []
+  for targetHit in targetHits:
+    for controlHit in controlHits:
+      if abs(targetHit.position[0] - controlHit.position[0]) <= limitRange:
+        falsePositivePeaks.append(targetHit)
+        targetHit.comment = 'False positive hit'
+  return falsePositivePeaks
+
+
+
 # def _find_STD_Hits(stdSpectrum, referenceSpectra: list, isMixture=False,
 #                   limitRange=0.01, minEfficiency=None, maxEfficiency=None, excludeRegions=None):
 #   hits = []

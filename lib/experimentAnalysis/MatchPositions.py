@@ -46,7 +46,6 @@ def matchingPosition(data, limitMax, limitMin):
   '''
 
   Data: the list of peak positions.
-  posToMatch: the peak from spectrum2 to match in the reference peaks
   limitRange: the limit to add on the left and on the right
 
   :return: array with matching positions
