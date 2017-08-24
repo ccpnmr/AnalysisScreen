@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 17, 2017) $"
 #=========================================================================================
 
 '''
-opens a csv file containing two columns x,y values
+opens a txt file containing two columns x,y values
 converts to ccpn spectra
 save as hdf5 in disk
 
@@ -36,16 +36,17 @@ Give input path and where to save the files
 '''
 
 
-#  all in
 import  glob
 import pandas as pd
+
+
 output_path='/Users/luca/Desktop/Andrea_Beatson/'
-input_paths = glob.glob("/Users/luca/Desktop/Andrea_Beatson/*.csv")
+input_paths = glob.glob("/Users/luca/Desktop/Andrea_Beatson/*.txt")
 
 
 for path in input_paths:
   fileName = path.split('/')[-1].split('.')[0]
-  dataFrame = pd.read_csv(path)
+  dataFrame = pd.read_table(path)
   dataFrame.columns = ['','x', 'y']
   x = dataFrame.as_matrix(columns=['x']).ravel()
   y = dataFrame.as_matrix(columns=['y']).ravel()

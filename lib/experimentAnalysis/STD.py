@@ -65,6 +65,8 @@ def _find_STD_Hits(stdSpectrum, referenceSpectra:list, refPeakListIndex=0,limitR
         hits.append(filteredMatches)
       else:
         hits.append(matches)
+  else:
+    print('Reference Spectra Not Given')
   return hits
 
 def _findFalsePositiveHits(targetHits, controlHits, limitRange=0.01):
