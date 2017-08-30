@@ -167,7 +167,7 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
     return set(list(spectra) + SGSpectra)
 
   def _filterNewHits(self, hits, targetSpectrum, references, minimumDistance):
-    if len(hits) > 0:
+    if hits:
       if len(targetSpectrum.peakLists) > 0:
         matchedRef = matchHitToReference(targetSpectrum, references, limitRange=minimumDistance,
                                          refPeakListIndex=DefaultPeakListIndex)
