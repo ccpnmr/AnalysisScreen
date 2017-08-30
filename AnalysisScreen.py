@@ -71,13 +71,13 @@ class Screen(Framework):
     self.project._logger.info("application.showScreeningPipeline()")
 
   def showHitAnalysisModule(self, position='top', relativeTo= None):
-    if not self.project.spectrumHits:
-      MessageDialog.showWarning('No Spectrum Hits Found','')
-      return
-    else:
-      self.showScreeningHits = HitsAnalysis(mainWindow=self.ui.mainWindow)
-      self.ui.mainWindow.moduleArea.addModule(self.showScreeningHits, position, None)
-      self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showHitAnalysisModule()")
-      self.project._logger.info("application.showHitAnalysisModule()")
+    # if not self.project.spectrumHits:
+    #   MessageDialog.showWarning('No Spectrum Hits Found','')
+    #   return
+    # else:
+    self.showScreeningHits = HitsAnalysis(mainWindow=self.ui.mainWindow)
+    self.ui.mainWindow.moduleArea.addModule(self.showScreeningHits, position, None)
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showHitAnalysisModule()")
+    self.project._logger.info("application.showHitAnalysisModule()")
 
     #########################################    End setup Menus      #############################################
