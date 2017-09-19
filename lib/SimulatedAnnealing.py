@@ -17,6 +17,7 @@ def randomDictMixtures(name, compounds, nMixtures):
   mixturesDict = {}
   n,b,mixtures = len(compounds),0,[]
   compounds = list(compounds)
+  compounds = random.sample(compounds, len(compounds))
   for k in range(nMixtures):
       a, b = b, b + (n+k)//nMixtures
       key = str(name)+'-'+str(k+1)
@@ -230,13 +231,14 @@ def iterateAnnealing(mixtures, startTemp=1000, finalTemp=0.01, maxSteps=1000, te
         bestIteration.update({currScore: copyNewMixtures})
         startingScore = currScore
       i += 1
-    if len(bestIteration)>0:
-      bestMixtures = findBestMixtures(bestIteration)
-      return bestMixtures
-    else:
-      print('No Better Iteration found, original mixtures are returned')
-      sc = calculateTotalScore(copyMixtures, minDistance)
-      return copyMixtures
+  if len(bestIteration)>0:
+    bestMixtures = findBestMixtures(bestIteration)
+    return bestMixtures
+  else:
+    print('No Better Iteration found, original mixtures are returned')
+    sc = calculateTotalScore(copyMixtures, minDistance)
+    return copyMixtures
+
 
 
 def showScoresPerMixture(mixtures,minDistance):
