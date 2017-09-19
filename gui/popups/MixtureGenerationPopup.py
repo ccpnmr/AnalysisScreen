@@ -200,6 +200,9 @@ class MixtureGenerationPopup(CcpnDialog):
     self.noiseLevelSpinbox = DoubleSpinbox(self)
     self.noiseLevelSpinbox.setMaximum(100000.00)
 
+    self.noiseLevelFactorLabel = Label(self, text='Noise Level Factor')
+    self.noiseLevelFactorSpinbox = DoubleSpinbox(self, value=10.0, min=0.01, step=0.1)
+
     # 4
     self.filterLabel = Label(self, text="Select filter size")
     self.filterSpinbox = Spinbox(self)
@@ -216,6 +219,7 @@ class MixtureGenerationPopup(CcpnDialog):
     widgetsGeneralTab = (self.pickPeaksLabel, self.pickPeaksRadioButtons,
                          self.noiseLabel, self.noiseLevelRadioButtons,
                          self.noiseThresholdLabel, self.noiseLevelSpinbox,
+                         self.noiseLevelFactorLabel, self.noiseLevelFactorSpinbox,
                          self.filterLabel, self.filterSpinbox,
                          self.maximumFilterMode, self.maximumFilterModePulldownList
                          )
@@ -257,7 +261,8 @@ class MixtureGenerationPopup(CcpnDialog):
                self.noiseThresholdLabel, self.noiseLevelSpinbox,
                self.filterLabel, self.filterSpinbox,
                self.maximumFilterMode, self.maximumFilterModePulldownList,
-               self.excludedRegionsWidgets)
+               self.excludedRegionsWidgets, self.noiseLevelFactorLabel,
+               self.noiseLevelFactorSpinbox)
 
     if selected == 'Automatic':
       self.noiseLevelRadioButtons.radioButtons[1].setChecked(True)
@@ -346,6 +351,7 @@ class MixtureGenerationPopup(CcpnDialog):
     filter = self.filterSpinbox.value()
     filterMode = self.maximumFilterModePulldownList.getText()
     ignoredRegions = self.excludedRegionsWidgets._getExcludedRegions()
+    factor =  self.noiseLevelFactorSpinbox.value()
 
     params = OrderedDict((
                         ('calculationMethod', calculationMethod),
@@ -358,6 +364,7 @@ class MixtureGenerationPopup(CcpnDialog):
                         ('peakPicking', peakPicking),
                         ('noiseLevel', noiseLevel),
                         ('threshold', threshold),
+                        ('factor', factor),
                         ('filter', filter),
                         ('filterMode', filterMode),
                         ('ignoredRegions', ignoredRegions)

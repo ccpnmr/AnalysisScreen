@@ -19,6 +19,7 @@ def _initialiseMixtures(params):
   spectra = _getSpectra(params)
   replaceMixtures = True #_getReplace(params)
   peaksAreTopick = _getPeakPicking(params)
+  factor = _getFactor(params)
   noiseLevel = _getNoiseLevel(params)
   pickFilter = _getFilter(params)
   pickFilterMode = _getFilterMode(params)
@@ -27,7 +28,7 @@ def _initialiseMixtures(params):
     project = _getProjectFromSpectrum(spectra[0])
     currentVirtualSamples = _getCurrentVirtualSamples(project)
     if peaksAreTopick:
-      _pickPeaks(spectra, pickFilter, pickFilterMode, ignoredRegions, noiseLevel)
+      _pickPeaks(spectra, pickFilter, factor, pickFilterMode, ignoredRegions, noiseLevel)
 
     if replaceMixtures:
       _deleteMixtures(currentVirtualSamples)
@@ -69,6 +70,9 @@ def _getPeakPicking(params):
   value = params['peakPicking']
   if value == 'Automatic':
     return True
+
+def _getFactor(params):
+  return params['factor']
 
 def _getNoiseLevel(params):
   value = params['noiseLevel']
@@ -169,11 +173,10 @@ def _getCurrentVirtualSamples(project):
       virtualSample = sample
       currentVirtualSamples.append(virtualSample)
   return currentVirtualSamples
-
-def _pickPeaks(spectra, filter, filterMode, ignoredRegions, noiseThreshold):
+def _pickPeaks(spectra, filter, factor, filterMode, ignoredRegions, noiseThreshold):
   for spectrum in spectra:
     spectrum.peakLists[0].pickPeaks1dFiltered(size=filter, mode=filterMode, excludeRegions=ignoredRegions,
-                                              positiveNoiseThreshold=noiseThreshold)
+                                              positiveNoiseThreshold=noiseThreshold, factor=factor)
 
 
 def _setSampleComponentScores(project,sample, mixtureCompounds, minDist):

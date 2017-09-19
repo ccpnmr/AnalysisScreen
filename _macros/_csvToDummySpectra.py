@@ -39,8 +39,8 @@ Give input path and where to save the files
 #  all in
 import  glob
 import pandas as pd
-output_path='/Users/luca/Desktop/Andrea_Beatson/'
-input_paths = glob.glob("/Users/luca/Desktop/Andrea_Beatson/*.csv")
+output_path='/Users/luca/PycharmProjects/LucaCodes/screening1/data/real_data/hdf5/'
+input_paths = glob.glob("/Users/luca/PycharmProjects/LucaCodes/screening1/data/real_data/*.csv")
 
 
 for path in input_paths:
