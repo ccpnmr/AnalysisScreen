@@ -37,7 +37,7 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
-
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from functools import partial
 from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import REFERENCEPEAKLIST, TARGETPEAKLIST
 from ccpn.core.lib.Notifiers import Notifier
@@ -260,6 +260,10 @@ class HitsAnalysis(CcpnModule):
     self.exportButton = Button(self.settingsWidget, text='Export hits...', icon=self.exportIcon,
                                        callback=self._exportHitsToXlsx, hAlign='l',
                                        grid=(row, 0))
+
+    Spacer(self.settingsWidget, 5, 5
+             , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+             , grid=(row+1,2), gridSpan=(1,1))
 
   def _magageHitRegions(self):
     if self.sender() is not None:
