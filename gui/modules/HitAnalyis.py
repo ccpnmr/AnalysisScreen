@@ -22,7 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
@@ -262,7 +262,7 @@ class HitsAnalysis(CcpnModule):
                                        grid=(row, 0))
 
     Spacer(self.settingsWidget, 5, 5
-             , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+             , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
              , grid=(row+1,2), gridSpan=(1,1))
 
   def _magageHitRegions(self):
@@ -377,7 +377,7 @@ class HitsAnalysis(CcpnModule):
     self.compoundView.setSmiles('h')
     self.substanceDetailsLabel.set(ReferenceLabel + spectrum.name)
     self.listWidgetsHitDetails.clear()
-    header = QtGui.QListWidgetItem('\n No Substance Details Found')
+    header = QtWidgets.QListWidgetItem('\n No Substance Details Found')
     header.setFlags(QtCore.Qt.NoItemFlags)
     header.setTextColor(ListWidgetHeaderColor)
     self.listWidgetsHitDetails.addItem(header)
@@ -561,12 +561,12 @@ class HitsAnalysis(CcpnModule):
     ''' Documentation '''
 
     if value is not None:
-      item = QtGui.QListWidgetItem(name+str(value))
+      item = QtWidgets.QListWidgetItem(name+str(value))
       item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)# | QtCore.Qt.ItemIsEditable)
       self.listWidgetsHitDetails.addItem(item)
     else:
       value = 'Not Given'
-      item = QtGui.QListWidgetItem(name+str(value))
+      item = QtWidgets.QListWidgetItem(name+str(value))
       self.listWidgetsHitDetails.addItem(item)
       item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)# | QtCore.Qt.ItemIsEditable)
 
@@ -586,7 +586,7 @@ class HitsAnalysis(CcpnModule):
 
 
       ## setSpectrum Hit
-      # headerHit =  QtGui.QListWidgetItem('\nSpectrum Hit Details')
+      # headerHit =  QtWidgets.QListWidgetItem('\nSpectrum Hit Details')
       # headerHit.setFlags(QtCore.Qt.NoItemFlags)
       # headerHit.setTextColor(ListWidgetHeaderColor)
       # self.listWidgetsHitDetails.addItem(headerHit)
@@ -596,7 +596,7 @@ class HitsAnalysis(CcpnModule):
       ## setSubstance
 
       self.substanceDetailsLabel.set(ReferenceLabel+substance.name)
-      headerSubstance =  QtGui.QListWidgetItem('\nSubstance Details')
+      headerSubstance =  QtWidgets.QListWidgetItem('\nSubstance Details')
       headerSubstance.setFlags(QtCore.Qt.NoItemFlags)
       headerSubstance.setTextColor(ListWidgetHeaderColor)
       self.listWidgetsHitDetails.addItem(headerSubstance)
@@ -608,7 +608,7 @@ class HitsAnalysis(CcpnModule):
         sampleComponent = substance.sampleComponents[0]
         if sampleComponent is not None:
           sample = sampleComponent.sample
-          headerSample =  QtGui.QListWidgetItem('\n'+sample.name+' Details')
+          headerSample =  QtWidgets.QListWidgetItem('\n'+sample.name+' Details')
           headerSample.setFlags(QtCore.Qt.NoItemFlags)
           headerSample.setTextColor(ListWidgetHeaderColor)
           self.listWidgetsHitDetails.addItem(headerSample)
@@ -706,7 +706,7 @@ class CustomPeakTableWidget(PeakListTableWidget):
       self.pLwidget.hide()
       self.posUnitPulldownLabel.hide()
       self.posUnitPulldown.hide()
-      # self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding))
+      # self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding))
 
 
 
@@ -716,7 +716,7 @@ if __name__ == '__main__':
 
   app = TestApplication()
 
-  win = QtGui.QMainWindow()
+  win = QtWidgets.QMainWindow()
 
   moduleArea = CcpnModuleArea(mainWindow=None, )
   module = HitsAnalysis(mainWindow=None)

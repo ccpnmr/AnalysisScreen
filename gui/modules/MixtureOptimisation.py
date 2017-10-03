@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from ccpn.AnalysisScreen.lib.MixturesGeneration import _getMixturesFromVirtualSamples, _createSamples
 from ccpn.AnalysisScreen.lib.SimulatedAnnealing import  iterateAnnealing, showScoresPerMixture
@@ -17,7 +17,7 @@ class SimulatedAnnealingWidgets(Frame):
   def __init__(self, initialTemp=1000, finalTemp=1, stepTemp=1000, constantTemp=30, coolingMethod='Linear', iterations=3):
     Frame.__init__(self)
 
-    self.mainLayout = QtGui.QGridLayout()
+    self.mainLayout = QtWidgets.QGridLayout()
     self.setLayout(self.mainLayout)
     self.coolingMethod = coolingMethod
 
@@ -118,13 +118,13 @@ class MixtureOptimisation(CcpnModule):
 
     ######## ======== Set Main Layout ====== ########
     self.mainFrame = Frame()
-    self.mainLayout = QtGui.QVBoxLayout()
+    self.mainLayout = QtWidgets.QVBoxLayout()
     self.mainFrame.setLayout(self.mainLayout)
     self.layout.addWidget(self.mainFrame, 0, 0)
 
     ######## ======== Set Secondary Layout ====== ########
-    self.settingFrameLayout = QtGui.QHBoxLayout()
-    self.buttonsFrameLayout = QtGui.QHBoxLayout()
+    self.settingFrameLayout = QtWidgets.QHBoxLayout()
+    self.buttonsFrameLayout = QtWidgets.QHBoxLayout()
     self.mainLayout.addLayout(self.settingFrameLayout)
     self.mainLayout.addLayout(self.buttonsFrameLayout)
 
@@ -153,7 +153,7 @@ class MixtureOptimisation(CcpnModule):
 
   def _setTabOtherOptions(self):
     self.tab2Frame = Frame()
-    self.tab2Layout = QtGui.QGridLayout()
+    self.tab2Layout = QtWidgets.QGridLayout()
     self.tab2Frame.setLayout(self.tab2Layout)
     self.tabWidget.addTab(self.tab2Frame, 'Others')
 
