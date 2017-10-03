@@ -409,7 +409,7 @@ class MixtureGenerationPopup(CcpnDialog):
 
 
 
-class SAsettingPopup(QtGui.QDialog):
+class SAsettingPopup(QtWidgets.QDialog):
 
   def __init__(self, parent=None, project=None, params=None,   **kw):
     super(SAsettingPopup, self).__init__(parent)
