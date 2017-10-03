@@ -24,7 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 
 from functools import partial
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.AnalysisScreen.lib.MixturesGeneration import _getCompounds, _createSamples
 from ccpn.AnalysisScreen.lib.SimulatedAnnealing import calculateOverlapCount,scoreMixture
@@ -84,13 +84,13 @@ class MixtureAnalysis(CcpnModule):
 
     ######## ======== Set Main Layout ====== ########
     self.mainFrame = Frame(self.mainWidget, setLayout=False)
-    self.mainLayout = QtGui.QVBoxLayout()
+    self.mainLayout = QtWidgets.QVBoxLayout()
     self.mainFrame.setLayout(self.mainLayout)
     self.mainWidget.getLayout().addWidget(self.mainFrame, 0,0)
 
     ######## ======== Set Secondary Layout ====== ########
-    self.settingFrameLayout = QtGui.QHBoxLayout()
-    self.analysisFrameLayout = QtGui.QHBoxLayout()
+    self.settingFrameLayout = QtWidgets.QHBoxLayout()
+    self.analysisFrameLayout = QtWidgets.QHBoxLayout()
     self.mainLayout.addLayout(self.settingFrameLayout)
     self.mainLayout.addLayout(self.analysisFrameLayout)
 
@@ -104,7 +104,7 @@ class MixtureAnalysis(CcpnModule):
 
     ######## ======== Create 1thTab with peak Table and Molecule view  ====== ########
     self.tabPeaksMolecule = Frame(None, setLayout=False)
-    self.tabPeaksMoleculeLayout = QtGui.QGridLayout()
+    self.tabPeaksMoleculeLayout = QtWidgets.QGridLayout()
     self.tabPeaksMolecule.setLayout(self.tabPeaksMoleculeLayout)
     self.tabWidget.addTab(self.tabPeaksMolecule, 'Components peaks')
     self.toolBarComponents = QtGui.QToolBar()
@@ -112,21 +112,21 @@ class MixtureAnalysis(CcpnModule):
 
     ######## ========  Create 2ndTab with multiple Molecule view ====== ########
     self.tabMoleculeView = Frame(None, setLayout=False)
-    self.tabMoleculeViewLayout = QtGui.QHBoxLayout()
+    self.tabMoleculeViewLayout = QtWidgets.QHBoxLayout()
     self.tabMoleculeView.setLayout(self.tabMoleculeViewLayout)
     self.tabWidget.addTab(self.tabMoleculeView, 'Components structure')
     self._tableComponentPeaks()
 
     ######## ========  Create 3thTab with Components Info ====== ########
     self.tabMoleculeInfo = Frame(None, setLayout=False)
-    self.tabMoleculeInfoLayout = QtGui.QVBoxLayout()
+    self.tabMoleculeInfoLayout = QtWidgets.QVBoxLayout()
     self.tabMoleculeInfo.setLayout(self.tabMoleculeInfoLayout)
     self.tabWidget.addTab(self.tabMoleculeInfo, 'Components Info')
     self._widgetsTabComponentsInfo()
 
     ######## ========  Create 4thTab Mixtures Management ====== ########
     self.tabMixturesManagement = Frame(None, setLayout=False)
-    self.tabMixturesManagementLayout = QtGui.QGridLayout()
+    self.tabMixturesManagementLayout = QtWidgets.QGridLayout()
     self.tabMixturesManagement.setLayout(self.tabMixturesManagementLayout)
     self.tabWidget.addTab(self.tabMixturesManagement, 'Mixtures Management')
     self._mixtureManagementWidgets()
@@ -370,7 +370,7 @@ class MixtureAnalysis(CcpnModule):
     if sample is not None:
       self.leftMixtureLineEdit.setText(str(sample.name))
       color = QtGui.QColor('Red')
-      header = QtGui.QListWidgetItem(str(sample.pid))
+      header = QtWidgets.QListWidgetItem(str(sample.pid))
       header.setFlags(QtCore.Qt.NoItemFlags)
       header.setTextColor(color)
       self.leftListWidget.addItem(header)
@@ -379,7 +379,7 @@ class MixtureAnalysis(CcpnModule):
           if len(sampleComponent.substance.referenceSpectra)>0:
             spectrum = sampleComponent.substance.referenceSpectra[0]
             if spectrum is not None:
-              item = QtGui.QListWidgetItem(str(spectrum.pid) + ' Single Score = ' + str(sampleComponent.score))
+              item = QtWidgets.QListWidgetItem(str(spectrum.pid) + ' Single Score = ' + str(sampleComponent.score))
               self.leftListWidget.addItem(item)
 
 
@@ -427,7 +427,7 @@ class MixtureAnalysis(CcpnModule):
       self.rightMixtureLineEdit.setText(str(sample.name))
       self.rightListWidget.clear()
       color = QtGui.QColor('Red')
-      header = QtGui.QListWidgetItem(str(sample.name))
+      header = QtWidgets.QListWidgetItem(str(sample.name))
       header.setFlags(QtCore.Qt.NoItemFlags)
       header.setTextColor(color)
       self.rightListWidget.addItem(header)
@@ -436,7 +436,7 @@ class MixtureAnalysis(CcpnModule):
           if len(sampleComponent.substance.referenceSpectra)>0:
             spectrum = sampleComponent.substance.referenceSpectra[0]
             if spectrum is not None:
-              item = QtGui.QListWidgetItem(str(spectrum.pid) + ' Single Score = ' + str(sampleComponent.score))
+              item = QtWidgets.QListWidgetItem(str(spectrum.pid) + ' Single Score = ' + str(sampleComponent.score))
               self.rightListWidget.addItem(item)
       self.rightListWidget.currentItemChanged.connect(self._getListWidgetItems)
 
@@ -539,7 +539,7 @@ class MixtureAnalysis(CcpnModule):
     self.leftCompounds = _getCompounds(leftSpectra)
     leftComponentsScores = self.temporarySampleComponentsScore(self.leftCompounds, self.minimalDistance )
     # self.leftListWidget.clear()
-    header = QtGui.QListWidgetItem(
+    header = QtWidgets.QListWidgetItem(
       'Predicted Tot Score' + str(round(scoreMixture(self.leftCompounds, self.minimalDistance), 2)))
     header.setFlags(QtCore.Qt.NoItemFlags)
     header.setTextColor(QtGui.QColor('Red'))
@@ -553,7 +553,7 @@ class MixtureAnalysis(CcpnModule):
     rightComponentsScores = self.temporarySampleComponentsScore(self.rightCompounds , self.minimalDistance)
     self.rightListWidget.clear()
 
-    header = QtGui.QListWidgetItem('Predicted Tot Score' + str(round(scoreMixture(self.rightCompounds, self.minimalDistance), 2)))
+    header = QtWidgets.QListWidgetItem('Predicted Tot Score' + str(round(scoreMixture(self.rightCompounds, self.minimalDistance), 2)))
     header.setFlags(QtCore.Qt.NoItemFlags)
     header.setTextColor(QtGui.QColor('Red'))
     self.rightListWidget.addItem(header)
@@ -648,7 +648,7 @@ class MixtureAnalysis(CcpnModule):
 
   def _initialLabelListWidgetRight(self):
     ''' Creates an initial message on the right ListWidget '''
-    item = QtGui.QListWidgetItem(' Drag and drop items across to calculate the new scores')
+    item = QtWidgets.QListWidgetItem(' Drag and drop items across to calculate the new scores')
     item.setFlags(QtCore.Qt.NoItemFlags)
     self.rightListWidget.addItem(item)
 
@@ -787,7 +787,7 @@ if __name__ == '__main__':
 
   app = TestApplication()
 
-  win = QtGui.QMainWindow()
+  win = QtWidgets.QMainWindow()
 
   moduleArea = CcpnModuleArea(mainWindow=None, )
   module = MixtureAnalysis(mainWindow=None)

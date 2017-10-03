@@ -22,7 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from ccpn.AnalysisScreen.gui.modules .MixtureAnalysis import MixtureAnalysis
 from ccpn.AnalysisScreen.gui.modules .MixtureOptimisation import SimulatedAnnealingWidgets
 from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
@@ -79,18 +79,18 @@ class MixtureGenerationPopup(CcpnDialog):
 
 
   def _setMainLayout(self):
-    self.mainLayout = QtGui.QGridLayout()
+    self.mainLayout = QtWidgets.QGridLayout()
     self.setLayout(self.mainLayout)
     self.resize(600, 500)
 
   def _setTabs(self):
     self.tabWidget = QtGui.QTabWidget()
     self.tabGeneralSetup = Frame(self, setLayout=False)
-    self.tabGeneralSetupLayout = QtGui.QGridLayout()
+    self.tabGeneralSetupLayout = QtWidgets.QGridLayout()
     self.tabGeneralSetup.setLayout(self.tabGeneralSetupLayout)
 
     self.tabPickPeaksSetup = Frame(self, setLayout=False)
-    self.tabPickPeaksSetupLayout = QtGui.QGridLayout()
+    self.tabPickPeaksSetupLayout = QtWidgets.QGridLayout()
     self.tabPickPeaksSetup.setLayout(self.tabPickPeaksSetupLayout)
 
     self.tabWidget.addTab(self.tabGeneralSetup, 'General Setup')
@@ -423,7 +423,7 @@ class SAsettingPopup(QtGui.QDialog):
     self._addWidgetsToMainLayout()
 
   def _setMainLayout(self):
-    self.mainLayout = QtGui.QVBoxLayout()
+    self.mainLayout = QtWidgets.QVBoxLayout()
     self.setLayout(self.mainLayout)
     self.setWindowTitle("Simulated Annealing Setup")
     self.resize(150, 300)
