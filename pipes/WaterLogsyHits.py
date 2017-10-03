@@ -161,7 +161,15 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
               references = referenceSpectrumGroup.spectra
           hits = wl.findWaterLogsyHits(wLTarget=targetSpectrum, wLControl=controlSpectrum,
                 mode=mode, limitRange=minimumDistance, limitIntensityChange=float(self._kwargs[MinEfficiency]))
-          self._filterNewHits(hits, targetSpectrum, references, minimumDistance)
+          filtered = self._filterNewHits(hits, targetSpectrum, references, minimumDistance)
+
+          # quick hack for demo on EM Symposium
+          if filtered:
+            if len(filtered)>0:
+              from ccpn.AnalysisScreen.gui.modules.HitAnalyis import HitsAnalysis
+              hitModule = HitsAnalysis(self.mainWindow)
+              self.mainWindow.moduleArea.addModule(hitModule)
+
 
     SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
     return set(list(spectra) + SGSpectra)
@@ -188,6 +196,7 @@ class WaterLogsyHitFinderPipe(SpectraPipe):
                   matchedHit.append(i)
         if len(matchedHit) > 0:
           _addNewHit(targetSpectrum, matchedHit)
+          return matchedHit
 
 WaterLogsyHitFinderPipe.register() # Registers the pipe in the pipeline
 

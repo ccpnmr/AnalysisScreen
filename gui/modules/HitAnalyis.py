@@ -125,11 +125,11 @@ class HitsAnalysis(CcpnModule):
     column += 1
     self.peakHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
                                           grid=(1, column))
-    self.peakHitWidgetsFrame.setMinimumWidth(400)
+    self.peakHitWidgetsFrame.setMinimumWidth(300)
     # column += 1
     self.referenceWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
                                           grid=(0, column))
-    self.referenceWidgetsFrame.setMinimumWidth(400)
+    self.referenceWidgetsFrame.setMinimumWidth(300)
     column += 1
     self.substanceDetailsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
                                           grid=(0, column), gridSpan=(2, column))
