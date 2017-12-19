@@ -32,7 +32,7 @@ from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from ccpn.AnalysisScreen.lib.experimentAnalysis.STD import _calculatePeakEffiency
+from ccpn.AnalysisScreen.lib.experimentAnalysis.STD import _calculatePeakEfficiency
 from ccpn.util.Logging import getLogger , _debug3
 
 ########################################################################################################################
@@ -132,8 +132,8 @@ class STDEfficiencyPipe(SpectraPipe):
       for stdSpectrum, offResonanceSpectrum, onResonanceSpectrum in zip(
           stdSpectrumGroup.spectra, offResonanceSpectrumGroup.spectra,onResonanceSpectrumGroup.spectra):
 
-        _calculatePeakEffiency(stdSpectrum, onResonanceSpectrum, offResonanceSpectrum, n_peakList=DefaultPeakListIndex,
-                               limitRange=minimumDistance)
+        _calculatePeakEfficiency(stdSpectrum, onResonanceSpectrum, offResonanceSpectrum, n_peakList=DefaultPeakListIndex,
+                                 limitRange=minimumDistance)
       self.project._logger.info('Peak efficiency calculated and stored in peak "figureOfMerit" ')
     else:
       getLogger().warning('Aborted: SpectrumGroups contain different lenght of spectra.')
