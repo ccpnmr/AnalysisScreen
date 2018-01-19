@@ -742,7 +742,7 @@ class MixtureAnalysis(CcpnModule):
     # ''' Export a simple xlxs file from the results '''
     # self.nameAndPath = ''
     # fType = 'XLS (*.xlsx)'
-    # dialog = QtGui.QFileDialog
+    # dialog = QtWidgets.QFileDialog
     # filePath = dialog.getSaveFileName(self,filter=fType)
     # self.nameAndPath = filePath
     #
@@ -761,7 +761,7 @@ class MixtureAnalysis(CcpnModule):
     dataFrame = self.createMixturesDataFrame()
 
     fType = 'XLSX (*.xlsx)'
-    dialog = QtGui.QFileDialog
+    dialog = QtWidgets.QFileDialog
     filePath = dialog.getSaveFileName(self, filter=fType)
     dataFrame.to_excel(filePath, sheet_name='Mixtures', index=False)
 
