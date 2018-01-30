@@ -394,6 +394,8 @@ class MixtureGenerationPopup(CcpnDialog):
     mixtureAnalysisModule = self.moduleArea.addModule(mixtureAnalysis, position='bottom')
 
     spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
+    self.mainWindow.moduleArea.addModule(spectrumDisplay, position='top'
+                                    , relativeTo=self.mainWindow.moduleArea)
     spectrumDisplay.setWhatsThis('MixtureDisplay')
 
     self.moduleArea.moveModule(spectrumDisplay, position='top', neighbor=mixtureAnalysisModule)
