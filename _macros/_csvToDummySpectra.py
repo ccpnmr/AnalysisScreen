@@ -59,3 +59,38 @@ from ccpn.util.Hdf5 import convertDataToHdf5
 for spectrum in  project.spectra:
   spectrumPath = str(output_path)+str(spectrum.name)+'.hdf5'
   convertDataToHdf5(spectrum, spectrumPath)
+
+ds = project.createDummySpectrum(('H',), str("TEST"))
+ds.positions = [0,1,2,3,4,5]
+ds.intensities = [0,0,22,0,0,0]
+ds.pointCounts = (len(ds._intensities),)
+ds.referenceValues = (ds.positions[0],)
+ds.totalPointCounts = (len(ds._intensities),)
+ds.aliasingLimits = ((0,5),)
+print(ds.aliasingLimits, ds.spectrumLimits)
+from ccpn.util.Hdf5 import convertDataToHdf5
+convertDataToHdf5(ds, "/Users/luca/Desktop/test.hdf5")
+
+# Using just python
+import numpy as np
+f = open("/Users/luca/Desktop/cpd_WL.csv", "r")
+lines = f.read().split("\n") # "\r\n" if needed
+x = []
+y = []
+for line in lines:
+    if line != "": # add other needed checks to skip titles
+        cols = line.split(",")
+        x.append(float(cols[0]))
+        y.append(float(cols[1]))
+xArray = np.array(x)
+yArray = np.array(y)
+
+ds = project.createDummySpectrum(('H',), str("TEST"))
+ds.positions = np.around(xArray,3)
+ds.intensities = yArray
+ds.referencePoints = (0.0,)
+ds.referenceValues = (ds.positions[0],)
+ds.pointCounts = (len(ds._intensities),)
+ds.spectralWidths = ((ds.positions[0] + abs(ds.positions[-1])),)
+from ccpn.util.Hdf5 import convertDataToHdf5
+convertDataToHdf5(ds, outputPath="/Users/luca/Desktop/cpd_WL.hdf5" )

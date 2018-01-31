@@ -98,7 +98,7 @@ def _findFalsePositiveHits(targetHits, controlHits, limitRange=0.01):
 #   return hits
 
 
-def _calculatePeakEffiency(stdSpectrum, onResonanceSpectrum, offResonanceSpectrum, n_peakList=0, limitRange=0.01):
+def _calculatePeakEfficiency(stdSpectrum, onResonanceSpectrum, offResonanceSpectrum, n_peakList=0, limitRange=0.01):
   ''' matchs the hit peak to the on and off Resonance and determines the efficiency change'''
   # if not onResonanceSpectrum.peakLists[n_peakList].peaks and not offResonanceSpectrum.peakLists[n_peakList].peaks: return
 

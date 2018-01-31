@@ -1,4 +1,6 @@
 
+############## ========= PRIVATE  MACRO ========= #########################
+
 
 #=========================================================================================
 # Licence, Reference and Credits
@@ -12,34 +14,28 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:24 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2017-07-07 16:32:25 +0100 (Fri, July 07, 2017) $"
 __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: TJ $"
-__date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
+__author__ = "$Author: Luca Mureddu $"
+__date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 17, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
+'''
+Set 1D  spectrum positions and intensities from a dataset. Spectrum previously created as dummy spectrum. 
 
+'''
 
-from ccpn.framework import Framework
-from ccpn.AnalysisScreen.AnalysisScreen import Screen as Application
-from ccpn.framework.Version import applicationVersion
-
-if __name__ == '__main__':
-  # from ccpn.util.GitTools import getAllRepositoriesGitCommit
-  # applicationVersion = 'development: {AnalysisScreen:.8s}'.format(**getAllRepositoriesGitCommit())
-
-  # argument parser
-  parser = Framework.defineProgramArguments()
-
-  # add any additional commandline argument here
-  commandLineArguments = parser.parse_args()
-
-  application = Application(Framework.AnalysisScreen, applicationVersion, commandLineArguments)
-  Framework._getApplication = lambda: application
-  application.start()
+for dataSet in project.dataSets:
+  if dataSet.title == "spectra":
+    if len(dataSet.data) > 0:
+      for datum in dataSet.data:
+        spectrum = datum.attachedObject
+        if spectrum:
+          spectrum.positions = datum.parameters["positions"]
+          spectrum.intensities = datum.parameters["intensities"]

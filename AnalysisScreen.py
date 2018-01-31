@@ -10,7 +10,7 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.modules.PipelineModule import GuiPipeline
 from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
 
-applicationName = 'Screen'
+# applicationName = 'Screen'
 
 _loadScreenPipes()  # load screen specific pipes
 

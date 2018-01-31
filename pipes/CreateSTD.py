@@ -90,7 +90,7 @@ class STDCreatorGuiPipe(GuiPipe):
     row += len(SGVarNames)
 
     self.newSTDSpectrumGroupLabel = Label(self.pipeFrame, NewSTDSpectrumGroupName, grid=(row, 0))
-    setattr(self, NewSTDSpectrumGroupName, LineEdit(self.pipeFrame, text=DefaultSTDname, textAligment='l', hAlign='l', grid=(row, 1)))
+    setattr(self, NewSTDSpectrumGroupName, LineEdit(self.pipeFrame, text=DefaultSTDname, textAlignment='l', hAlign='l', grid=(row, 1)))
 
     self._updateWidgets()
 
