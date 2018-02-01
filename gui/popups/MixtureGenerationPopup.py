@@ -45,8 +45,8 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 class MixtureGenerationPopup(CcpnDialog):
 
-  def __init__(self, mainWindow, title='Mixture Generation Setup', **kw):
-    CcpnDialog.__init__(self, parent=mainWindow, setLayout=False, windowTitle=title, **kw)
+  def __init__(self, parent=None, mainWindow=None, title='Mixture Generation Setup', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
 
     if mainWindow is None: #This allows opening the popup for graphical tests
       self.project = None

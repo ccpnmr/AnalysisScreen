@@ -50,7 +50,7 @@ class Screen(Framework):
 
   def showMixtureGenerationPopup(self):
     """Displays Sample creation popup."""
-    popup = MixtureGenerationPopup(mainWindow=self.ui.mainWindow)
+    popup = MixtureGenerationPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
     popup.exec_()
     popup.raise_()
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
