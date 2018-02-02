@@ -99,7 +99,7 @@ class MixtureAnalysis(CcpnModule):
     self._scoringTable()
 
     ######## ======== Set Tabs  ====== ########
-    self.tabWidget = QtGui.QTabWidget()
+    self.tabWidget = QtWidgets.QTabWidget()
     self.analysisFrameLayout.addWidget(self.tabWidget)
 
     ######## ======== Create 1thTab with peak Table and Molecule view  ====== ########

@@ -84,7 +84,7 @@ class MixtureGenerationPopup(CcpnDialog):
     self.resize(600, 500)
 
   def _setTabs(self):
-    self.tabWidget = QtGui.QTabWidget()
+    self.tabWidget = QtWidgets.QTabWidget()
     self.tabGeneralSetup = Frame(self, setLayout=False)
     self.tabGeneralSetupLayout = QtWidgets.QGridLayout()
     self.tabGeneralSetup.setLayout(self.tabGeneralSetupLayout)

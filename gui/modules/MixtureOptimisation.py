@@ -129,7 +129,7 @@ class MixtureOptimisation(CcpnModule):
     self.mainLayout.addLayout(self.buttonsFrameLayout)
 
     ######## ======== Set Tabs  ====== ########
-    self.tabWidget = QtGui.QTabWidget()
+    self.tabWidget = QtWidgets.QTabWidget()
     self.settingFrameLayout.addWidget(self.tabWidget)
     self.scoringListWidget = ListWidget(self, contextMenu=False)
     self.settingFrameLayout.addWidget(self.scoringListWidget)
