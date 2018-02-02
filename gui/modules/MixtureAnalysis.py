@@ -372,7 +372,7 @@ class MixtureAnalysis(CcpnModule):
       color = QtGui.QColor('Red')
       header = QtWidgets.QListWidgetItem(str(sample.pid))
       header.setFlags(QtCore.Qt.NoItemFlags)
-      header.setTextColor(color)
+      # header.setTextColor(color)
       self.leftListWidget.addItem(header)
       for sampleComponent in sample.sampleComponents:
         if sampleComponent.substance is not None:
@@ -542,7 +542,7 @@ class MixtureAnalysis(CcpnModule):
     header = QtWidgets.QListWidgetItem(
       'Predicted Tot Score' + str(round(scoreMixture(self.leftCompounds, self.minimalDistance), 2)))
     header.setFlags(QtCore.Qt.NoItemFlags)
-    header.setTextColor(QtGui.QColor('Red'))
+    # header.set(QtGui.QColor('Red'))
     self.leftListWidget.addItem(header)
 
     for i in leftComponentsScores:
@@ -555,7 +555,7 @@ class MixtureAnalysis(CcpnModule):
 
     header = QtWidgets.QListWidgetItem('Predicted Tot Score' + str(round(scoreMixture(self.rightCompounds, self.minimalDistance), 2)))
     header.setFlags(QtCore.Qt.NoItemFlags)
-    header.setTextColor(QtGui.QColor('Red'))
+    # header.setTextColor(QtGui.QColor('Red'))
     self.rightListWidget.addItem(header)
     for i in rightComponentsScores:
       self.rightListWidget.addItem(i)

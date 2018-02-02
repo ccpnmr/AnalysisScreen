@@ -180,7 +180,7 @@ class HitsAnalysis(CcpnModule):
     self.peakHitTableLabel = Label(self.peakHitWidgetsFrame, text='Target Peak Hits',vAlign='t',
                                        grid=(0, 0))
 
-    self.targetPeakTable = CustomPeakTableWidget(self.peakHitWidgetsFrame, moduleParent=self, application=self.application,
+    self.targetPeakTable = CustomPeakTableWidget(self.peakHitWidgetsFrame, moduleParent=self, mainWindow=self.mainWindow,
                                        grid=(1, 0))
 
     self.peakButtons = ButtonList(self.peakHitWidgetsFrame, texts=['', '', '', ],
@@ -198,7 +198,7 @@ class HitsAnalysis(CcpnModule):
     self.referencePeakTableLabel = Label(self.referenceWidgetsFrame, text='Matched Reference Peak', vAlign='t',
                                    grid=(0, 0))
 
-    self.referencePeakTable = CustomPeakTableWidget(self.referenceWidgetsFrame, moduleParent=self, application=self.application,
+    self.referencePeakTable = CustomPeakTableWidget(self.referenceWidgetsFrame, moduleParent=self, mainWindow=self.mainWindow,
                                  grid=(1, 0))
 
     # self.referenceButtons = ButtonList(self.referenceWidgetsFrame, texts=['', '', '', ],
@@ -697,10 +697,10 @@ class HitsAnalysis(CcpnModule):
 
 class CustomPeakTableWidget(PeakListTableWidget):
 
-  def __init__(self, parent, moduleParent, application, peakList=None, **kwds):
+  def __init__(self, parent, moduleParent, mainWindow, peakList=None, **kwds):
 
-    if application is not None:
-      PeakListTableWidget.__init__(self, parent=parent, moduleParent=moduleParent, application=application,
+    if mainWindow is not None:
+      PeakListTableWidget.__init__(self, parent=parent, moduleParent=moduleParent, mainWindow=mainWindow,
                                    peakList=peakList, **kwds)
 
       self.pLwidget.hide()
