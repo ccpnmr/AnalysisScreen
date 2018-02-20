@@ -429,7 +429,7 @@ class MixtureAnalysis(CcpnModule):
       color = QtGui.QColor('Red')
       header = QtWidgets.QListWidgetItem(str(sample.name))
       header.setFlags(QtCore.Qt.NoItemFlags)
-      header.setTextColor(color)
+      # header.setTextColor(color)
       self.rightListWidget.addItem(header)
       for sampleComponent in sample.sampleComponents:
         if sampleComponent.substance is not None:
@@ -761,9 +761,11 @@ class MixtureAnalysis(CcpnModule):
     dataFrame = self.createMixturesDataFrame()
 
     fType = 'XLSX (*.xlsx)'
+    # FIXME
     dialog = QtWidgets.QFileDialog
     filePath = dialog.getSaveFileName(self, filter=fType)
-    dataFrame.to_excel(filePath, sheet_name='Mixtures', index=False)
+    if len(filePath)>0:
+      dataFrame.to_excel(filePath[0], sheet_name='Mixtures', index=False)
 
   def _openOptimisationModule(self):
     mixtureOptimisation = MixtureOptimisation(mainWindow=self.mainWindow, virtualSamples=self._getVirtualSamples(),
