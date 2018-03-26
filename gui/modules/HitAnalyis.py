@@ -305,14 +305,12 @@ class HitsAnalysis(CcpnModule):
     set as current the selected peaks on the table and populates the reference peak Table
     """
     matchedPeak = None
-
     self.targetPeakTable._selectionCallback(peaks, *args) #set currentPeaks
     if peaks is not None:
       for peak in peaks:
         if peak._linkedPeak is not None:
           matchedPeak  = peak._linkedPeak
         else:
-           #NB HACK until we have linkedPeak!!
           if peak.annotation is not None:
             matchedPeak = self.project.getByPid(peak.annotation)
             peak._linkedPeak = matchedPeak
@@ -393,12 +391,10 @@ class HitsAnalysis(CcpnModule):
       self.referencePeakTable.selectObject(peak)
 
 
-
-
-
   def _setTargetPeakTable(self):
     self.referencePeakTable.clearTable()
     targetPeakList = self._getTargetPeakList()
+    print(targetPeakList)
     if targetPeakList is not None:
       self.targetPeakTable.pLwidget.select(targetPeakList.pid)
       self.targetPeakTable._updateTable()
