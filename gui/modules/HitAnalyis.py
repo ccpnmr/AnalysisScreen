@@ -182,7 +182,7 @@ class HitsAnalysis(CcpnModule):
 
     self.targetPeakTable = CustomPeakTableWidget(self.peakHitWidgetsFrame, moduleParent=self, mainWindow=self.mainWindow,
                                        grid=(1, 0))
-
+    self.targetPeakTable.selectionCallback = self._selectionTargetPeakCallback
     self.peakButtons = ButtonList(self.peakHitWidgetsFrame, texts=['', '', '', ],
                                  callbacks=[partial(self._movePreviousRow,self.targetPeakTable),
                                             partial(self._deletePeaks,self.targetPeakTable) ,
@@ -386,9 +386,9 @@ class HitsAnalysis(CcpnModule):
     if peak is not None:
       referencePeakList = peak.peakList
       self.referencePeakTable.pLwidget.select(referencePeakList.pid)
-      if referencePeakList is not None:
-        self.referencePeakTable._updateTable(useSelectedPeakList=False, peaks=[peak])
-      self.referencePeakTable.selectObject(peak)
+      # if referencePeakList is not None:
+      #   self.referencePeakTable._updateTable(useSelectedPeakList=False, peaks=[peak])
+      # self.referencePeakTable.selectObject(peak)
 
 
   def _setTargetPeakTable(self):
@@ -399,8 +399,8 @@ class HitsAnalysis(CcpnModule):
       self.targetPeakTable.pLwidget.select(targetPeakList.pid)
       self.targetPeakTable._updateTable()
       self.targetPeakTable.selectionCallback = self._selectionTargetPeakCallback
-      if len(self.targetPeakTable.objects)>0:
-        self.targetPeakTable.selectObject(self.targetPeakTable.objects[0])
+      # if len(self.targetPeakTable.objects)>0:
+      #   self.targetPeakTable.selectObject(self.targetPeakTable.objects[0])
     else:
       self.targetPeakTable.clearTable()
 
