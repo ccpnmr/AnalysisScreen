@@ -384,9 +384,11 @@ class MixtureAnalysis(CcpnModule):
 
 
         #   self.leftListWidget.addItem(item)
+    self.rightListWidget.dropped.connect(self._itemsDropped)
+    self.leftListWidget.dropped.connect(self._itemsDropped)
 
-    self.connect(self.rightListWidget, QtCore.SIGNAL("dropped"), self._itemsDropped)
-    self.connect(self.leftListWidget, QtCore.SIGNAL("dropped"), self._itemsDropped)
+    # self.connect(self.rightListWidget, QtCore.SIGNAL("dropped"), self._itemsDropped)
+    # self.connect(self.leftListWidget, QtCore.SIGNAL("dropped"), self._itemsDropped)
     self.leftListWidget.currentItemChanged.connect(self._itemClicked)
 
   def _populatePullDownSelection(self):
@@ -440,7 +442,8 @@ class MixtureAnalysis(CcpnModule):
               self.rightListWidget.addItem(item)
       self.rightListWidget.currentItemChanged.connect(self._getListWidgetItems)
 
-      self.connect(self.rightListWidget, QtCore.SIGNAL("dropped"), self._itemsDropped)
+      # self.connect(self.rightListWidget, QtCore.SIGNAL("dropped"), self._itemsDropped)
+      self.rightListWidget.dropped.connect(self._itemsDropped)
       self.rightListWidget.currentItemChanged.connect(self._itemClicked)
 
 
