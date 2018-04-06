@@ -158,8 +158,8 @@ class HitsAnalysis(CcpnModule):
 
 
     self.hitTable = ObjectTable(self.spectrumHitWidgetsFrame, columns=[], actionCallback=None,
-                               selectionCallback=self._selectionCallback, objects=[],
-                               grid=(1, 0))
+                                selectionCallback=self._setCurrentSpectrumHit, objects=[],
+                                grid=(1, 0))
 
 
     self.hitButtons = ButtonList(self.spectrumHitWidgetsFrame, texts=['', '', '', '', ''],
@@ -180,9 +180,8 @@ class HitsAnalysis(CcpnModule):
     self.peakHitTableLabel = Label(self.peakHitWidgetsFrame, text='Target Peak Hits',vAlign='t',
                                        grid=(0, 0))
 
-    self.targetPeakTable = CustomPeakTableWidget(self.peakHitWidgetsFrame, moduleParent=self, mainWindow=self.mainWindow,
+    self.targetPeakTable = CustomPeakTableWidget(self.peakHitWidgetsFrame, moduleParent=self, selectionCallback = self._selectionTargetPeakCallback, mainWindow=self.mainWindow,
                                        grid=(1, 0))
-    self.targetPeakTable.selectionCallback = self._selectionTargetPeakCallback
     self.peakButtons = ButtonList(self.peakHitWidgetsFrame, texts=['', '', '', ],
                                  callbacks=[partial(self._movePreviousRow,self.targetPeakTable),
                                             partial(self._deletePeaks,self.targetPeakTable) ,
@@ -198,17 +197,18 @@ class HitsAnalysis(CcpnModule):
     self.referencePeakTableLabel = Label(self.referenceWidgetsFrame, text='Matched Reference Peak', vAlign='t',
                                    grid=(0, 0))
 
-    self.referencePeakTable = CustomPeakTableWidget(self.referenceWidgetsFrame, moduleParent=self, mainWindow=self.mainWindow,
+    self.referencePeakTable = CustomPeakTableWidget(self.referenceWidgetsFrame, moduleParent=self, selectionCallback=self._referencePeakTableCallback,
+                                                    mainWindow=self.mainWindow,
                                  grid=(1, 0))
 
-    # self.referenceButtons = ButtonList(self.referenceWidgetsFrame, texts=['', '', '', ],
-    #                               callbacks=[partial(self._movePreviousRow,self.referencePeakTable),
-    #                                         None,
-    #                                          partial(self._movePreviousRow,self.referencePeakTable)],
-    #                               icons=[self.previousIcon, self.rejectIcon, self.nextIcon],
-    #                               tipTexts=[None, None, None],
-    #                               direction='H', vAlign='b',
-    #                               grid=(2, 0))
+    self.referenceButtons = ButtonList(self.referenceWidgetsFrame, texts=['', '', '', ],
+                                  callbacks=[partial(self._movePreviousRow,self.referencePeakTable),
+                                            None,
+                                             partial(self._movePreviousRow,self.referencePeakTable)],
+                                  icons=[self.previousIcon, self.rejectIcon, self.nextIcon],
+                                  tipTexts=[None, None, None],
+                                  direction='H', vAlign='b',
+                                  grid=(2, 0))
 
 
   def _setSubstanceDetailsWidgets(self):
@@ -300,12 +300,14 @@ class HitsAnalysis(CcpnModule):
 
 
 
-  def _selectionTargetPeakCallback(self, peaks, *args):
+  def _selectionTargetPeakCallback(self, data, *args):
     """
     set as current the selected peaks on the table and populates the reference peak Table
     """
+    print(data)
+    peaks = data['object']
     matchedPeak = None
-    self.targetPeakTable._selectionCallback(peaks, *args) #set currentPeaks
+    # self.targetPeakTable._selectionCallback(data, *args) #set currentPeaks
     if peaks is not None:
       for peak in peaks:
         if peak._linkedPeak is not None:
@@ -314,13 +316,15 @@ class HitsAnalysis(CcpnModule):
           if peak.annotation is not None:
             matchedPeak = self.project.getByPid(peak.annotation)
             peak._linkedPeak = matchedPeak
+        print(peak._linkedPeak, matchedPeak)
       if matchedPeak is not None:
         self._populateReferencePeakTable(matchedPeak)
 
 
 
-  def _referencePeakTableCallback(self, peaks, *args):
-    self.referencePeakTable._selectionCallback(peaks, *args)
+  def _referencePeakTableCallback(self, data, *args):
+    peaks = data['object']
+    # self.referencePeakTable._selectionCallback(data, *args)
     if peaks is not None:
       for peak in peaks:
         if peak is not None:
@@ -377,30 +381,27 @@ class HitsAnalysis(CcpnModule):
     self.listWidgetsHitDetails.clear()
     header = QtWidgets.QListWidgetItem('\n No Substance Details Found')
     header.setFlags(QtCore.Qt.NoItemFlags)
-    header.setTextColor(ListWidgetHeaderColor)
+    # header.setTextColor(ListWidgetHeaderColor)
     self.listWidgetsHitDetails.addItem(header)
 
   def _populateReferencePeakTable(self, peak):
     'populates the table only with matched peaks linked to the targetPeak'
-    self.referencePeakTable.selectionCallback = self._referencePeakTableCallback
     if peak is not None:
       referencePeakList = peak.peakList
       self.referencePeakTable.pLwidget.select(referencePeakList.pid)
-      # if referencePeakList is not None:
-      #   self.referencePeakTable._updateTable(useSelectedPeakList=False, peaks=[peak])
-      # self.referencePeakTable.selectObject(peak)
+      if referencePeakList is not None:
+        self.referencePeakTable._updateTable(useSelectedPeakList=False, peaks=[peak])
+      self.referencePeakTable.selectObjects([peak])
 
 
   def _setTargetPeakTable(self):
     self.referencePeakTable.clearTable()
     targetPeakList = self._getTargetPeakList()
-    print(targetPeakList)
     if targetPeakList is not None:
       self.targetPeakTable.pLwidget.select(targetPeakList.pid)
       self.targetPeakTable._updateTable()
-      self.targetPeakTable.selectionCallback = self._selectionTargetPeakCallback
       # if len(self.targetPeakTable.objects)>0:
-      #   self.targetPeakTable.selectObject(self.targetPeakTable.objects[0])
+      #   self.targetPeakTable.selectObjects([self.targetPeakTable.objects[0]])
     else:
       self.targetPeakTable.clearTable()
 
@@ -422,7 +423,7 @@ class HitsAnalysis(CcpnModule):
         hit.isConfirmed = value
         self._updateHitTable()
 
-  def _selectionCallback(self, spectrumHit, *args):
+  def _setCurrentSpectrumHit(self, spectrumHit, *args):
     """
     set as current the selected spectrumHit on the table
     """
@@ -463,11 +464,6 @@ class HitsAnalysis(CcpnModule):
           targetPeakList.delete()
         spectrumHit.delete()
 
-      self._selectFirstRowHitTable()
-
-  def _selectFirstRowHitTable(self):
-    if len(self.hitTable.objects) >0:
-      self.hitTable.selectObject(self.hitTable.objects[0])
 
   def _deletePeaks(self, table):
     if table is not None:
@@ -522,7 +518,7 @@ class HitsAnalysis(CcpnModule):
     ''' Documentation '''
 
     self.currentRowPosition = table.getSelectedRows()
-    if len(table.objects) > 0:
+    if len(table.rows) > 0:
       if len(self.currentRowPosition)>0:
           newPosition = self.currentRowPosition[0]+1
           table.selectRow(newPosition)
@@ -594,7 +590,7 @@ class HitsAnalysis(CcpnModule):
       self.substanceDetailsLabel.set(ReferenceLabel+substance.name)
       headerSubstance =  QtWidgets.QListWidgetItem('\nSubstance Details')
       headerSubstance.setFlags(QtCore.Qt.NoItemFlags)
-      headerSubstance.setTextColor(ListWidgetHeaderColor)
+      # headerSubstance.setTextColor(ListWidgetHeaderColor)
       self.listWidgetsHitDetails.addItem(headerSubstance)
       for name, value in self._getSubstanceInfoToDisplay(substance).items():
         self._populateInfoList(name, value)
@@ -606,7 +602,7 @@ class HitsAnalysis(CcpnModule):
           sample = sampleComponent.sample
           headerSample =  QtWidgets.QListWidgetItem('\n'+sample.name+' Details')
           headerSample.setFlags(QtCore.Qt.NoItemFlags)
-          headerSample.setTextColor(ListWidgetHeaderColor)
+          # headerSample.setTextColor(ListWidgetHeaderColor)
           self.listWidgetsHitDetails.addItem(headerSample)
           for name, value in self._getSampleInfoToDisplay(sample).items():
             self._populateInfoList(name, value)
@@ -693,11 +689,11 @@ class HitsAnalysis(CcpnModule):
 
 class CustomPeakTableWidget(PeakListTableWidget):
 
-  def __init__(self, parent, moduleParent, mainWindow, peakList=None, **kwds):
+  def __init__(self, parent, moduleParent, mainWindow, peakList=None, actionCallback=None, selectionCallback=None, **kwds):
 
     if mainWindow is not None:
       PeakListTableWidget.__init__(self, parent=parent, moduleParent=moduleParent, mainWindow=mainWindow,
-                                   peakList=peakList, **kwds)
+                                   peakList=peakList, actionCallback=actionCallback, selectionCallback=selectionCallback, **kwds)
 
       self.pLwidget.hide()
       self.posUnitPulldownLabel.hide()
