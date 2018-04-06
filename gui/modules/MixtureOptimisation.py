@@ -103,6 +103,9 @@ class SimulatedAnnealingWidgets(Frame):
 class MixtureOptimisation(CcpnModule):
 
   '''Creates a module to analyse the mixtures'''
+  includeSettingsWidget = False
+  maxSettingsState = 2
+  className = 'MixtureOptimisation'
 
   def __init__(self, mainWindow, name='Mixture Optimisation', virtualSamples=None, mixtureAnalysisModule=None, minimalDistance=0.01,):
     super(MixtureOptimisation, self)

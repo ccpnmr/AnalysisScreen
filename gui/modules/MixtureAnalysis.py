@@ -62,7 +62,6 @@ class MixtureAnalysis(CcpnModule):
     #This allows opening the popup for graphical tests
     self.project = None
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
-
     if mainWindow is not None:
       self.mainWindow = mainWindow
       self.project = self.mainWindow.project
@@ -721,7 +720,7 @@ class MixtureAnalysis(CcpnModule):
       if len(spectrumDisplay.strips)>0:
         self.current.strip = spectrumDisplay.strips[0]
         self.current.strip.plotWidget.autoRange()
-      self.moduleArea.moveModule(spectrumDisplay.module, position='top', neighbor=self)
+      self.moduleArea.moveModule(spectrumDisplay, position='top', neighbor=self)
       return spectrumDisplay
 
   def _closeBlankDisplay(self):
