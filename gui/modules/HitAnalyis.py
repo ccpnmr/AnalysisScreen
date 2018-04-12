@@ -124,11 +124,11 @@ class HitsAnalysis(CcpnModule):
     self.spectrumHitWidgetsFrame.setMinimumWidth(200)
     column += 1
     self.peakHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
-                                          grid=(1, column))
+                                          grid=(0, column))
     self.peakHitWidgetsFrame.setMinimumWidth(300)
     # column += 1
     self.referenceWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
-                                          grid=(0, column))
+                                          grid=(1, column))
     self.referenceWidgetsFrame.setMinimumWidth(300)
     column += 1
     self.substanceDetailsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
@@ -201,14 +201,14 @@ class HitsAnalysis(CcpnModule):
                                                     mainWindow=self.mainWindow,
                                  grid=(1, 0))
 
-    self.referenceButtons = ButtonList(self.referenceWidgetsFrame, texts=['', '', '', ],
-                                  callbacks=[partial(self._movePreviousRow,self.referencePeakTable),
-                                            None,
-                                             partial(self._movePreviousRow,self.referencePeakTable)],
-                                  icons=[self.previousIcon, self.rejectIcon, self.nextIcon],
-                                  tipTexts=[None, None, None],
-                                  direction='H', vAlign='b',
-                                  grid=(2, 0))
+    # self.referenceButtons = ButtonList(self.referenceWidgetsFrame, texts=['', '', '', ],
+    #                               callbacks=[partial(self._movePreviousRow,self.referencePeakTable),
+    #                                         None,
+    #                                          partial(self._movePreviousRow,self.referencePeakTable)],
+    #                               icons=[self.previousIcon, self.rejectIcon, self.nextIcon],
+    #                               tipTexts=[None, None, None],
+    #                               direction='H', vAlign='b',
+    #                               grid=(2, 0))
 
 
   def _setSubstanceDetailsWidgets(self):
@@ -392,6 +392,13 @@ class HitsAnalysis(CcpnModule):
       if referencePeakList is not None:
         self.referencePeakTable._updateTable(useSelectedPeakList=False, peaks=[peak])
       self.referencePeakTable.selectObjects([peak])
+      self.current.peaks += (peak,)
+      spectrum = peak.peakList.spectrum
+      substance = spectrum.referenceSubstance
+      if substance is not None:
+        self._showHitInfoOnDisplay(substance)
+      else:
+        self._showSpectrumInfo(spectrum)
 
 
   def _setTargetPeakTable(self):
