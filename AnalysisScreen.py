@@ -19,7 +19,7 @@ class Screen(Assign):
   """Root class for Screen application"""
 
   def __init__(self, applicationName, applicationVersion, commandLineArguments):
-    Framework.__init__(self, applicationName, applicationVersion, commandLineArguments)
+    Assign.__init__(self, applicationName, applicationVersion, commandLineArguments)
 
 
   #########################################    Start setup Menu      #############################################
