@@ -9,12 +9,13 @@ from ccpn.AnalysisScreen.gui.modules.MixtureAnalysis import MixtureAnalysis
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.modules.PipelineModule import GuiPipeline
 from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
+from ccpn.AnalysisAssign.AnalysisAssign import Assign
 
 # applicationName = 'Screen'
 
 _loadScreenPipes()  # load screen specific pipes
 
-class Screen(Framework):
+class Screen(Assign):
   """Root class for Screen application"""
 
   def __init__(self, applicationName, applicationVersion, commandLineArguments):
