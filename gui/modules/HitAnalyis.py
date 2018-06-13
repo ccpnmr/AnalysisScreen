@@ -98,7 +98,7 @@ class HitsAnalysis(CcpnModule):
     self.minusIcon = Icon('icons/minus')
     self.settingIcon = Icon('icons/applications-system')
     self.exportIcon = Icon('icons/export')
-    self._showHitRegion = True
+    self._showHitRegion = False
     self._createWidgets()
     self._createSettingsWidgets()
 
@@ -157,7 +157,7 @@ class HitsAnalysis(CcpnModule):
                                grid = (0, 0))
 
 
-    self.hitTable = ObjectTable(self.spectrumHitWidgetsFrame, columns=[], actionCallback=None,
+    self.hitTable = ObjectTable(self.spectrumHitWidgetsFrame, columns=[], actionCallback=self._openSpectrumHitOnNewDiplay,
                                 selectionCallback=self._setCurrentSpectrumHit, objects=[],
                                 grid=(1, 0))
 
@@ -174,7 +174,10 @@ class HitsAnalysis(CcpnModule):
                                grid=(2, 0))
 
 
-
+  def _openSpectrumHitOnNewDiplay(self, spectrumHit, *args):
+    from ccpn.ui.gui.widgets.SideBar import _openSpectrumDisplay
+    spectrum = spectrumHit._parent
+    _openSpectrumDisplay(self.mainWindow,spectrum)
 
   def _setPeakHitWidgets(self):
     self.peakHitTableLabel = Label(self.peakHitWidgetsFrame, text='Target Peak Hits',vAlign='t',
@@ -226,36 +229,41 @@ class HitsAnalysis(CcpnModule):
   def _setSpectrumHitTable(self):
     "Sets parameters to the SpectrumHitTable."
 
-    columns = [Column('Hit Name', lambda hit:str(hit.substanceName)),
+    columns = [Column('#', lambda hit: self._getSerial(hit)),
+               Column('Hit Name', lambda hit:str(hit.substanceName)),
                Column('Confirmed', lambda hit:str(hit.isConfirmed)), # setEditValue=lambda hit, value: self._testEditor(hit, value)),
-               Column('Merit (Efficiency)', lambda hit:hit.figureOfMerit)] #setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
-
+               Column('Merit (Efficiency)', lambda hit:hit.figureOfMerit), #setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
+               Column('Total Score', lambda hit: hit._getTotalScore()),  # setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
+               Column('Peaks', lambda hit: hit._getTotalPeakHitCount())]  # setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
     self.hitTable.setObjectsAndColumns(self._spectrumHits, columns)
     if len(self._spectrumHits) > 0:
       self.hitTable.setCurrentObject(self._spectrumHits[0])
+
+  def _getSerial(self, hit):
+    return self._spectrumHits.index(hit)+1
 
 
   def _createSettingsWidgets(self):
     self.settingsWidget.setContentsMargins(20, 20, 20, 20)
     row = 0
-    self.targetPeaksCheckbox = CheckBox(self.settingsWidget, text='Hide Target Peaks', checked=False,
-                                           callback=partial(self._hideShowWidgetFromCheckBox,
+    self.targetPeaksCheckbox = CheckBox(self.settingsWidget, text='Target Peaks', checked=False,
+                                           callback=partial(self._toggleFrame,
                                                             widget=self.peakHitWidgetsFrame),
                                            grid=(row, 0))
     row += 1
-    self.referencePeaksCheckbox = CheckBox(self.settingsWidget, text='Hide Reference Peaks', checked=False,
-                                           callback=partial(self._hideShowWidgetFromCheckBox,
+    self.referencePeaksCheckbox = CheckBox(self.settingsWidget, text='Reference Peaks', checked=False,
+                                           callback=partial(self._toggleFrame,
                                                             widget=self.referenceWidgetsFrame),
                                            grid=(row, 0))
     row +=1
-    self.substanceDetailsCheckbox = CheckBox(self.settingsWidget, text='Hide Substance Details', checked=self._showHitRegion,
-                                           callback=partial(self._hideShowWidgetFromCheckBox,
+    self.substanceDetailsCheckbox = CheckBox(self.settingsWidget, text='Substance Details', checked=self._showHitRegion,
+                                           callback=partial(self._toggleFrame,
                                                             widget= self.substanceDetailsFrame),
                                            grid=(row,0))
     row += 1
-    self.hitRegionsCheckbox = CheckBox(self.settingsWidget, text='Show Hit Regions ', checked=True,
-                                             callback=self._magageHitRegions,
-                                             grid=(row, 0))
+    self.hitRegionsCheckbox = CheckBox(self.settingsWidget, text='Hit Regions ', checked=True,
+                                       callback=self._toggleRegions,
+                                       grid=(row, 0))
     row += 1
     self.exportButton = Button(self.settingsWidget, text='Export hits...', icon=self.exportIcon,
                                        callback=self._exportHitsToXlsx, hAlign='l',
@@ -265,7 +273,12 @@ class HitsAnalysis(CcpnModule):
              , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
              , grid=(row+1,2), gridSpan=(1,1))
 
-  def _magageHitRegions(self):
+    #   Hide tables until fixed:
+    self.peakHitWidgetsFrame.hide()
+    self.referenceWidgetsFrame.hide()
+    self.substanceDetailsFrame.hide()
+
+  def _toggleRegions(self):
     if self.sender() is not None:
       if self.sender().isChecked():
         self._showHitRegion = True
@@ -274,13 +287,13 @@ class HitsAnalysis(CcpnModule):
         if self.current.strip is not None:
           self._deleteHitRegionFromStrip(self.current.strip.plotWidget)
 
-  def _hideShowWidgetFromCheckBox(self, widget):
+  def _toggleFrame(self, widget):
     '''Specific to hide a widget from a checkbox callback  '''
     if self.sender() is not None:
       if self.sender().isChecked():
-        widget.hide()
-      else:
         widget.show()
+      else:
+        widget.hide()
 
   def _showBytExperimentType(self):
     "Shows hits by the experiment type of the spectrumHit.spectrum. If not Defined, only All is active"
@@ -304,7 +317,6 @@ class HitsAnalysis(CcpnModule):
     """
     set as current the selected peaks on the table and populates the reference peak Table
     """
-    print(data)
     peaks = data['object']
     matchedPeak = None
     # self.targetPeakTable._selectionCallback(data, *args) #set currentPeaks
@@ -525,7 +537,7 @@ class HitsAnalysis(CcpnModule):
     ''' Documentation '''
 
     self.currentRowPosition = table.getSelectedRows()
-    if len(table.rows) > 0:
+    try:
       if len(self.currentRowPosition)>0:
           newPosition = self.currentRowPosition[0]+1
           table.selectRow(newPosition)
@@ -535,10 +547,9 @@ class HitsAnalysis(CcpnModule):
           else:
             table.selectRow(newPosition)
       else:
-        try:
           table.selectRow(0)
-        except:
-          pass
+    except:
+      pass
 
 
 
