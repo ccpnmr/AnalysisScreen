@@ -64,22 +64,22 @@ def _addNewHit(spectrum, hits):
 
   newTargetPeakList = spectrum.newPeakList(title=TARGETPEAKLIST, isSimulated=True, comment='PeakList containing peak hits')
 
-
-  referenceSpectra = []
+  peaksToCopy = {}
   for  hit in hits:
     if len(hit) == 3:
       referencePeak, targetPeak, position = hit
       efficiencies.append(targetPeak.figureOfMerit)
-      referenceSpectra.append(referencePeak.peakList.spectrum)
-      newPeakFromTarget = targetPeak.copyTo(newTargetPeakList)
+      peaksToCopy.update({targetPeak:referencePeak})
 
+
+  for targetPeak, referencePeak in peaksToCopy.items():
+      newPeakFromTarget = targetPeak.copyTo(newTargetPeakList)
       newPeakFromTarget.annotation = referencePeak.pid #hack but we need to link the reference Peak to the target Peak.
       referencePeak.annotation = newPeakFromTarget.pid #hack but we need to link the reference Peak to the target Peak.
-
       newPeakFromTarget._linkedPeak = referencePeak  # hack but we need to link the reference Peak to the target Peak.
       referencePeak._linkedPeak = newPeakFromTarget
-
       newPeakFromTarget.comment = 'Hit: Peak matched and copied From Target PeakList '
 
   if min(efficiencies)!= 1.0:
     spectrumHit.figureOfMerit = min(efficiencies)
+
