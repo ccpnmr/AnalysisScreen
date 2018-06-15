@@ -39,7 +39,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from functools import partial
-from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import REFERENCEPEAKLIST, TARGETPEAKLIST
+from ccpn.core.SpectrumHit import SpectrumHitPeakList
 from ccpn.core.lib.Notifiers import Notifier
 
 Qt = QtCore.Qt
@@ -317,18 +317,15 @@ class HitsAnalysis(CcpnModule):
     """
     set as current the selected peaks on the table and populates the reference peak Table
     """
+    # FIXME
     peaks = data['object']
     matchedPeak = None
     # self.targetPeakTable._selectionCallback(data, *args) #set currentPeaks
     if peaks is not None:
       for peak in peaks:
-        if peak._linkedPeak is not None:
-          matchedPeak  = peak._linkedPeak
-        else:
-          if peak.annotation is not None:
-            matchedPeak = self.project.getByPid(peak.annotation)
-            peak._linkedPeak = matchedPeak
-        print(peak._linkedPeak, matchedPeak)
+        if len(peak._linkedPeaks) == 0 :
+          matchedPeak  = peak._linkedPeaks[0]
+
       if matchedPeak is not None:
         self._populateReferencePeakTable(matchedPeak)
 
@@ -429,7 +426,7 @@ class HitsAnalysis(CcpnModule):
     if self.current is not None:
       if self.current.spectrumHit is not None:
         for pl in self.current.spectrumHit.spectrum.peakLists:
-          if pl.isSimulated and pl.title == TARGETPEAKLIST:
+          if pl.isSimulated and pl.title == SpectrumHitPeakList:
             return pl
 
 
@@ -656,6 +653,7 @@ class HitsAnalysis(CcpnModule):
     dataFrame.to_excel(filePath, sheet_name='Hits', index=False)
 
   def _createHitsDataFrame(self):
+    # FIXME Make new
     from pandas import DataFrame
 
     hitDic = {}
@@ -666,16 +664,17 @@ class HitsAnalysis(CcpnModule):
       if hit is not None:
         for pl in hit.spectrum.peakLists:
           if pl is not None:
-            if pl.isSimulated and pl.title == TARGETPEAKLIST:
+            if pl.isSimulated and pl.title == SpectrumHitPeakList:
               for peak in pl.peaks:
-                linkedPeak = self.project.getByPid(peak.annotation)
-                if linkedPeak is not None:
-                  peak._linkedPeak = linkedPeak
-                  spectrumRef = linkedPeak.peakList.spectrum
-                  substanceRef =  spectrumRef.referenceSubstance
-                  if substanceRef is not None:
-                    referenceSubstances.append(substanceRef.name)
-                  spectrumRefNames.append(spectrumRef.name)
+                if len(peak._linkedPeaks)>0:
+                  linkedPeak = peak._linkedPeaks[0]
+                  if linkedPeak is not None:
+                    peak._linkedPeaks = [linkedPeak]
+                    spectrumRef = linkedPeak.peakList.spectrum
+                    substanceRef =  spectrumRef.referenceSubstance
+                    if substanceRef is not None:
+                      referenceSubstances.append(substanceRef.name)
+                    spectrumRefNames.append(spectrumRef.name)
       if len(referenceSubstances)>0:
         hitDic.update({hit.substanceName: referenceSubstances})
       else:

@@ -24,8 +24,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 from ccpn.util.Logging import getLogger
-
-TARGETPEAKLIST = 'Target PeakList'
+from ccpn.core.SpectrumHit import SpectrumHitPeakList
 REFERENCEPEAKLIST = 'Reference PeakList'
 
 
@@ -62,7 +61,7 @@ def _addNewHit(spectrum, hits):
     getLogger().warning('Could not create pre-existing spectrumHit name ')
     return
 
-  newTargetPeakList = spectrum.newPeakList(title=TARGETPEAKLIST, isSimulated=True, comment='PeakList containing peak hits')
+  newTargetPeakList = spectrum.newPeakList(title=SpectrumHitPeakList, isSimulated=True, comment='PeakList containing peak hits')
 
   peaksToCopy = {}
   for  hit in hits:
@@ -74,10 +73,8 @@ def _addNewHit(spectrum, hits):
 
   for targetPeak, referencePeak in peaksToCopy.items():
       newPeakFromTarget = targetPeak.copyTo(newTargetPeakList)
-      newPeakFromTarget.annotation = referencePeak.pid #hack but we need to link the reference Peak to the target Peak.
-      referencePeak.annotation = newPeakFromTarget.pid #hack but we need to link the reference Peak to the target Peak.
-      newPeakFromTarget._linkedPeak = referencePeak  # hack but we need to link the reference Peak to the target Peak.
-      referencePeak._linkedPeak = newPeakFromTarget
+      newPeakFromTarget._linkPeaks([referencePeak])
+      referencePeak._linkPeaks([newPeakFromTarget])
       newPeakFromTarget.comment = 'Hit: Peak matched and copied From Target PeakList '
 
   if min(efficiencies)!= 1.0:
