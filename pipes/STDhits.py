@@ -163,7 +163,8 @@ class STDHitFinder(SpectraPipe):
                 listsControlHits = _find_STD_Hits(stdSpectrum=controlSTD, referenceSpectra=references,
                                           limitRange=minimumDistance,
                                           refPeakListIndex=DefaultPeakListIndex, minEfficiency=minimumEfficiency)
-
+              else:
+                listsControlHits  = []
               targetHits = [i for hit in listsTargetHits for i in hit] # clean up the empty sublists
               controlHits = [i for hit in listsControlHits for i in hit]  # clean up the empty sublists
 
