@@ -685,32 +685,31 @@ class MixtureAnalysis(CcpnModule):
 
   def _displayMixture(self, sample):
     ''' displays all the spectra present in a mixture '''
-    currentDisplay = self._clearDisplayView()
+    strip = self._clearDisplayView()
     for sampleComponent in sample.sampleComponents:
       if sampleComponent.substance is not None:
         if len(sampleComponent.substance.referenceSpectra)>0:
-          currentDisplay.displaySpectrum(sampleComponent.substance.referenceSpectra[0])
+          strip.spectrumDisplay.displaySpectrum(sampleComponent.substance.referenceSpectra[0])
         else:
           spectrum = self.project.getByPid('SP:'+str(sampleComponent.substance.name))
           if spectrum is not None:
-            currentDisplay.displaySpectrum(spectrum)
+            strip.spectrumDisplay.displaySpectrum(spectrum)
 
 
   def _clearDisplayView(self):
     ''' Deletes all the spectra from the display '''
     if self.current.strip is None:
       if len(self.project.strips)>0:
-        self.currentDisplayed =  self.project.strips[0]
-        self.current.strip = self.currentDisplayed
+        strip =  self.project.strips[0]
+        self.current.strip = strip
         self.current.strip.plotWidget.autoRange()
       else:
-        self.currentDisplayed=self._openNewDisplay()
-        self._closeBlankDisplay()
+        strip =self._openNewDisplay()
     else:
-      self.currentDisplayed = self.current.strip
-    for spectrumView in self.currentDisplayed.spectrumViews:
+      strip = self.current.strip
+    for spectrumView in strip.spectrumViews:
       spectrumView.delete()
-    return self.currentDisplayed
+    return strip
 
   def _openNewDisplay(self):
     ''' opens a new spectrum display '''
