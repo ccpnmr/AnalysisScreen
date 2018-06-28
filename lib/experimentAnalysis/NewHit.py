@@ -56,6 +56,7 @@ def _addNewHit(spectrum, hits):
   project = spectrum.project
   efficiencies = []
   try:
+    #   FIXME
     spectrumHit = spectrum.newSpectrumHit(substanceName=spectrum.name)
   except Exception as e:
     getLogger().warning('Could not create pre-existing spectrumHit name ')
@@ -65,6 +66,7 @@ def _addNewHit(spectrum, hits):
 
   peaksToCopy = {}
   for  hit in hits:
+    print('Hit', hit)
     if len(hit) == 3:
       referencePeak, targetPeak, position = hit
       efficiencies.append(targetPeak.figureOfMerit)
@@ -73,8 +75,13 @@ def _addNewHit(spectrum, hits):
 
   for targetPeak, referencePeak in peaksToCopy.items():
       newPeakFromTarget = targetPeak.copyTo(newTargetPeakList)
-      newPeakFromTarget._linkPeaks([referencePeak])
-      referencePeak._linkPeaks([newPeakFromTarget])
+      targetLinkedPeaks =  newPeakFromTarget._linkedPeaks
+      targetLinkedPeaks.append(referencePeak)
+      newPeakFromTarget._linkPeaks(targetLinkedPeaks)
+
+      referencePeakLinkedPeaks = referencePeak._linkedPeaks
+      referencePeakLinkedPeaks.append(newPeakFromTarget)
+      referencePeak._linkPeaks(referencePeakLinkedPeaks)
       newPeakFromTarget.comment = 'Hit: Peak matched and copied From Target PeakList '
 
   if min(efficiencies)!= 1.0:

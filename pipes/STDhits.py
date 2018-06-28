@@ -166,15 +166,17 @@ class STDHitFinder(SpectraPipe):
               else:
                 listsControlHits  = []
               targetHits = [i for hit in listsTargetHits for i in hit] # clean up the empty sublists
+              print('targetHits -> ',targetHits)
               controlHits = [i for hit in listsControlHits for i in hit]  # clean up the empty sublists
-
+              print('controlHits -> ', controlHits)
               filteredHits = self._filterFalsePositiveHits(targetHits, controlHits)
+              print('filteredHits -> ', filteredHits)
               if len(filteredHits)>0:
                 _addNewHit(stdSpectrum, filteredHits)
 
     else:
       getLogger().warning('Aborted: STD SpectrumGroup not found')
-
+    # TODO this should return the spectrumHits only
     SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
     return set(list(spectra)+SGSpectra)
 
