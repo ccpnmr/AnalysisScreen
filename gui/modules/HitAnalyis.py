@@ -42,7 +42,7 @@ from functools import partial
 from ccpn.core.SpectrumHit import SpectrumHitPeakList
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.QuickTable import QuickTable
-from ccpn.ui.gui.widgets.tableTest import DataFrameWidget
+# from ccpn.ui.gui.widgets.tableTest import DataFrameWidget
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
@@ -159,11 +159,11 @@ class HitsAnalysis(CcpnModule):
                                grid = (0, 0))
 
 
-    # self.hitTable = ObjectTable(self.spectrumHitWidgetsFrame, columns=[], actionCallback=self._openSpectrumHitOnNewDiplay,
-    #                             selectionCallback=self._setCurrentSpectrumHit, objects=[],
-    #                             grid=(1, 0))
+    self.hitTable = ObjectTable(self.spectrumHitWidgetsFrame, columns=[], actionCallback=self._openSpectrumHitOnNewDiplay,
+                                selectionCallback=self._setCurrentSpectrumHit, objects=[],
+                                grid=(1, 0))
 
-    self.hitTable = DataFrameWidget()
+    # self.hitTable = DataFrameWidget()
     self.spectrumHitWidgetsFrame.getLayout().addWidget(self.hitTable, 1, 0)
 
     self.hitButtons = ButtonList(self.spectrumHitWidgetsFrame, texts=['', '', '', '', ''],
@@ -233,17 +233,17 @@ class HitsAnalysis(CcpnModule):
   def _setSpectrumHitTable(self):
     "Sets parameters to the SpectrumHitTable."
 
-    # columns = [Column('#', lambda hit: self._getSerial(hit)),
-    #            Column('Hit Name', lambda hit:str(hit.substanceName)),
-    #            Column('Confirmed', lambda hit:str(hit.isConfirmed)), # setEditValue=lambda hit, value: self._testEditor(hit, value)),
-    #            Column('Merit (Efficiency)', lambda hit:hit.figureOfMerit), #setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
-    #            Column('Total Score', lambda hit: hit._getTotalScore()),  # setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
-    #            Column('Peaks', lambda hit: hit._getTotalPeakHitCount())]  # setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
-    # self.hitTable.setObjectsAndColumns(self._spectrumHits, columns)
-    if len(self._spectrumHits) > 0:
-      from ccpn.AnalysisScreen.pipes.HitsOutput import hitsToDataFrame
-      df = hitsToDataFrame(self._spectrumHits)
-      self.hitTable.setDataFrame(df)
+    columns = [Column('#', lambda hit: self._getSerial(hit)),
+               Column('Hit Name', lambda hit:str(hit.substanceName)),
+               Column('Confirmed', lambda hit:str(hit.isConfirmed)), # setEditValue=lambda hit, value: self._testEditor(hit, value)),
+               Column('Merit (Efficiency)', lambda hit:hit.figureOfMerit), #setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
+               Column('Total Score', lambda hit: hit._getTotalScore()),  # setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
+               Column('Peaks', lambda hit: hit._getTotalPeakHitCount())]  # setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
+    self.hitTable.setObjectsAndColumns(self._spectrumHits, columns)
+    # if len(self._spectrumHits) > 0:
+    #   from ccpn.AnalysisScreen.pipes.HitsOutput import hitsToDataFrame
+    #   df = hitsToDataFrame(self._spectrumHits)
+    #   self.hitTable.setDataFrame(df)
 
 
   def _getSerial(self, hit):
