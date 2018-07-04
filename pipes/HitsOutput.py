@@ -9,6 +9,7 @@ from ccpn.core.SpectrumHit import _getReferenceLevel
 import collections
 
 # Naming
+RefPid = 'Pid'
 ReferenceName = 'Reference'                      # -> Str | name of the spectrum used as reference
 SpectrumHitName = 'SpectrumHit'                  # -> Str | name of the spectrum used to identified the hits. Like STDs of sample with target
 SampleName = 'Sample'                            # -> Str | name of the sample
@@ -51,8 +52,10 @@ def hitsToDataFrame(spectrumHits)-> pd.DataFrame:
     for spectrumHit in spectrumHits:
         referenceSpectra = spectrumHit._getReferenceHitsSpectra()
         for referenceSpectrum in referenceSpectra:
+            referenceSpectrum._referenceSpectrumHit = spectrumHit
             ## naming columns
             d = Default_DataFrame.copy()
+            d[RefPid] = str(referenceSpectrum.pid)
             d[ReferenceName] = str(referenceSpectrum.name)
             d[SpectrumHitName] = str(spectrumHit.substanceName)
             sample = spectrumHit._getSample()

@@ -31,6 +31,8 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.Column import ColumnClass, Column
+
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.modules.PeakTable import PeakListTableWidget
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
@@ -72,6 +74,7 @@ class HitsAnalysis(CcpnModule):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     self._spectrumHits = []
+    self._reference = None #selected ref spectrum on hit table
     self.application = None
     self.project = None
     self.current = None
@@ -101,6 +104,7 @@ class HitsAnalysis(CcpnModule):
     self.settingIcon = Icon('icons/applications-system')
     self.exportIcon = Icon('icons/export')
     self._showHitRegion = False
+    self._markHitPositions = False
     self._createWidgets()
     self._createSettingsWidgets()
 
@@ -113,13 +117,13 @@ class HitsAnalysis(CcpnModule):
   def _createWidgets(self):
     ''' Documentation '''
 
-    self.mainWidget.setContentsMargins(20,20,20,20)
+    # self.mainWidget.setContentsMargins(10,10,10,10)
 
 
     ## Set ExperimentType Frame
     column = 0
-    self.experimentTypeWidgetsFrame = Frame(self.mainWidget,  setLayout=True, margins=(10,10,10,10),
-                                           grid=(0, column))
+    self.experimentTypeWidgetsFrame = Frame(self.settingsWidget,  setLayout=True, margins=(10,10,10,10),
+                                           grid=(1, column))
     column += 1
     self.spectrumHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
                                            grid=(0, column), gridSpan=(2, column))
@@ -143,32 +147,36 @@ class HitsAnalysis(CcpnModule):
     self._setSpectrumHitTable()
 
   def _setExperimentTypeWidgets(self):
-    self.experimentTypeLabel = Label(self.experimentTypeWidgetsFrame, text='Experiment Type',
-                                     grid=(0, 0), vAlign='t',)
+    self.experimentTypeLabel = Label(self.settingsWidget, text='Experiment Type',
+                                     grid=(0, 1), vAlign='t',)
 
-    self.experimentTypeRadioButtons = RadioButtons(self.experimentTypeWidgetsFrame,
+    self.experimentTypeRadioButtons = RadioButtons(self.settingsWidget,
                                                    texts=sorted(list(ExperimentTypesDict.keys())),
                                                    callback=self._showBytExperimentType,
                                                    direction='V',
-                                                   grid=(1, 0))
+                                                   grid=(1, 1))
     self.experimentTypeWidgetsFrame.getLayout().setAlignment(Qt.AlignTop)
 
   def _setSpectrumHitWidgets(self):
 
-    self.spectrumHitTableLabel = Label(self.spectrumHitWidgetsFrame, text='SpectrumHits',vAlign='t',
-                               grid = (0, 0))
+    # self.spectrumHitTableLabel = Label(self.spectrumHitWidgetsFrame, text='SpectrumHits',vAlign='t',
+    #                            grid = (0, 0))
 
 
-    self.hitTable = ObjectTable(self.spectrumHitWidgetsFrame, columns=[], actionCallback=self._openSpectrumHitOnNewDiplay,
-                                selectionCallback=self._setCurrentSpectrumHit, objects=[],
-                                grid=(1, 0))
+    # self.hitTable = ObjectTable(self.spectrumHitWidgetsFrame, columns=[], actionCallback=self._openSpectrumHitOnNewDiplay,
+    #                             selectionCallback=self._setCurrentSpectrumHit, objects=[],
+    #                             grid=(1, 0))
+    self.hitTable = QuickTable(self.spectrumHitWidgetsFrame, mainWindow=self.mainWindow,
+                               selectionCallback=self._setCurrentSpectrumHit,
+                               actionCallback=self._openSpectrumHitOnNewDiplay,
 
+                               grid=(0, 0))
     # self.hitTable = DataFrameWidget()
-    self.spectrumHitWidgetsFrame.getLayout().addWidget(self.hitTable, 1, 0)
+    # self.spectrumHitWidgetsFrame.getLayout().addWidget(self.hitTable, 1, 0)
 
     self.hitButtons = ButtonList(self.spectrumHitWidgetsFrame, texts=['', '', '', '', ''],
                                callbacks=[partial(self._movePreviousRow,self.hitTable),
-                                          self._deleteHit,
+                                          self._deleteReference,
                                           partial(self._setHitIsConfirmed,False),
                                           partial(self._setHitIsConfirmed,True),
                                           partial(self._moveNextRow, self.hitTable)],
@@ -177,11 +185,25 @@ class HitsAnalysis(CcpnModule):
                                direction='H', vAlign='b',
                                grid=(2, 0))
 
+    self.hitButtons.hide()
 
-  def _openSpectrumHitOnNewDiplay(self, spectrumHit, *args):
+
+  def _openSpectrumHitOnNewDiplay(self, data):
     from ccpn.ui.gui.widgets.SideBar import _openSpectrumDisplay
-    spectrum = spectrumHit._parent
-    _openSpectrumDisplay(self.mainWindow,spectrum)
+    spectrum = data['object']
+    if spectrum:
+
+     spectrumDisplay = _openSpectrumDisplay(self.mainWindow,spectrum)
+     if self.current.strip:
+       self.current.strip.displaySpectrum(self.current.spectrumHit.spectrum)
+
+     if self._markHitPositions:
+       for mark in self.project.marks:
+         mark.delete()
+       for p in self.current.spectrumHit._getPeakHits():
+         self.project.newMark(colour=p.peakList.spectrum.sliceColour, positions=p.position,
+                         axisCodes=p.peakList.spectrum.axisCodes)
+
 
   def _setPeakHitWidgets(self):
     self.peakHitTableLabel = Label(self.peakHitWidgetsFrame, text='Target Peak Hits',vAlign='t',
@@ -231,20 +253,11 @@ class HitsAnalysis(CcpnModule):
 
 
   def _setSpectrumHitTable(self):
-    "Sets parameters to the SpectrumHitTable."
+    "Sets the SpectrumHitTable."
 
-    columns = [Column('#', lambda hit: self._getSerial(hit)),
-               Column('Hit Name', lambda hit:str(hit.substanceName)),
-               Column('Confirmed', lambda hit:str(hit.isConfirmed)), # setEditValue=lambda hit, value: self._testEditor(hit, value)),
-               Column('Merit (Efficiency)', lambda hit:hit.figureOfMerit), #setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
-               Column('Total Score', lambda hit: hit._getTotalScore()),  # setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
-               Column('Peaks', lambda hit: hit._getTotalPeakHitCount())]  # setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
-    self.hitTable.setObjectsAndColumns(self._spectrumHits, columns)
-    # if len(self._spectrumHits) > 0:
-    #   from ccpn.AnalysisScreen.pipes.HitsOutput import hitsToDataFrame
-    #   df = hitsToDataFrame(self._spectrumHits)
-    #   self.hitTable.setDataFrame(df)
-
+    from ccpn.AnalysisScreen.pipes.HitsOutput import hitsToDataFrame
+    df = hitsToDataFrame(self._spectrumHits)
+    self.hitTable.setData(df)
 
   def _getSerial(self, hit):
     return self._spectrumHits.index(hit)+1
@@ -269,11 +282,7 @@ class HitsAnalysis(CcpnModule):
                                            grid=(row,0))
     row += 1
     self.hitRegionsCheckbox = CheckBox(self.settingsWidget, text='Hit Regions ', checked=True,
-                                       callback=self._toggleRegions,
-                                       grid=(row, 0))
-    row += 1
-    self.exportButton = Button(self.settingsWidget, text='Export hits...', icon=self.exportIcon,
-                                       callback=self._exportHitsToXlsx, hAlign='l',
+                                       callback=self._toggleMarks,
                                        grid=(row, 0))
 
     Spacer(self.settingsWidget, 5, 5
@@ -284,15 +293,19 @@ class HitsAnalysis(CcpnModule):
     self.peakHitWidgetsFrame.hide()
     self.referenceWidgetsFrame.hide()
     self.substanceDetailsFrame.hide()
+    self.targetPeaksCheckbox.setEnabled(False)
+    self.referencePeaksCheckbox.setEnabled(False)
+    self.hitRegionsCheckbox.setEnabled(False)
+    self.substanceDetailsCheckbox.setEnabled(False)
 
-  def _toggleRegions(self):
+
+  def _toggleMarks(self):
     if self.sender() is not None:
       if self.sender().isChecked():
-        self._showHitRegion = True
+        self._markHitPositions = True
       else:
-        self._showHitRegion = False
-        if self.current.strip is not None:
-          self._deleteHitRegionFromStrip(self.current.strip.plotWidget)
+        self._markHitPositions = False
+
 
   def _toggleFrame(self, widget):
     '''Specific to hide a widget from a checkbox callback  '''
@@ -446,17 +459,22 @@ class HitsAnalysis(CcpnModule):
         hit.isConfirmed = value
         self._updateHitTable()
 
-  def _setCurrentSpectrumHit(self, spectrumHit, *args):
+  def _setCurrentSpectrumHit(self, data):
     """
     set as current the selected spectrumHit on the table
     """
-    if self.current is not None:
-      if spectrumHit is None:
-        self.current.spectrumHit = None
-      else:
-        self.current.spectrumHit = spectrumHit
+    refSpectra = data['object']
+    if len(refSpectra) == 1:
+      sp = refSpectra[0]
+      self._reference = sp
+      if sp._referenceSpectrumHit:
+        spectrumHit = sp._referenceSpectrumHit
+        if self.current is not None:
+          if spectrumHit is None:
+            self.current.spectrumHit = None
+          else:
+            self.current.spectrumHit = spectrumHit
 
-      self._setTargetPeakTable()
 
 
   def _clearListWidget(self):
@@ -475,6 +493,11 @@ class HitsAnalysis(CcpnModule):
     self._acceptAssignment()
     self._movePreviousRow(self.hitTable)
 
+  def _deleteReference(self):
+    if self._reference is not None:
+      if self.current.spectrumHit is not None:
+        self.current.spectrumHit._removeReference(self._reference)
+    self._setSpectrumHitTable()
 
   def _deleteHit(self):
     ''' Deletes hit from project and from the table. If is last cleans all graphics
@@ -563,8 +586,8 @@ class HitsAnalysis(CcpnModule):
     self.currentRowPosition = table.getSelectedRows()
     if len(self.currentRowPosition) > 0:
       newPosition = self.currentRowPosition[0]-1
-      if len(table.objects)>0:
-        lastRow = len(table.objects)-1
+      if len(table._rawData)>0:
+        lastRow = len(table._rawData)-1
         if newPosition == -1:
           table.selectRow(lastRow)
         else:
@@ -645,10 +668,7 @@ class HitsAnalysis(CcpnModule):
   def _updateHitTable(self):
     ''' Documentation '''
     if self.project is not None:
-      hits = [hit for hit in self._spectrumHits if hit is not None]
-      self.hitTable.setObjects(hits)
-    else:
-      self.hitTable.setObjects([])
+      self._setSpectrumHitTable()
 
   def _exportHitsToXlsx(self):
     ''' Export a simple xlxs file from the results '''
