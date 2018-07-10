@@ -24,7 +24,7 @@ ReferenceLevel = 'Level'                                  # -> Int   | the hit l
 
 # Peak hits positions
 ReferencePeakPositions = 'PeakPositions'                 # -> list of tuple
-
+DeltaPositions = 'DeltaPositions'                        # -> Delta positions between reference peak and target peak
 
 
 
@@ -57,7 +57,7 @@ def hitsToDataFrame(spectrumHits)-> pd.DataFrame:
             d = Default_DataFrame.copy()
             d[RefPid] = str(referenceSpectrum.pid)
             d[ReferenceName] = str(referenceSpectrum.name)
-            d[SpectrumHitName] = str(spectrumHit.substanceName)
+            d[SpectrumHitName] = str(spectrumHit.spectrum.name)
             sample = spectrumHit._getSample()
             if sample:
                 d[SampleName] = str(sample.name)
@@ -76,6 +76,9 @@ def hitsToDataFrame(spectrumHits)-> pd.DataFrame:
                 refpeakHits = spectrumHit._getReferencePeakHits(referencePeakList)
                 refpeakHitPos = [p.position for p in refpeakHits]
                 d[ReferencePeakPositions] = str(refpeakHitPos)
+                deltas = [round(abs(lp.position[0] - p.position[0]), 4)
+                     for p in spectrumHit._getPeakHits() for lp in p._linkedPeaks if lp in referencePeakList.peaks]
+                d[DeltaPositions] = str(deltas)
 
             ##  level column
             level = _getReferenceLevel(spectrumHit.project, referenceSpectrum)
