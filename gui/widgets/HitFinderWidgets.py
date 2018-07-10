@@ -44,7 +44,7 @@ def _addCommonHitFinderWidgets(cls, row, ReferenceSpectrumGroup, ReferenceFromMi
   row += 1
   minimumDistanceLabel = Label(cls.pipeFrame, MatchPeaksWithin, grid=(row, 0))
   setattr(cls, MatchPeaksWithin, DoubleSpinbox(cls.pipeFrame, value=DefaultMinDist,
-                                               step=DefaultMinDist, min=0.01, grid=(row, 1)))
+                                               step=DefaultMinDist, min=0.01, decimals=3, grid=(row, 1)))
 
   row += 1
   mEfLabel = Label(cls.pipeFrame, thresholdName, grid=(row, 0))
