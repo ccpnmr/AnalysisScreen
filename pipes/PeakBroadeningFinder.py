@@ -184,6 +184,6 @@ class PeakBroadeningFinder(SpectraPipe):
     SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
     return set(list(spectra) + SGSpectra)
 
-PeakBroadeningFinder.register() # Registers the pipe in the pipeline
+# PeakBroadeningFinder.register() # Registers the pipe in the pipeline
 
 
