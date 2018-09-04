@@ -1,4 +1,5 @@
 #=========================================================================================
+#=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
@@ -195,7 +196,7 @@ class HitsAnalysis(CcpnModule):
 
      spectrumDisplay = _openSpectrumDisplay(self.mainWindow,spectrum)
      if self.current.strip:
-       self.current.strip.displaySpectrum(self.current.spectrumHit.spectrum)
+       self.current.strip.spectrumDisplay.displaySpectrum(self.current.spectrumHit.spectrum)
 
      if self._markHitPositions:
        for mark in self.project.marks:
