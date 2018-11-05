@@ -45,8 +45,8 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 class MixtureGenerationPopup(CcpnDialog):
 
-  def __init__(self, parent=None, mainWindow=None, title='Mixture Generation Setup', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+  def __init__(self, parent=None, mainWindow=None, title='Mixture Generation Setup', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kwds)
 
     if mainWindow is None: #This allows opening the popup for graphical tests
       self.project = None
@@ -413,7 +413,7 @@ class MixtureGenerationPopup(CcpnDialog):
 
 class SAsettingPopup(QtWidgets.QDialog):
 
-  def __init__(self, parent=None, project=None, params=None,   **kw):
+  def __init__(self, parent=None, project=None, params=None,   **kwds):
     super(SAsettingPopup, self).__init__(parent)
     self.project = project
     self.parent = parent

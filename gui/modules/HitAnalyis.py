@@ -70,7 +70,7 @@ class HitsAnalysis(CcpnModule):
   settingsPosition = 'top'
   className = 'ScreeningHits'
 
-  def __init__(self, mainWindow, name='Hit Analysis', **kw):
+  def __init__(self, mainWindow, name='Hit Analysis', **kwds):
     super(HitsAnalysis, self)
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
@@ -711,7 +711,7 @@ class HitsAnalysis(CcpnModule):
     return ps
 
 
-  def _spectrumHitNotifierCallback(self, *kw):
+  def _spectrumHitNotifierCallback(self, *kwds):
     self._spectrumHits = self.project.spectrumHits
     self._updateHitTable()
 
