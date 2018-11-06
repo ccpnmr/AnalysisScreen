@@ -416,7 +416,7 @@ class SAsettingPopup(QtWidgets.QDialog):
   def __init__(self, parent=None, project=None, params=None,   **kwds):
     super(SAsettingPopup, self).__init__(parent)
     self.project = project
-    self.parent = parent
+    self._parent = parent
 
     i, f, s, k, c, it = list(params.values())
     self.simulatedAnnealingWidgets = SimulatedAnnealingWidgets(i,f,s,k,c,it)
@@ -443,7 +443,7 @@ class SAsettingPopup(QtWidgets.QDialog):
 
   def _okButton(self):
     param = self.simulatedAnnealingWidgets._getParam()
-    self.parent.simulatedAnnealingParams.append(param)
+    self._parent.simulatedAnnealingParams.append(param)
     self.accept()
 
 

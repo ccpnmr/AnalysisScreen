@@ -86,7 +86,7 @@ class PeakBroadeningFinderGuiPipe(GuiPipe):
   def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
     super(PeakBroadeningFinderGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self.parent = parent
+    self._parent = parent
 
     row = 0
     hw._addSGpulldowns(self, row, SGVarNames)
