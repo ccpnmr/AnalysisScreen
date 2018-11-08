@@ -2,7 +2,7 @@ from ccpn.framework.Framework import Framework
 from ccpn.core.Project import Project
 from ccpn.pipes import loadedPipes
 from ccpn.AnalysisScreen.pipes import _loadScreenPipes
-from ccpn.AnalysisScreen.lib.ScreenLookup import _loadScreenLookupFile
+# from ccpn.AnalysisScreen.lib.ScreenLookup import _loadScreenLookupFile
 from ccpn.AnalysisScreen.gui.popups.MixtureGenerationPopup import MixtureGenerationPopup
 from ccpn.AnalysisScreen.gui.modules.HitAnalyis import HitsAnalysis
 from ccpn.AnalysisScreen.gui.modules.MixtureAnalysis import MixtureAnalysis
