@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -23,20 +23,13 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 
 
-
 #################################################
 #######   NOT IMPLEMENTED YET      ##############
 #################################################
 
 
-
-
-
-
-
-
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -46,6 +39,7 @@ from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
+
 
 ########################################################################################################################
 ###   Attributes:
@@ -63,35 +57,27 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 PipeName = 'Output Hits'
 
 
-
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
 
 
 class OutputHitsGuiPipe(GuiPipe):
-  
-  preferredPipe = False
-  applicationSpecificPipe = True
-  pipeName = PipeName
-  _alreadyOpened = False
+    preferredPipe = False
+    applicationSpecificPipe = True
+    pipeName = PipeName
+    _alreadyOpened = False
 
+    def __init__(self, name=pipeName, parent=None, project=None, **kwds):
+        super(OutputHitsGuiPipe, self)
+        GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
+        self._parent = parent
+        OutputHitsGuiPipe._alreadyOpened = True
 
-  def __init__(self, name=pipeName, parent=None, project=None, **kwds):
-    super(OutputHitsGuiPipe, self)
-    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self._parent = parent
-    OutputHitsGuiPipe._alreadyOpened = True
-
-
-
-
-  def _closeBox(self):
-    'reset alreadyOpened flag '
-    OutputHitsGuiPipe._alreadyOpened = False
-    self.closeBox()
-
-
+    def _closeBox(self):
+        'reset alreadyOpened flag '
+        OutputHitsGuiPipe._alreadyOpened = False
+        self.closeBox()
 
 
 ########################################################################################################################
@@ -99,26 +85,20 @@ class OutputHitsGuiPipe(GuiPipe):
 ########################################################################################################################
 
 
-
-
 class OutputHitsPipe(SpectraPipe):
+    guiPipe = OutputHitsGuiPipe
+    pipeName = PipeName
 
-  guiPipe = OutputHitsGuiPipe
-  pipeName = PipeName
+    _kwargs = {
 
-  _kwargs  =   {
+        }
 
-               }
+    def runPipe(self, spectra):
+        '''
+        :param spectra: inputData
+        :return: spectra
+        '''
 
-
-  def runPipe(self, spectra):
-    '''
-    :param spectra: inputData
-    :return: spectra
-    '''
-
-    return spectra
+        return spectra
 
 # OutputHitsPipe.register() # Registers the pipe in the pipeline
-
-

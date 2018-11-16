@@ -194,7 +194,7 @@ class MixtureAnalysis(CcpnModule):
 
     # def _findSelectedPeaks(self, peaks:None):
     #   ''' this callback, registered with a notifier, allows to select a peak either on the table, compoundView or
-    #   guiSpectrum display and highLight the respective peak/s or atom/s on compoundView, table , display '''
+    #   guiSpectrum display and highLight the respective peak/s or atom/s on compoundView, table, display '''
     #   # self.peakTable.clearSelection()
     #   selectedPeaks = []
     #   if self.project.strips:
