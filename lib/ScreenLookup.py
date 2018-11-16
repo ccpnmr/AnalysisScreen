@@ -4,7 +4,7 @@
 # from collections import OrderedDict
 # import pathlib
 # import pandas as pd
-# from ccpn.util.Logging import getLogger , _debug3
+# from ccpn.util.Logging import getLogger, _debug3
 # ######################### Excel Headers ##################
 # """The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
 # Changing these will fail to set the attribute"""
@@ -56,15 +56,15 @@
 # HDF5 = 'HDF5'
 #
 #
-# SAMPLE_PROPERTIES =  [comment, pH, ionicStrength,  amount , amountUnit,isHazardous,creationDate, batchIdentifier,
+# SAMPLE_PROPERTIES =  [comment, pH, ionicStrength,  amount, amountUnit,isHazardous,creationDate, batchIdentifier,
 #                       plateIdentifier,rowNumber,columnNumber]
 #
 # SUBSTANCE_PROPERTIES =  [comment,smiles,synonyms,stereoInfo,molecularMass,empiricalFormula,atomCount,
 #                          hBondAcceptorCount,hBondDonorCount,bondCount,ringCount,polarSurfaceArea,
 #                          logPartitionCoefficient,userCode,]
 #
-# EXP_TYPES = OrderedDict([(SPECTRUM_1H, 'H'), (SPECTRUM_OFF_RESONANCE ,'STD.H'),
-#                         (SPECTRUM_ON_RESONANCE ,'STD.H'), (SPECTRUM_STD ,'STD.H'),
+# EXP_TYPES = OrderedDict([(SPECTRUM_1H, 'H'), (SPECTRUM_OFF_RESONANCE, 'STD.H'),
+#                         (SPECTRUM_ON_RESONANCE ,'STD.H'), (SPECTRUM_STD, 'STD.H'),
 #                         (SPECTRUM_WLOGSY,'Water-LOGSY.H'),])
 #
 #

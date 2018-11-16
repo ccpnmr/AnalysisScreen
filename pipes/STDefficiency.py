@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -33,7 +33,8 @@ from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.AnalysisScreen.lib.experimentAnalysis.STD import _calculatePeakEfficiency
-from ccpn.util.Logging import getLogger , _debug3
+from ccpn.util.Logging import getLogger, _debug3
+
 
 ########################################################################################################################
 ###   Attributes:
@@ -56,6 +57,7 @@ DefaultPeakListIndex = -1
 ## PipeName
 PipeName = 'STD Efficiency'
 
+
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
@@ -68,30 +70,27 @@ PipeName = 'STD Efficiency'
 
 
 class STDEfficiencyGuiPipe(GuiPipe):
+    preferredPipe = False
+    applicationSpecificPipe = True
+    pipeName = PipeName
 
-  preferredPipe = False
-  applicationSpecificPipe = True
-  pipeName = PipeName
+    def __init__(self, name=pipeName, parent=None, project=None, **kwds):
+        super(STDEfficiencyGuiPipe, self)
+        GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
+        self._parent = parent
 
+        row = 0
+        hw._addSGpulldowns(self, row, SGVarNames)
 
-  def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
-    super(STDEfficiencyGuiPipe, self)
-    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self._parent = parent
+        row += len(SGVarNames)
+        minimumDistanceLabel = Label(self.pipeFrame, MatchPeaksWithin, grid=(row, 0))
+        setattr(self, MatchPeaksWithin, DoubleSpinbox(self.pipeFrame, value=DefaultMinDist,
+                                                      step=DefaultMinDist, min=0.01, grid=(row, 1)))
 
-    row = 0
-    hw._addSGpulldowns(self, row, SGVarNames)
+        self._updateWidgets()
 
-    row += len(SGVarNames)
-    minimumDistanceLabel = Label(self.pipeFrame, MatchPeaksWithin, grid=(row, 0))
-    setattr(self, MatchPeaksWithin, DoubleSpinbox(self.pipeFrame, value=DefaultMinDist,
-                                                 step=DefaultMinDist, min=0.01, grid=(row, 1)))
-
-    self._updateWidgets()
-
-
-  def _updateWidgets(self):
-    self._setSpectrumGroupPullDowns(SGVarNames)
+    def _updateWidgets(self):
+        self._setSpectrumGroupPullDowns(SGVarNames)
 
 
 ########################################################################################################################
@@ -100,45 +99,41 @@ class STDEfficiencyGuiPipe(GuiPipe):
 
 
 class STDEfficiencyPipe(SpectraPipe):
+    guiPipe = STDEfficiencyGuiPipe
+    pipeName = PipeName
 
-  guiPipe = STDEfficiencyGuiPipe
-  pipeName = PipeName
+    _kwargs = {
+        OffResonanceSpectrumGroup: 'OffResonanceSpectrumGroup.pid',
+        OnResonanceSpectrumGroup: 'OnResonanceSpectrumGroup.pid',
+        STDSpectrumGroup: 'STDSpectrumGroup.pid',
+        MatchPeaksWithin: DefaultMinDist,
+        }
 
-  _kwargs  =   {
-                OffResonanceSpectrumGroup: 'OffResonanceSpectrumGroup.pid',
-                OnResonanceSpectrumGroup:  'OnResonanceSpectrumGroup.pid',
-                STDSpectrumGroup:          'STDSpectrumGroup.pid',
-                MatchPeaksWithin:          DefaultMinDist,
-               }
+    def runPipe(self, spectra):
+        '''
+        :param spectra: inputData
+        :return: calculates the STD peak efficiency and stores the value in the peak.figureOfMerit.
+        '''
+
+        stdSpectrumGroup = self._getSpectrumGroup(self._kwargs[STDSpectrumGroup])
+        offResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OffResonanceSpectrumGroup])
+        onResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OnResonanceSpectrumGroup])
+
+        minimumDistance = float(self._kwargs[MatchPeaksWithin])
+
+        if None in [stdSpectrumGroup, offResonanceSpectrumGroup, onResonanceSpectrumGroup]:
+            getLogger().warning('Aborted: SpectrumGroup spectra contains illegal values (None)')
+            return
+        if len(stdSpectrumGroup.spectra) == len(offResonanceSpectrumGroup.spectra) == len(onResonanceSpectrumGroup.spectra):
+            for stdSpectrum, offResonanceSpectrum, onResonanceSpectrum in zip(
+                    stdSpectrumGroup.spectra, offResonanceSpectrumGroup.spectra, onResonanceSpectrumGroup.spectra):
+                _calculatePeakEfficiency(stdSpectrum, onResonanceSpectrum, offResonanceSpectrum, n_peakList=DefaultPeakListIndex,
+                                         limitRange=minimumDistance)
+            self.project._logger.info('Peak efficiency calculated and stored in peak "figureOfMerit" ')
+        else:
+            getLogger().warning('Aborted: SpectrumGroups contain different lenght of spectra.')
+
+        return set(spectra)
 
 
-  def runPipe(self, spectra):
-    '''
-    :param spectra: inputData
-    :return: calculates the STD peak efficiency and stores the value in the peak.figureOfMerit.
-    '''
-
-    stdSpectrumGroup = self._getSpectrumGroup(self._kwargs[STDSpectrumGroup])
-    offResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OffResonanceSpectrumGroup])
-    onResonanceSpectrumGroup = self._getSpectrumGroup(self._kwargs[OnResonanceSpectrumGroup])
-
-    minimumDistance = float(self._kwargs[MatchPeaksWithin])
-
-
-    if None in [stdSpectrumGroup, offResonanceSpectrumGroup, onResonanceSpectrumGroup]:
-      getLogger().warning('Aborted: SpectrumGroup spectra contains illegal values (None)')
-      return
-    if len(stdSpectrumGroup.spectra) == len(offResonanceSpectrumGroup.spectra) == len(onResonanceSpectrumGroup.spectra):
-      for stdSpectrum, offResonanceSpectrum, onResonanceSpectrum in zip(
-          stdSpectrumGroup.spectra, offResonanceSpectrumGroup.spectra,onResonanceSpectrumGroup.spectra):
-
-        _calculatePeakEfficiency(stdSpectrum, onResonanceSpectrum, offResonanceSpectrum, n_peakList=DefaultPeakListIndex,
-                                 limitRange=minimumDistance)
-      self.project._logger.info('Peak efficiency calculated and stored in peak "figureOfMerit" ')
-    else:
-      getLogger().warning('Aborted: SpectrumGroups contain different lenght of spectra.')
-
-    return set(spectra)
-
-STDEfficiencyPipe.register() # Registers the pipe in the pipeline
-
+STDEfficiencyPipe.register()  # Registers the pipe in the pipeline
