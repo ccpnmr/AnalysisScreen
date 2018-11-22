@@ -682,7 +682,7 @@ class HitsAnalysis(CcpnModule):
         """Re-implementation of closeModule function from CcpnModule to unregister notification """
         if self._spectrumHitNotifier is not None:
             self._spectrumHitNotifier.unRegister()
-        super(HitsAnalysis, self)._closeModule()
+        super()._closeModule()
 
     def close(self):
         """
