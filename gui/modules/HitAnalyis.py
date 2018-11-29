@@ -368,7 +368,9 @@ class HitsAnalysis(CcpnModule):
                     if self.current.spectrumHit.spectrum is not None:
                         spectrumDisplay.displaySpectrum(self.current.spectrumHit.spectrum)
                     if self._showHitRegion:
-                        widths = _getCurrentZoomRatio(self.current.strip.viewBox.viewRange())
+                        # widths = _getCurrentZoomRatio(self.current.strip.viewBox.viewRange())
+                        widths = _getCurrentZoomRatio(self.current.strip.viewRange())
+
                         navigateToPositionInStrip(strip=self.current.strip, positions=peak.position, widths=widths)
                         region = LinearRegionsPlot(values=[peak.position[0] - 0.05, peak.position[0] + 0.05],
                                                    movable=False, orientation='v', colour='red')
