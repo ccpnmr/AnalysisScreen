@@ -43,9 +43,10 @@ Default_DataFrame = collections.OrderedDict((
 
 def hitsToDataFrame(spectrumHits)-> pd.DataFrame:
     """
+    Each column to be like Default_DataFrame. NB. One spectrum/Hit can have multiple references as could be a mixture of substances
+
     :param spectrumHits: list of Ccpn Obj spectrumHits
     :return: a data frame showing the details of the hits.
-    Each column to be like Default_DataFrame. NB. One spectrum|Hit can have multiple references as coul be a mixture of substances
     """
     data = []
 
