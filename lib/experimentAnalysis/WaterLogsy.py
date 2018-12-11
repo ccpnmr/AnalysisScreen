@@ -94,7 +94,7 @@ def __findHitsByMissingTargetPeaks(wLControl, wLTarget, matchedControl, peakList
           % (wLTarget.name, wLControl.name, missingWLT_peaks))
     for wLControlPeak in missingWLT_peaks:
       ##add new peak to peaklists of wlTarget with same position but 0 intensity. Keep it as hit
-      wLTargetnewPeak = wLTarget.peakLists[peakListTarget].newPeak(position=wLControlPeak.position, height=0.0, comment='Hit')
+      wLTargetnewPeak = wLTarget.peakLists[peakListTarget].newPeak(ppmPositions=wLControlPeak.position, height=0.0, comment='Hit')
       wLTarget.peakLists[0].peaks.append(wLTargetnewPeak)
       hits.append((wLControlPeak, wLTargetnewPeak, wLTargetnewPeak.position[0]))
   return hits
