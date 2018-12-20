@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -38,76 +38,73 @@ Matching Peaks
 import numpy as np
 import inspect
 
+
 currentFile = inspect.getfile(inspect.currentframe())
 
 
-
 def matchingPosition(data, limitMax, limitMin):
-  '''
+    '''
 
-  Data: the list of peak positions.
-  limitRange: the limit to add on the left and on the right
+    Data: the list of peak positions.
+    limitRange: the limit to add on the left and on the right
 
-  :return: array with matching positions
-  '''
+    :return: array with matching positions
+    '''
 
-  return data[np.argwhere(np.logical_and(data <= limitMax, data >= limitMin))]
-
-
+    return data[np.argwhere(np.logical_and(data <= limitMax, data >= limitMin))]
 
 
 def excludeFromComparing(data, excludeRegions):
-  ''' excludeRegions: list of lists E.G. [['start','stop'],  '...', ['start','stop']]'''
-  ll = []
-  for region in excludeRegions:
-    if not region:
-      return data
-    if region:
-      start, stop = region
-      ll.append(data[np.argwhere(np.logical_and(data <= start, data >= stop))])
-  if ll:
-    ll = np.concatenate(ll, axis = 0)
-    data = [j for j in data if j not in ll]
-    return np.array(data)
-
+    ''' excludeRegions: list of lists E.G. [['start','stop'],  '...', ['start','stop']]'''
+    ll = []
+    for region in excludeRegions:
+        if not region:
+            return data
+        if region:
+            start, stop = region
+            ll.append(data[np.argwhere(np.logical_and(data <= start, data >= stop))])
+    if ll:
+        ll = np.concatenate(ll, axis=0)
+        data = [j for j in data if j not in ll]
+        return np.array(data)
 
 
 def matchPeaks(reference, spectrumB, limitRange, refPeakListIndex=0, ):
-  '''
-  spectrum object type CCPN. Assumes it has a peaklist and peaks object
-  :param reference: the reference spectrum object
-  :param spectrumB: the spectrum object to match against the reference
-  :param limitRange: ppm range where to find a matching peak
-  :return:Tuple of reference Peak, target Peak, position of match
-  '''
+    '''
+    spectrum object type CCPN. Assumes it has a peaklist and peaks object
+    :param reference: the reference spectrum object
+    :param spectrumB: the spectrum object to match against the reference
+    :param limitRange: ppm range where to find a matching peak
+    :return:Tuple of reference Peak, target Peak, position of match
+    '''
 
-  allMatches = []
-  if len(reference.peakLists)>refPeakListIndex:
-    referencePeakPositions = np.array([peak.position[0] for peak in reference.peakLists[refPeakListIndex].peaks if peak.position])
-    for peakB in spectrumB.peakLists[refPeakListIndex].peaks:
-      peakBpos = peakB.position[0]
-      matches = matchingPosition(referencePeakPositions, peakBpos+limitRange, peakBpos-limitRange)
-      referencePeaks = [peak for peak in reference.peakLists[refPeakListIndex].peaks if peak.position[0] in matches]
-      if referencePeaks:
-        allMatches.append((referencePeaks[0], peakB, matches))
+    allMatches = []
+    if len(reference.peakLists) > refPeakListIndex:
+        referencePeakPositions = np.array([peak.position[0] for peak in reference.peakLists[refPeakListIndex].peaks if peak.position])
+        for peakB in spectrumB.peakLists[refPeakListIndex].peaks:
+            peakBpos = peakB.position[0]
+            matches = matchingPosition(referencePeakPositions, peakBpos + limitRange, peakBpos - limitRange)
+            referencePeaks = [peak for peak in reference.peakLists[refPeakListIndex].peaks if peak.position[0] in matches]
+            if referencePeaks:
+                allMatches.append((referencePeaks[0], peakB, matches))
 
-  return allMatches
+    return allMatches
 
 
 def matchHitToReference(spectrumHit, referenceSpectra, limitRange=0.01, refPeakListIndex=0):
-  '''
+    '''
 
-  :param targetHitSpectrum: spectrum calculated as hit (peak linewhidths changed compared to its control)
-  :param referenceSpectra: list of reference spectra. Eg mixture or single reference spectrum
-  :return: matches of the hit peak to the references
-  '''
+    :param targetHitSpectrum: spectrum calculated as hit (peak linewhidths changed compared to its control)
+    :param referenceSpectra: list of reference spectra. Eg mixture or single reference spectrum
+    :return: matches of the hit peak to the references
+    '''
 
-  hits = []
-  if referenceSpectra:
-    for referenceSpectrum in referenceSpectra:
-      if len(referenceSpectrum.peakLists) > refPeakListIndex:
-        matches = matchPeaks(reference=referenceSpectrum, spectrumB=spectrumHit, limitRange=limitRange,
-                             refPeakListIndex=refPeakListIndex)
-        hits.append(matches)
+    hits = []
+    if referenceSpectra:
+        for referenceSpectrum in referenceSpectra:
+            if len(referenceSpectrum.peakLists) > refPeakListIndex:
+                matches = matchPeaks(reference=referenceSpectrum, spectrumB=spectrumHit, limitRange=limitRange,
+                                     refPeakListIndex=refPeakListIndex)
+                hits.append(matches)
 
-  return hits
+    return hits

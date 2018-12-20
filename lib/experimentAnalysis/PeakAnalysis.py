@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -23,41 +23,41 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 
 
-
-
-
 def isPositive(intensity):
-  ''' Used to find positive peaks by giving the intenity as float.
-  Can be used for WaterLogsy or STD
-  '''
-  return True if intensity >= 0.0 else False
+    ''' Used to find positive peaks by giving the intenity as float.
+    Can be used for WaterLogsy or STD
+    '''
+    return True if intensity >= 0.0 else False
 
 
 def intensitySignChanged(referenceIntensity, spectrumBIntensity):
-  '''
-  compare intensity signs of a reference and a target value
-  Used in Finding WaterLogsy Hits.
-  ReferenceIntensity: intensity from the control Spectrum. EG. WL without target.
-  spectrumBIntensity: intensity from the experimental Spectrum. EG. WL with target.
-  return: True if intensity sign has changed
-  '''
-  if isPositive(referenceIntensity) == isPositive(spectrumBIntensity):return False
-  else: return True
+    '''
+    compare intensity signs of a reference and a target value
+    Used in Finding WaterLogsy Hits.
+    ReferenceIntensity: intensity from the control Spectrum. EG. WL without target.
+    spectrumBIntensity: intensity from the experimental Spectrum. EG. WL with target.
+    return: True if intensity sign has changed
+    '''
+    if isPositive(referenceIntensity) == isPositive(spectrumBIntensity):
+        return False
+    else:
+        return True
 
 
 def getIntensiyChange(reference, intensityB):
-  '''compare the reference intensity and a target intensity
-    return the difference '''
+    '''compare the reference intensity and a target intensity
+      return the difference '''
 
-  if intensityB is not None:
-    return reference - intensityB
+    if intensityB is not None:
+        return reference - intensityB
+
 
 def getPercentageIntensiyChange(intensityB, difference):
     '''compare the reference intensity and a target intensity
       return the percentage of difference. It can be used for STD efficiency '''
 
     try:
-      percentage =  difference / intensityB * 100.0
+        percentage = difference / intensityB * 100.0
     except ZeroDivisionError:
-      return 0
+        return 0
     return percentage
