@@ -184,12 +184,12 @@ class HitsAnalysis(CcpnModule):
         self.hitButtons.hide()
 
     def _openSpectrumHitOnNewDiplay(self, data):
-        from ccpn.ui.gui.lib.MenuActions import _openSpectrumDisplay
+        from ccpn.ui.gui.lib.MenuActions import _openItemObject
 
         spectrum = data['object']
         if spectrum:
 
-            spectrumDisplay = _openSpectrumDisplay(self.mainWindow, spectrum)
+            spectrumDisplay = _openItemObject(self.mainWindow, [spectrum])
             if self.current.strip:
                 self.current.strip.spectrumDisplay.displaySpectrum(self.current.spectrumHit.spectrum)
 
