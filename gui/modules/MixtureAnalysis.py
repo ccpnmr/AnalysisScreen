@@ -675,7 +675,7 @@ class MixtureAnalysis(CcpnModule):
             if len(self.project.strips) > 0:
                 strip = self.project.strips[0]
                 self.current.strip = strip
-                self.current.strip.plotWidget.autoRange()
+                self.current.strip._maximiseRegions()
             else:
                 strip = self._openNewDisplay()
         else:
@@ -691,14 +691,10 @@ class MixtureAnalysis(CcpnModule):
             spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
             if len(spectrumDisplay.strips) > 0:
                 self.current.strip = spectrumDisplay.strips[0]
-                self.current.strip.plotWidget.autoRange()
+                self.current.strip._maximiseRegions()
             self.moduleArea.moveModule(spectrumDisplay, position='top', neighbor=self)
             return spectrumDisplay
 
-    def _closeBlankDisplay(self):
-        ''' deletes a module display if present one '''
-        if 'BLANK DISPLAY' in self.moduleArea.findAll()[1]:
-            self.moduleArea.guiWindow.deleteBlankDisplay()
 
     ''' ######## ==== Settings  ====  ########   '''
 
