@@ -73,8 +73,8 @@ convertDataToHdf5(ds, "/Users/luca/Desktop/test.hdf5")
 
 # Using just python
 import numpy as np
-f = open("/Users/luca/Desktop/cpd_WL.csv", "r")
-lines = f.read().split("\n") # "\r\n" if needed
+with open("/Users/luca/Desktop/cpd_WL.csv", "r") as f:
+    lines = f.read().split("\n") # "\r\n" if needed
 x = []
 y = []
 for line in lines:
