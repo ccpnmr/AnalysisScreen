@@ -6,6 +6,8 @@ from collections import OrderedDict
 from ccpn.AnalysisScreen.lib.SimulatedAnnealing import randomDictMixtures, iterateAnnealing, getOverlappedCount, scoreMixture, calculateOverlapCount
 from ccpn.util.Logging import getLogger
 from ccpn.core.Spectrum import Spectrum
+from ccpn.ui.gui.widgets.MessageDialog import _stoppableProgressBar
+from ccpn.core.lib.ContextManagers import logCommandBlock, notificationEchoBlocking
 
 
 def _initialiseMixtures(params):
@@ -23,16 +25,17 @@ def _initialiseMixtures(params):
     pickFilterMode = _getFilterMode(params)
     ignoredRegions = _getIgnoredRegions(params)
     if len(spectra) > 0:
-        project = _getProjectFromSpectrum(spectra[0])
-        currentVirtualSamples = _getCurrentVirtualSamples(project)
-        if peaksAreTopick:
-            _pickPeaks(spectra, pickFilter, factor, pickFilterMode, ignoredRegions, noiseLevel)
+        with notificationEchoBlocking():
+            project = _getProjectFromSpectrum(spectra[0])
+            currentVirtualSamples = _getCurrentVirtualSamples(project)
+            if peaksAreTopick:
+                _pickPeaks(spectra, pickFilter, factor, pickFilterMode, ignoredRegions, noiseLevel)
 
-        if replaceMixtures:
-            _deleteMixtures(currentVirtualSamples)
-            _generateMixtures(project, spectra, calculationMethod, simulatedAnnealingParm, mode, modeNumber, minimalDistance, )
-        else:
-            _generateMixtures(project, spectra, calculationMethod, simulatedAnnealingParm, mode, modeNumber, minimalDistance)
+            if replaceMixtures:
+                _deleteMixtures(currentVirtualSamples)
+                _generateMixtures(project, spectra, calculationMethod, simulatedAnnealingParm, mode, modeNumber, minimalDistance, )
+            else:
+                _generateMixtures(project, spectra, calculationMethod, simulatedAnnealingParm, mode, modeNumber, minimalDistance)
     else:
         getLogger().warning('No spectra found')
         return
@@ -107,8 +110,10 @@ def _getProjectFromSpectrum(spectrum):
 
 
 def _deleteMixtures(currentMixtures):
-    for mixture in currentMixtures:
-        mixture.delete()
+    if len(currentMixtures)>0:
+        project = currentMixtures[0].project
+        project.deleteObjects(*currentMixtures)
+
 
 
 def _getCompounds(spectra):
@@ -150,7 +155,9 @@ def _getMixturesNumber(lenght, mode, n):
 
 
 def _createSamples(project, mixtures, minDistance):
-    for mixtureName, mixtureCompounds in mixtures.items():
+
+
+    for mixtureName, mixtureCompounds in _stoppableProgressBar(mixtures.items(), '(2/2) Creating Mixtures...'):
         compoundNames = [compound[0] for compound in mixtureCompounds]
         sample = project.newSample(name=str(mixtureName))
         sample.isVirtual = True
@@ -158,11 +165,11 @@ def _createSamples(project, mixtures, minDistance):
         #   newSampleComponent = sample.newSampleComponent(name=(str(compoundName)+'-1'), labelling='H')
 
         _setMixtureScores(mixtureCompounds, sample)
-        _setSampleComponentScores(project, sample, mixtureCompounds, minDistance)
+        _setSampleComponentScores(sample, mixtureCompounds, minDistance)
 
 
-def _setMixtureScores(mixtureCompounds, sample, minimalOverlap=0.01):
-    sample.score = round(scoreMixture(mixtureCompounds, minimalOverlap), 2)
+def _setMixtureScores(mixtureCompounds, sample, minDist=0.01):
+    sample.score = round(scoreMixture(mixtureCompounds, minDist), 2)
     sample.overlaps = getOverlappedCount(mixtureCompounds)
 
 
@@ -195,15 +202,15 @@ def _getCurrentVirtualSamples(project):
 
 
 def _pickPeaks(spectra, filter, factor, filterMode, ignoredRegions, noiseThreshold):
-    for spectrum in spectra:
+    for spectrum in _stoppableProgressBar(spectra, '(1/2) Picking Peaks...'):
         spectrum.peakLists[0].pickPeaks1dFiltered(size=filter, mode=filterMode, excludeRegions=ignoredRegions,
                                                   positiveNoiseThreshold=noiseThreshold, factor=factor)
 
 
-def _setSampleComponentScores(project, sample, mixtureCompounds, minDist):
+def _setSampleComponentScores(sample, mixtureCompounds,  minDist=0.01):
     for compound in mixtureCompounds:
         compoundName, compoundPeakList = compound
-        newSampleComponent = sample.newSampleComponent(name=(str(compoundName)))
+        newSampleComponent = sample._fetchSampleComponent(str(compoundName))
         compoundsToCompare = [c[1] for c in mixtureCompounds if c[0] != compoundName]
         overlaped = calculateOverlapCount(compoundPeakList, compoundsToCompare, minDist)
 
@@ -217,3 +224,9 @@ def _setSampleComponentScores(project, sample, mixtureCompounds, minDist):
             #       'score: -->',round(score,2))
             newSampleComponent.score = round(score, 2)
             newSampleComponent.overlaps = list(set(overlaped))
+
+def _rescoreMixture(sample, minDist=0.01):
+    spectra = [s.substance.referenceSpectra[0] for s in sample.sampleComponents]
+    compounds = _getCompounds(spectra)
+    _setMixtureScores(compounds, sample)
+    _setSampleComponentScores(sample, compounds)
