@@ -3,13 +3,15 @@ from collections import OrderedDict
 from PyQt5 import QtGui, QtWidgets
 
 from ccpn.AnalysisScreen.lib.MixturesGeneration import _getMixturesFromVirtualSamples, _createSamples
-from ccpn.AnalysisScreen.lib.SimulatedAnnealing import iterateAnnealing, showScoresPerMixture
+from ccpn.AnalysisScreen.lib.SimulatedAnnealing import iterateAnnealing, _showScoresPerMixture
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+
 from ccpn.ui.gui.widgets.Frame import Frame
 
 
@@ -24,26 +26,26 @@ class SimulatedAnnealingWidgets(Frame):
         # def _createWidgets(self):
         #0  initial Temperature
         self.initialTempLabel = Label(self, 'Initial Temperature')
-        self.initialTempSpinbox = Spinbox(self)
-        self.initialTempSpinbox.setMaximum(100000)
+        self.initialTempSpinbox = DoubleSpinbox(self)
+        self.initialTempSpinbox.setMaximum(1000000)
         self.initialTempSpinbox.setValue(initialTemp)
 
         # 1  final Temperature
         self.finalTempLabel = Label(self, 'Final Temperature')
-        self.finalTempSpinbox = Spinbox(self)
-        self.finalTempSpinbox.setMaximum(100000)
+        self.finalTempSpinbox = DoubleSpinbox(self)
+        self.finalTempSpinbox.setMaximum(1000000)
         self.finalTempSpinbox.setValue(finalTemp)
 
         # 2  Step Temperature
         self.stepTempLabel = Label(self, 'Max Steps')
-        self.stepTempSpinbox = Spinbox(self)
-        self.stepTempSpinbox.setMaximum(100000)
+        self.stepTempSpinbox = DoubleSpinbox(self,  decimals=6)
+        self.stepTempSpinbox.setMaximum(1000000)
         self.stepTempSpinbox.setValue(stepTemp)
 
         # 3  constant Temperature
         self.constantTempLabel = Label(self, 'Probability Constant')
-        self.constantTempSpinbox = Spinbox(self)
-        self.constantTempSpinbox.setMaximum(100000)
+        self.constantTempSpinbox = DoubleSpinbox(self, decimals=6)
+        self.constantTempSpinbox.setMaximum(1000000)
         self.constantTempSpinbox.setValue(constantTemp)
 
         # 4  cooling Method
@@ -57,7 +59,7 @@ class SimulatedAnnealingWidgets(Frame):
         # 5  constant Temperature
         self.iterationLabel = Label(self, 'Iteration')
         self.iterationSpinbox = Spinbox(self)
-        self.iterationSpinbox.setMaximum(100000)
+        self.iterationSpinbox.setMaximum(1000000)
         self.iterationSpinbox.setValue(iterations)
 
         if self.coolingMethod == 'Linear':
@@ -184,6 +186,6 @@ class MixtureOptimisation(CcpnModule):
             sample.delete()
 
     def showScoresOnListWidget(self, newMixtures):
-        scores = showScoresPerMixture(newMixtures, self.minimalDistance)
+        scores = _showScoresPerMixture(newMixtures, self.minimalDistance)
         for score in scores:
             self.scoringListWidget.addItem(score)

@@ -134,7 +134,7 @@ class MixtureGenerationPopup(CcpnDialog):
                                              tipTexts=None)
         #
         self.numberLabel = Label(self, text='Select number')
-        self.numberSlider = SliderSpinBox(None, value=2, startVal=2, endVal=100, step=1, bigStep=5,
+        self.numberSlider = SliderSpinBox(None, value=2, startVal=2, endVal=10000, step=1, bigStep=5,
                                           hAlign='c')
 
         #
