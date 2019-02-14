@@ -556,7 +556,11 @@ class MixtureAnalysis(CcpnModule):
                 self.componentsScores.append(str(compoundName) + ' temp Score= 0')
 
             else:
-                score = len(overlaped) / len(compoundPeakList)
+                # TODO replace with proper call from simulatedAnnealing file
+                try:
+                    score = len(overlaped) / len(compoundPeakList)
+                except ZeroDivisionError:
+                    score = 0
                 self.componentsScores.append(str(compoundName) + ' temp Score= ' + str(round(score, 2)))
         return self.componentsScores
 

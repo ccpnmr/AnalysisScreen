@@ -9,6 +9,8 @@ import pandas as pd
 import numpy as np
 import datetime
 from itertools import combinations
+from ccpn.ui.gui.widgets.MessageDialog import _stoppableProgressBar
+
 from ccpn.AnalysisScreen.lib.experimentAnalysis.MatchPositions import matchingPosition
 
 def randomDictMixtures(name, compounds, nMixtures):
@@ -23,15 +25,29 @@ def randomDictMixtures(name, compounds, nMixtures):
       mixturesDict.update({key:value})
   return mixturesDict
 
-def scoreCompound_(compoundA, compoundB, minDist, scalingFactor=1):
+def _getScore(overlapCount, compoundPeaksCount,  scalingFactor=1):
+  try:
+    return (scalingFactor * (overlapCount / compoundPeaksCount))
+  except ZeroDivisionError:
+    return 0
+
+def _getOverlapCount(compoundA, compoundB, minDist):
   "for refactoring"
-  m = [matchingPosition(np.array(compoundA), limitMax=i + minDist, limitMin=i - minDist) for i in np.array(compoundB)]
-  overlapCount = sum([len(a) for a in m])
-  if len(compoundA)<0: return 0
-  return scalingFactor * (overlapCount / len(compoundA))
+  a, b = np.array(compoundA), np.array(compoundB)
+  c = abs(b[:, None] - a)
+  d = np.argwhere(c < minDist)
+  overlapCount = d.shape[0]
+  return overlapCount
 
 
 def scoreCompound(compoundA, compoundB, minDist, scalingFactor=1):
+  overlapCount = _getOverlapCount(compoundA, compoundB, minDist)
+  compoundPeaksCount = len(compoundB)
+  score =  _getScore(overlapCount, compoundPeaksCount,  scalingFactor)
+  return score
+
+def scoreCompound_OLD(compoundA, compoundB, minDist, scalingFactor=1):
+  """ OLD slow keep for backup"""
   overlapCount = 0
   for shiftA in compoundA:
     for shiftB in compoundB:
@@ -67,22 +83,23 @@ def calculateTotalScore(mixturesDict, peaksDistance=0.01):
   return score
 
 
-def getAllOverlappedPositions(mixtures, minDist):
-
-  for mixtureName, compounds in mixtures.items():
-    for compound in compounds:
-      compoundName, compoundPeakList = compound
-      compoundsToCompare = [c[1] for c in compounds if c[0] != compoundName]
-      overlaped = calculateOverlapCount(compoundPeakList, compoundsToCompare, minDist )
-      if overlaped is None:
-        print(compoundName, 'No Overlapped peaks found')
-      else:
-        score = len(overlaped) / len(compoundPeakList)
-        # print(compoundName, ' --> Counts',len(list(set(overlaped))), ' --> Overlapped positions:', overlaped, 'score: -->', score)
+# def getAllOverlappedPositions(mixtures, minDist):
+# 
+#   for mixtureName, compounds in mixtures.items():
+#     for compound in compounds:
+#       compoundName, compoundPeakList = compound
+#       compoundsToCompare = [c[1] for c in compounds if c[0] != compoundName]
+#       overlaped = calculateOverlapCount(compoundPeakList, compoundsToCompare, minDist )
+#       if overlaped is None:
+#         print(compoundName, 'No Overlapped peaks found')
+#       else:
+#         score = len(overlaped) / len(compoundPeakList)
+#         # print(compoundName, ' --> Counts',len(list(set(overlaped))), ' --> Overlapped positions:', overlaped, 'score: -->', score)
 
 
 def getOverlappedCount(mixtureCompounds, minDist=0.01):
     "called from score single sample"
+    # TODO get rid of . Duplicated routine,
     totalOverlapped  = 0
     overlaps = []
     for compound in mixtureCompounds:
@@ -102,6 +119,7 @@ def getOverlappedCount(mixtureCompounds, minDist=0.01):
 
 def calculateOverlapCount(compoundA, mixture, minimalOverlap):
   "called from score single sampleComponent and sample"
+  # TODO get rid of . Duplicated routine,
   ll = []
   for compound in mixture:
     overlaped = [peakA for peak in compound for peakA in compoundA if abs(peak - peakA) <= minimalOverlap]
@@ -111,11 +129,6 @@ def calculateOverlapCount(compoundA, mixture, minimalOverlap):
   return [j for l in ll for j in l]
 
 
-def _calculateSingleCompoundScore(compoundA, mixture, minimalOverlap):
-  for mix, compounds in mixture.items():
-    for compound in compounds:
-      overlaped = [peakA for peak in compound[1] for peakA in compoundA[1] if abs(peak - peakA) <= 0.01]
-      scoring = len(overlaped) / len(compoundA[1])
 
 def findBestMixtures(mixturesSteps):
   bestMixturesStep = list(mixturesSteps.items())
@@ -174,6 +187,9 @@ def getProbability(scoreDiff, currentTemp, tempK):
   return probabilty
 
 
+from tqdm import tqdm
+
+
 def annealling(mixtures, coolingMethod='Linear', startTemp=1000, finalTemp=0.01,
                maxSteps=1000, tempK=200, minDistance=0.01):
   mixturesSteps = {}
@@ -182,10 +198,11 @@ def annealling(mixtures, coolingMethod='Linear', startTemp=1000, finalTemp=0.01,
   scores = []
   probabilities  = []
   step = 1
-  for currentTemp in coolingSchedule:
+  for currentTemp in tqdm(coolingSchedule):
     newMixtures = mixTwoMixturesDict(mixtures)
     copyNewMixtures = copy.deepcopy(newMixtures)
     newScore = calculateTotalScore(newMixtures,minDistance)
+    # print('Annealing .... : T%s, Score %s' %(currentTemp, newScore,) )
     scoreDiff = abs(newScore - currScore)
     scores.append(newScore)
     if newScore == 0:
@@ -207,7 +224,7 @@ def annealling(mixtures, coolingMethod='Linear', startTemp=1000, finalTemp=0.01,
       break
   if len(scores)>0:
     bestScore = min(scores)
-    print('--> bestScore anniling:',bestScore)
+    # print('--> bestScore anniling:',bestScore)
   bestMixtures = findBestMixtures(mixturesSteps)
   return  bestMixtures
 
@@ -255,7 +272,7 @@ def iterateAnnealing(mixtures, startTemp=1000, finalTemp=0.01, maxSteps=1000, te
 
   df = pd.DataFrame(totalScores)
   dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S").replace(' ','_')
-  df.to_excel('/Users/luca/Desktop/PhD/data/UCB/results/mixtures/allScores__'+dt+'.xlsx')
+  # df.to_excel('/Users/luca/Desktop/PhD/data/UCB/results/mixtures/allScores__'+dt+'.xlsx')
   if len(bestIteration)>0:
     print("Annealing Finished")
     bestMixtures = findBestMixtures(bestIteration)

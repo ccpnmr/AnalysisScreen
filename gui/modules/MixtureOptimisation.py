@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from PyQt5 import QtGui, QtWidgets
 
-from ccpn.AnalysisScreen.lib.MixturesGeneration import _getMixturesFromVirtualSamples, _createSamples
+from ccpn.AnalysisScreen.lib.MixturesGeneration import _getMixturesFromVirtualSamples, _createSamples, _deleteMixtures
 from ccpn.AnalysisScreen.lib.SimulatedAnnealing import iterateAnnealing, _showScoresPerMixture
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -177,6 +177,7 @@ class MixtureOptimisation(CcpnModule):
 
     def _applyNewMixtures(self):
         self.deleteCurrentVirtualSamples(self.virtualSamples)
+        _deleteMixtures(self.project, self.virtualSamples)
         _createSamples(self.project, self.newMixtures, self.minimalDistance)
         self.mixtureAnalysisModule.scoringTable.setObjects(self.mixtureAnalysisModule._getVirtualSamples())
         self.close()
