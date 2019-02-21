@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 from ccpn.util.Logging import getLogger
 from ccpn.core.SpectrumHit import SpectrumHitPeakList
+from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
 
 
 REFERENCEPEAKLIST = 'Reference PeakList'
@@ -56,24 +57,25 @@ def _addNewHit(spectrum, hits):
     """
     project = spectrum.project
     efficiencies = []
+    with undoBlockWithoutSideBar():
+        spectrumHit = spectrum.newSpectrumHit(substanceName=spectrum.name + '-' + str(len(project.spectrumHits) + 1))
 
-    spectrumHit = spectrum.newSpectrumHit(substanceName=spectrum.name + '-' + str(len(project.spectrumHits) + 1))
+        newTargetPeakList = spectrum.newPeakList(title=SpectrumHitPeakList, isSimulated=True, comment='PeakList containing peak hits')
 
-    newTargetPeakList = spectrum.newPeakList(title=SpectrumHitPeakList, isSimulated=True, comment='PeakList containing peak hits')
+        for hit in hits:
+            if len(hit) == 3:
 
-    for hit in hits:
-        if len(hit) == 3:
-            referencePeak, targetPeak, position = hit
-            efficiencies.append(targetPeak.figureOfMerit)
-            newPeakFromTarget = targetPeak.copyTo(newTargetPeakList)
-            targetLinkedPeaks = newPeakFromTarget._linkedPeaks
-            targetLinkedPeaks.append(referencePeak)
-            newPeakFromTarget._linkPeaks(targetLinkedPeaks)
+                referencePeak, targetPeak, position = hit
+                efficiencies.append(targetPeak.figureOfMerit)
+                newPeakFromTarget = targetPeak.copyTo(newTargetPeakList)
+                targetLinkedPeaks = newPeakFromTarget._linkedPeaks
+                targetLinkedPeaks.append(referencePeak)
+                newPeakFromTarget._linkPeaks(targetLinkedPeaks)
 
-            referencePeakLinkedPeaks = referencePeak._linkedPeaks
-            referencePeakLinkedPeaks.append(newPeakFromTarget)
-            referencePeak._linkPeaks(referencePeakLinkedPeaks)
-            newPeakFromTarget.comment = 'Hit: Peak matched and copied From Target PeakList '
+                referencePeakLinkedPeaks = referencePeak._linkedPeaks
+                referencePeakLinkedPeaks.append(newPeakFromTarget)
+                referencePeak._linkPeaks(referencePeakLinkedPeaks)
+                newPeakFromTarget.comment = 'Hit: Peak matched and copied From Target PeakList '
 
     if min(efficiencies) != 1.0:
         spectrumHit.figureOfMerit = min(efficiencies)

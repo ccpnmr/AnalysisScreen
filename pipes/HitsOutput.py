@@ -76,10 +76,10 @@ def hitsToDataFrame(spectrumHits)-> pd.DataFrame:
                  ##  Positions columns
                 refpeakHits = spectrumHit._getReferencePeakHits(referencePeakList)
                 refpeakHitPos = [p.position for p in refpeakHits]
-                d[ReferencePeakPositions] = str(refpeakHitPos)
-                deltas = [round(abs(lp.position[0] - p.position[0]), 4)
+                d[ReferencePeakPositions] = refpeakHitPos
+                deltas = [round(lp.position[0] - p.position[0], 4)
                      for p in spectrumHit._getPeakHits() for lp in p._linkedPeaks if lp in referencePeakList.peaks]
-                d[DeltaPositions] = str(deltas)
+                d[DeltaPositions] = deltas
 
             ##  level column
             level = _getReferenceLevel(spectrumHit.project, referenceSpectrum)

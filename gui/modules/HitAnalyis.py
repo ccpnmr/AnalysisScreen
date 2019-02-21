@@ -44,10 +44,9 @@ from functools import partial
 from ccpn.core.SpectrumHit import SpectrumHitPeakList
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.QuickTable import QuickTable
-
-
+from ccpn.AnalysisScreen.pipes.HitsOutput import hitsToDataFrame, DeltaPositions, ReferencePeakPositions
 # from ccpn.ui.gui.widgets.tableTest import DataFrameWidget
-
+from ccpn.util.Common import makeIterableList
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
@@ -244,13 +243,25 @@ class HitsAnalysis(CcpnModule):
         self.listWidgetsHitDetails = ListWidget(self.substanceDetailsFrame, contextMenu=False,  #hAlign='t',vAlign='t',
                                                 grid=(2, 0))
 
+    @property
+    def hitsData(self):
+        """ currently displayed data as pandas DataFrame  """
+        return hitsToDataFrame(self._spectrumHits)
+
+    def _dfCell__ListsToStrs(self, df, dfColumnName):
+        """Pandas specific. flatten a list of list present in a pandas row cell to one single list.
+         Convert the list to strs without brackets,  to display on a table"""
+        vv = [(makeIterableList(b[dfColumnName])) for i, b in df.iterrows()]
+        return [', '.join(str(i) for i in v) for v in vv]
+
     def _setSpectrumHitTable(self):
         "Sets the SpectrumHitTable."
+        df = self.hitsData
 
-        from ccpn.AnalysisScreen.pipes.HitsOutput import hitsToDataFrame
-
-        df = hitsToDataFrame(self._spectrumHits)
+        df[DeltaPositions] = self._dfCell__ListsToStrs(df, DeltaPositions) # it has to be a str for the table
+        df[ReferencePeakPositions] = self._dfCell__ListsToStrs(df, ReferencePeakPositions)
         self.hitTable.setData(df)
+
 
     def _getSerial(self, hit):
         return self._spectrumHits.index(hit) + 1
