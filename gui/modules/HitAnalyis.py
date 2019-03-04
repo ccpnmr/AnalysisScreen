@@ -43,7 +43,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from functools import partial
 from ccpn.core.SpectrumHit import SpectrumHitPeakList
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.AnalysisScreen.pipes.HitsOutput import hitsToDataFrame, DeltaPositions, ReferencePeakPositions
 # from ccpn.ui.gui.widgets.tableTest import DataFrameWidget
 from ccpn.util.Common import makeIterableList
@@ -161,11 +161,11 @@ class HitsAnalysis(CcpnModule):
         # self.hitTable = ObjectTable(self.spectrumHitWidgetsFrame, columns=[], actionCallback=self._openSpectrumHitOnNewDiplay,
         #                             selectionCallback=self._setCurrentSpectrumHit, objects=[],
         #                             grid=(1, 0))
-        self.hitTable = QuickTable(self.spectrumHitWidgetsFrame, mainWindow=self.mainWindow,
-                                   selectionCallback=self._setCurrentSpectrumHit,
-                                   actionCallback=self._openSpectrumHitOnNewDiplay,
+        self.hitTable = GuiTable(self.spectrumHitWidgetsFrame, mainWindow=self.mainWindow,
+                                 selectionCallback=self._setCurrentSpectrumHit,
+                                 actionCallback=self._openSpectrumHitOnNewDiplay,
 
-                                   grid=(0, 0))
+                                 grid=(0, 0))
         # self.hitTable = DataFrameWidget()
         # self.spectrumHitWidgetsFrame.getLayout().addWidget(self.hitTable, 1, 0)
 

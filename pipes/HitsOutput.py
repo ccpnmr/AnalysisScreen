@@ -5,8 +5,9 @@ Create a new Pandas dataFrame from SpectrumHits obtained from a pipeline
 '''
 
 import pandas as pd
-from ccpn.core.SpectrumHit import _getReferenceLevel
+from ccpn.core.SpectrumHit import _getReferenceLevel, scoreHit, _norm
 import collections
+from sklearn.preprocessing import minmax_scale
 
 # Naming
 RefPid = 'Pid'
@@ -16,6 +17,9 @@ SampleName = 'Sample'                            # -> Str | name of the sample
 ExperimentTypeName = 'ExperimentType'            # -> Str | name of ccpn ExperimentType
 
 # Scoring
+RelativeScore = 'Relative Score'                          # -> Float | relative score per each reference spectrum identified as hit.
+NormalisedScore = 'Normalised Score'                      # -> Float | relative score per each reference spectrum identified as hit.
+
 ReferenceTotalScore = 'Total Score'                       # -> Float | tot score per each reference spectrum identified as hit.
 ReferenceFigureOfMerit = 'FigureOfMerit'                  # -> Float | score like efficiency for each reference
 ReferenceTotalPeaksCount = 'Peaks'                        # -> Int   | tot count of peak per each reference spectrum identified as hit.
@@ -77,9 +81,16 @@ def hitsToDataFrame(spectrumHits)-> pd.DataFrame:
                 refpeakHits = spectrumHit._getReferencePeakHits(referencePeakList)
                 refpeakHitPos = [p.position for p in refpeakHits]
                 d[ReferencePeakPositions] = refpeakHitPos
-                deltas = [round(lp.position[0] - p.position[0], 4)
-                     for p in spectrumHit._getPeakHits() for lp in p._linkedPeaks if lp in referencePeakList.peaks]
+                # deltas = [round(lp.position[0] - p.position[0], 4)
+                #      for p in spectrumHit._getPeakHits() for lp in p._linkedPeaks if lp in referencePeakList.peaks]
+                deltas= spectrumHit._getDeltaPositions(referencePeakList)
                 d[DeltaPositions] = deltas
+                heights = spectrumHit._getHitHeights(spectrumHit._getPeakHits())
+                snr = spectrumHit.spectrum._snr
+                if not snr:
+                    snr = 1
+                relScore = scoreHit(heights,snr,deltas)
+                d[RelativeScore] = relScore
 
             ##  level column
             level = _getReferenceLevel(spectrumHit.project, referenceSpectrum)
@@ -87,5 +98,7 @@ def hitsToDataFrame(spectrumHits)-> pd.DataFrame:
             data.append(d)
 
     dataFrame = pd.DataFrame(data)
+    dataFrame[NormalisedScore] = _norm(dataFrame[RelativeScore])
+    #
 
     return dataFrame
