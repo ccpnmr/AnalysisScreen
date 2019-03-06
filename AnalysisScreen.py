@@ -32,7 +32,7 @@ class Screen(Assign):
             # ("Pick Peaks ", self.showPickPeakPopup),
             ("Generate Mixtures ", self.showMixtureGenerationPopup, [('shortcut', 'cs')]),
             ("Mixtures Analysis ", self.showMixtureAnalysis, [('shortcut', 'st')]),
-            ("Screening Pipeline", self.showScreeningPipeline, [('shortcut', 'sp')]),
+            ("Screening Pipeline", self.showScreeningPipeline, [('shortcut', 'sl')]),
             ("Hit Analysis", self.showHitAnalysisModule, [('shortcut', 'ha')]),
             ]
                     )
