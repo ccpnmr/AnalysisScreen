@@ -5,8 +5,9 @@ Create a new Pandas dataFrame from SpectrumHits obtained from a pipeline
 '''
 
 import pandas as pd
-from ccpn.core.SpectrumHit import _getReferenceLevel, scoreHit, _norm
+from ccpn.core.SpectrumHit import _getReferenceLevel, scoreHit, _norm, _grade
 import collections
+from ccpn.core.PeakList import _estimateNoiseLevel1D
 from sklearn.preprocessing import minmax_scale
 
 # Naming
@@ -19,17 +20,16 @@ ExperimentTypeName = 'ExperimentType'            # -> Str | name of ccpn Experim
 # Scoring
 RelativeScore = 'Relative Score'                          # -> Float | relative score per each reference spectrum identified as hit.
 NormalisedScore = 'Normalised Score'                      # -> Float | relative score per each reference spectrum identified as hit.
-
+Grade =            'Grade'                                # -> Str   | conversion 0-1 to a grade scale  weak-strong
 ReferenceTotalScore = 'Total Score'                       # -> Float | tot score per each reference spectrum identified as hit.
 ReferenceFigureOfMerit = 'FigureOfMerit'                  # -> Float | score like efficiency for each reference
 ReferenceTotalPeaksCount = 'Peaks'                        # -> Int   | tot count of peak per each reference spectrum identified as hit.
 ReferenceLevel = 'Level'                                  # -> Int   | the hit level based on  how many experiment type the reference has appeared to be a hit.
-
+SNR = 'SNR'
 
 # Peak hits positions
 ReferencePeakPositions = 'PeakPositions'                 # -> list of tuple
 DeltaPositions = 'DeltaPositions'                        # -> Delta positions between reference peak and target peak
-
 
 
 Default_DataFrame = collections.OrderedDict((
@@ -42,6 +42,8 @@ Default_DataFrame = collections.OrderedDict((
                                             (ReferenceTotalPeaksCount    ,None),
                                             (ReferenceLevel              ,None),
                                             (ReferencePeakPositions      ,None),
+                                            (RelativeScore               ,None),
+                                            (NormalisedScore             ,None),
                                             ))
 
 
@@ -87,18 +89,19 @@ def hitsToDataFrame(spectrumHits)-> pd.DataFrame:
                 d[DeltaPositions] = deltas
                 heights = spectrumHit._getHitHeights(spectrumHit._getPeakHits())
                 snr = spectrumHit.spectrum._snr
-                if not snr:
-                    snr = 1
+                if snr is None:
+                    snr, nl = _estimateNoiseLevel1D(spectrumHit.spectrum.intensities)
+                    spectrumHit.spectrum._snr = snr
                 relScore = scoreHit(heights,snr,deltas)
                 d[RelativeScore] = relScore
-
+                d[SNR] = snr
             ##  level column
             level = _getReferenceLevel(spectrumHit.project, referenceSpectrum)
             d[ReferenceLevel] = int(level)
             data.append(d)
 
     dataFrame = pd.DataFrame(data)
-    dataFrame[NormalisedScore] = _norm(dataFrame[RelativeScore])
-    #
+    if RelativeScore in dataFrame:
+        dataFrame[NormalisedScore] = _norm(dataFrame[RelativeScore])*100
 
     return dataFrame

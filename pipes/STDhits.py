@@ -157,6 +157,7 @@ class STDHitFinder(SpectraPipe):
                             targetHits = [i for hit in listsTargetHits for i in hit]  # clean up the empty sublists
                             controlHits = [i for hit in listsControlHits for i in hit]  # clean up the empty sublists
                             filteredHits = self._filterFalsePositiveHits(targetHits, controlHits)
+                            print('stdSpectrum',stdSpectrum)
                             if len(filteredHits) > 0:
                                 _addNewHit(stdSpectrum, filteredHits)
 

@@ -44,7 +44,7 @@ from functools import partial
 from ccpn.core.SpectrumHit import SpectrumHitPeakList
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
-from ccpn.AnalysisScreen.pipes.HitsOutput import hitsToDataFrame, DeltaPositions, ReferencePeakPositions
+from ccpn.AnalysisScreen.pipes.HitsOutput import hitsToDataFrame, DeltaPositions, ReferencePeakPositions, ExperimentTypeName,ReferenceFigureOfMerit, ReferenceLevel
 # from ccpn.ui.gui.widgets.tableTest import DataFrameWidget
 from ccpn.util.Common import makeIterableList
 Qt = QtCore.Qt
@@ -258,8 +258,15 @@ class HitsAnalysis(CcpnModule):
         "Sets the SpectrumHitTable."
         df = self.hitsData
 
-        df[DeltaPositions] = self._dfCell__ListsToStrs(df, DeltaPositions) # it has to be a str for the table
-        df[ReferencePeakPositions] = self._dfCell__ListsToStrs(df, ReferencePeakPositions)
+        # df[DeltaPositions] = self._dfCell__ListsToStrs(df, DeltaPositions) # it has to be a str for the table
+        # df[ReferencePeakPositions] = self._dfCell__ListsToStrs(df, ReferencePeakPositions)
+
+        del df[DeltaPositions]
+        del df[ReferencePeakPositions]
+        del df[ExperimentTypeName]
+        del df[ReferenceFigureOfMerit]
+        del df[ReferenceLevel]
+        df = df.drop_duplicates(subset='Reference', keep="last")
         self.hitTable.setData(df)
 
 
@@ -466,6 +473,18 @@ class HitsAnalysis(CcpnModule):
                         self.current.spectrumHit = None
                     else:
                         self.current.spectrumHit = spectrumHit
+        self._showHitOnStrip()
+
+    def _showHitOnStrip(self, *args):
+        if self.current.strip:
+            self.current.strip._clear()
+            d = self.current.strip.spectrumDisplay.displaySpectrum
+            if self.current.spectrumHit:
+                spectrum = self.hitTable.getSelectedObjects()[-1]
+                if spectrum:
+                    if self.current.strip:
+                        d(self.current.spectrumHit.spectrum)
+                        d(spectrum)
 
     def _clearListWidget(self):
         ''' Documentation '''
