@@ -5,11 +5,12 @@ Create a new Pandas dataFrame from SpectrumHits obtained from a pipeline
 '''
 
 import pandas as pd
-from ccpn.core.SpectrumHit import _getReferenceLevel, scoreHit, _norm, _grade
-import collections
-from ccpn.core.PeakList import _estimateNoiseLevel1D
-from sklearn.preprocessing import minmax_scale
+from ccpn.core.SpectrumHit import _getReferenceLevel, scoreHit, _norm, _grade, _scoreMatches
 
+import collections
+from ccpn.core.PeakList import _estimateNoiseLevel1D, _estimateSNR1D
+from sklearn.preprocessing import minmax_scale
+import numpy as np
 # Naming
 RefPid = 'Pid'
 ReferenceName = 'Reference'                      # -> Str | name of the spectrum used as reference
@@ -26,6 +27,7 @@ ReferenceFigureOfMerit = 'FigureOfMerit'                  # -> Float | score lik
 ReferenceTotalPeaksCount = 'Peaks'                        # -> Int   | tot count of peak per each reference spectrum identified as hit.
 ReferenceLevel = 'Level'                                  # -> Int   | the hit level based on  how many experiment type the reference has appeared to be a hit.
 SNR = 'SNR'
+MatchesScore = 'Matches Score'                            # -> Float | score  each reference to the hit
 
 # Peak hits positions
 ReferencePeakPositions = 'PeakPositions'                 # -> list of tuple
@@ -44,6 +46,7 @@ Default_DataFrame = collections.OrderedDict((
                                             (ReferencePeakPositions      ,None),
                                             (RelativeScore               ,None),
                                             (NormalisedScore             ,None),
+                                            (MatchesScore                ,None),
                                             ))
 
 
@@ -89,10 +92,15 @@ def hitsToDataFrame(spectrumHits)-> pd.DataFrame:
                 d[DeltaPositions] = deltas
                 heights = spectrumHit._getHitHeights(spectrumHit._getPeakHits())
                 snr = spectrumHit.spectrum._snr
-                if snr is None:
-                    snr, nl = _estimateNoiseLevel1D(spectrumHit.spectrum.intensities)
-                    spectrumHit.spectrum._snr = snr
-                relScore = scoreHit(heights,snr,deltas)
+                nl = spectrumHit.spectrum.noiseLevel
+                # if snr is None:
+                #     snr = _estimateSNR1D(spectrumHit.spectrum.intensities)
+                #     spectrumHit.spectrum._snr = snr
+                # relScore = scoreHit(heights,snr)
+                matchScore = _scoreMatches(deltas)
+                d[MatchesScore] = matchScore
+                # relScore = np.sum(np.array(heights)-nl)
+                relScore = _scoreMatches(heights)
                 d[RelativeScore] = relScore
                 d[SNR] = snr
             ##  level column
@@ -102,6 +110,6 @@ def hitsToDataFrame(spectrumHits)-> pd.DataFrame:
 
     dataFrame = pd.DataFrame(data)
     if RelativeScore in dataFrame:
-        dataFrame[NormalisedScore] = _norm(dataFrame[RelativeScore])*100
+        dataFrame[NormalisedScore] = _norm(dataFrame[ReferenceTotalScore])*100
 
     return dataFrame
