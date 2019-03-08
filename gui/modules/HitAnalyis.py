@@ -246,7 +246,16 @@ class HitsAnalysis(CcpnModule):
     @property
     def hitsData(self):
         """ currently displayed data as pandas DataFrame  """
+        return self._hitsData
+
+    @hitsData.getter
+    def hitsData(self):
         return hitsToDataFrame(self._spectrumHits)
+
+    @hitsData.setter
+    def hitsData(self, df):
+        self._hitsData = df
+
 
     def _dfCell__ListsToStrs(self, df, dfColumnName):
         """Pandas specific. flatten a list of list present in a pandas row cell to one single list.
@@ -257,17 +266,17 @@ class HitsAnalysis(CcpnModule):
     def _setSpectrumHitTable(self):
         "Sets the SpectrumHitTable."
         df = self.hitsData
+        if df is not None:
+            df[DeltaPositions] = self._dfCell__ListsToStrs(df, DeltaPositions) # it has to be a str for the table
+            df[ReferencePeakPositions] = self._dfCell__ListsToStrs(df, ReferencePeakPositions)
 
-        # df[DeltaPositions] = self._dfCell__ListsToStrs(df, DeltaPositions) # it has to be a str for the table
-        # df[ReferencePeakPositions] = self._dfCell__ListsToStrs(df, ReferencePeakPositions)
-
-        del df[DeltaPositions]
-        del df[ReferencePeakPositions]
-        del df[ExperimentTypeName]
-        del df[ReferenceFigureOfMerit]
-        del df[ReferenceLevel]
-        df = df.drop_duplicates(subset='Reference', keep="last")
-        self.hitTable.setData(df)
+            # del df[DeltaPositions]
+            # del df[ReferencePeakPositions]
+            del df[ExperimentTypeName]
+            del df[ReferenceFigureOfMerit]
+            del df[ReferenceLevel]
+            df = df.drop_duplicates(subset='Reference', keep="last")
+            self.hitTable.setData(df)
 
 
     def _getSerial(self, hit):
