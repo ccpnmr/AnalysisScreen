@@ -5,10 +5,10 @@ Create a new Pandas dataFrame from SpectrumHits obtained from a pipeline
 '''
 
 import pandas as pd
-from ccpn.core.SpectrumHit import _getReferenceLevel, scoreHit, _norm, _grade, _scoreMatches
+from ccpn.core.SpectrumHit import _getReferenceLevel, scoreHit, _norm, _grade, _scoreHits
 
 import collections
-from ccpn.core.PeakList import _estimateNoiseLevel1D, _estimateSNR1D
+from ccpn.core.PeakList import estimateNoiseLevel1D, estimateSNR_1D
 from sklearn.preprocessing import minmax_scale
 import numpy as np
 # Naming
@@ -90,11 +90,9 @@ def hitsToDataFrame(spectrumHits)-> pd.DataFrame:
                 d[DeltaPositions] = deltas
                 heights = spectrumHit._getHitHeights(spectrumHit._getPeakHits())
                 snr = spectrumHit.spectrum._snr
-                matchScore = _scoreMatches(deltas)
+                matchScore = _scoreHits(deltas)
                 d[MatchesScore] = matchScore
-                # nl = spectrumHit.spectrum.noiseLevel
-                # relScore = np.sum(np.array(heights)-nl)
-                relScore = _scoreMatches(heights)
+                relScore = _scoreHits(heights)
                 d[RelativeScore] = relScore
                 d[SNR] = snr
             level = _getReferenceLevel(spectrumHit.project, referenceSpectrum)

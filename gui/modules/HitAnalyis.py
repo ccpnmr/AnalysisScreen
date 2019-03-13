@@ -90,17 +90,11 @@ class HitsAnalysis(CcpnModule):
             self._spectrumHits = self.project.spectrumHits
 
         ######## ======== Icons ====== ########
-        self.acceptIcon = Icon('icons/dialog-apply')
-        self.rejectIcon = Icon('icons/reject')
-        self.nextAndCommitIcon = Icon('icons/commitNextCopy')
-        self.previousAndCommitIcon = Icon('icons/commitPrevCopy')
+
         self.nextIcon = Icon('icons/next')
         self.previousIcon = Icon('icons/previous')
-        self.undoIcon = Icon('icons/edit-undo')
         self.removeIcon = Icon('icons/list-remove')
         self.minusIcon = Icon('icons/minus')
-        self.settingIcon = Icon('icons/applications-system')
-        self.exportIcon = Icon('icons/export')
         self._showHitRegion = False
         self._markHitPositions = False
         self._createWidgets()
@@ -125,21 +119,21 @@ class HitsAnalysis(CcpnModule):
                                              grid=(0, column), gridSpan=(2, column))
         self.spectrumHitWidgetsFrame.setMinimumWidth(200)
         column += 1
-        self.peakHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
-                                         grid=(0, column))
-        self.peakHitWidgetsFrame.setMinimumWidth(300)
+        # self.peakHitWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
+        #                                  grid=(0, column))
+        # self.peakHitWidgetsFrame.setMinimumWidth(300)
+        # # column += 1
+        # self.referenceWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
+        #                                    grid=(1, column))
+        # self.referenceWidgetsFrame.setMinimumWidth(300)
         # column += 1
-        self.referenceWidgetsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
-                                           grid=(1, column))
-        self.referenceWidgetsFrame.setMinimumWidth(300)
-        column += 1
-        self.substanceDetailsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
-                                           grid=(0, column), gridSpan=(2, column))
-        self._setExperimentTypeWidgets()
+        # self.substanceDetailsFrame = Frame(self.mainWidget, setLayout=True, margins=(10, 10, 10, 10),
+        #                                    grid=(0, column), gridSpan=(2, column))
+        # self._setExperimentTypeWidgets()
         self._setSpectrumHitWidgets()
-        self._setPeakHitWidgets()
-        self._setReferenceHitWidgets()
-        self._setSubstanceDetailsWidgets()
+        # self._setPeakHitWidgets()
+        # self._setReferenceHitWidgets()
+        # self._setSubstanceDetailsWidgets()
         self._setSpectrumHitTable()
 
     def _setExperimentTypeWidgets(self):
@@ -155,32 +149,25 @@ class HitsAnalysis(CcpnModule):
 
     def _setSpectrumHitWidgets(self):
 
-        # self.spectrumHitTableLabel = Label(self.spectrumHitWidgetsFrame, text='SpectrumHits',vAlign='t',
-        #                            grid = (0, 0))
 
-        # self.hitTable = ObjectTable(self.spectrumHitWidgetsFrame, columns=[], actionCallback=self._openSpectrumHitOnNewDiplay,
-        #                             selectionCallback=self._setCurrentSpectrumHit, objects=[],
-        #                             grid=(1, 0))
         self.hitTable = GuiTable(self.spectrumHitWidgetsFrame, mainWindow=self.mainWindow,
                                  selectionCallback=self._setCurrentSpectrumHit,
                                  actionCallback=self._openSpectrumHitOnNewDiplay,
-
                                  grid=(0, 0))
-        # self.hitTable = DataFrameWidget()
-        # self.spectrumHitWidgetsFrame.getLayout().addWidget(self.hitTable, 1, 0)
 
-        self.hitButtons = ButtonList(self.spectrumHitWidgetsFrame, texts=['', '', '', '', ''],
-                                     callbacks=[partial(self._movePreviousRow, self.hitTable),
-                                                self._deleteReference,
-                                                partial(self._setHitIsConfirmed, False),
-                                                partial(self._setHitIsConfirmed, True),
-                                                partial(self._moveNextRow, self.hitTable)],
-                                     icons=[self.previousIcon, self.minusIcon, self.rejectIcon, self.acceptIcon, self.nextIcon],
-                                     tipTexts=[None, None, None, None, None],
-                                     direction='H', vAlign='b',
-                                     grid=(2, 0))
 
-        self.hitButtons.hide()
+        # self.hitButtons = ButtonList(self.spectrumHitWidgetsFrame, texts=['', '', '', '', ''],
+        #                              callbacks=[partial(self._movePreviousRow, self.hitTable),
+        #                                         self._deleteReference,
+        #                                         partial(self._setHitIsConfirmed, False),
+        #                                         partial(self._setHitIsConfirmed, True),
+        #                                         partial(self._moveNextRow, self.hitTable)],
+        #                              icons=[self.previousIcon, self.minusIcon, self.rejectIcon, self.acceptIcon, self.nextIcon],
+        #                              tipTexts=[None, None, None, None, None],
+        #                              direction='H', vAlign='b',
+        #                              grid=(2, 0))
+        #
+        # self.hitButtons.hide()
 
     def _openSpectrumHitOnNewDiplay(self, data):
         from ccpn.ui.gui.lib.MenuActions import _openItemObject
@@ -285,37 +272,37 @@ class HitsAnalysis(CcpnModule):
     def _createSettingsWidgets(self):
         self.settingsWidget.setContentsMargins(20, 20, 20, 20)
         row = 0
-        self.targetPeaksCheckbox = CheckBox(self.settingsWidget, text='Target Peaks', checked=False,
-                                            callback=partial(self._toggleFrame,
-                                                             widget=self.peakHitWidgetsFrame),
-                                            grid=(row, 0))
-        row += 1
-        self.referencePeaksCheckbox = CheckBox(self.settingsWidget, text='Reference Peaks', checked=False,
-                                               callback=partial(self._toggleFrame,
-                                                                widget=self.referenceWidgetsFrame),
-                                               grid=(row, 0))
-        row += 1
-        self.substanceDetailsCheckbox = CheckBox(self.settingsWidget, text='Substance Details', checked=self._showHitRegion,
-                                                 callback=partial(self._toggleFrame,
-                                                                  widget=self.substanceDetailsFrame),
-                                                 grid=(row, 0))
-        row += 1
-        self.hitRegionsCheckbox = CheckBox(self.settingsWidget, text='Hit Regions ', checked=True,
-                                           callback=self._toggleMarks,
-                                           grid=(row, 0))
-
-        Spacer(self.settingsWidget, 5, 5,
-               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-               grid=(row + 1, 2), gridSpan=(1, 1))
-
-        #   Hide tables until fixed:
-        self.peakHitWidgetsFrame.hide()
-        self.referenceWidgetsFrame.hide()
-        self.substanceDetailsFrame.hide()
-        self.targetPeaksCheckbox.setEnabled(False)
-        self.referencePeaksCheckbox.setEnabled(False)
-        self.hitRegionsCheckbox.setEnabled(False)
-        self.substanceDetailsCheckbox.setEnabled(False)
+        # self.targetPeaksCheckbox = CheckBox(self.settingsWidget, text='Target Peaks', checked=False,
+        #                                     callback=partial(self._toggleFrame,
+        #                                                      widget=self.peakHitWidgetsFrame),
+        #                                     grid=(row, 0))
+        # row += 1
+        # self.referencePeaksCheckbox = CheckBox(self.settingsWidget, text='Reference Peaks', checked=False,
+        #                                        callback=partial(self._toggleFrame,
+        #                                                         widget=self.referenceWidgetsFrame),
+        #                                        grid=(row, 0))
+        # row += 1
+        # self.substanceDetailsCheckbox = CheckBox(self.settingsWidget, text='Substance Details', checked=self._showHitRegion,
+        #                                          callback=partial(self._toggleFrame,
+        #                                                           widget=self.substanceDetailsFrame),
+        #                                          grid=(row, 0))
+        # row += 1
+        # self.hitRegionsCheckbox = CheckBox(self.settingsWidget, text='Hit Regions ', checked=True,
+        #                                    callback=self._toggleMarks,
+        #                                    grid=(row, 0))
+        #
+        # Spacer(self.settingsWidget, 5, 5,
+        #        QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+        #        grid=(row + 1, 2), gridSpan=(1, 1))
+        #
+        # #   Hide tables until fixed:
+        # self.peakHitWidgetsFrame.hide()
+        # self.referenceWidgetsFrame.hide()
+        # self.substanceDetailsFrame.hide()
+        # self.targetPeaksCheckbox.setEnabled(False)
+        # self.referencePeaksCheckbox.setEnabled(False)
+        # self.hitRegionsCheckbox.setEnabled(False)
+        # self.substanceDetailsCheckbox.setEnabled(False)
 
     def _toggleMarks(self):
         if self.sender() is not None:
