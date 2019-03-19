@@ -89,12 +89,13 @@ def hitsToDataFrame(spectrumHits)-> pd.DataFrame:
                 deltas= spectrumHit._getDeltaPositions(referencePeakList)
                 d[DeltaPositions] = deltas
                 heights = spectrumHit._getHitHeights(spectrumHit._getPeakHits())
-                snr = spectrumHit.spectrum._snr
+                snr =  spectrumHit._getHitSNR(refpeakHits)
                 matchScore = _scoreHits(deltas)
                 d[MatchesScore] = matchScore
                 relScore = _scoreHits(heights)
                 d[RelativeScore] = relScore
-                d[SNR] = snr
+                snrScore = np.mean(snr)
+                d[SNR] = snrScore
             level = _getReferenceLevel(spectrumHit.project, referenceSpectrum)
             d[ReferenceLevel] = int(level)
             data.append(d)
