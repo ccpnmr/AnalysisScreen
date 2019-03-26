@@ -28,13 +28,14 @@ class Screen(Assign):
     def setupMenus(self):
         super().setupMenus()
 
-        menuSpec = ('Screen', [
-            # ("Pick Peaks ", self.showPickPeakPopup),
-            ("Generate Mixtures ", self.showMixtureGenerationPopup, [('shortcut', 'cs')]),
-            ("Mixtures Analysis ", self.showMixtureAnalysis, [('shortcut', 'st')]),
-            ("Screening Pipeline", self.showScreeningPipeline, [('shortcut', 'sl')]),
-            ("Hit Analysis", self.showHitAnalysisModule, [('shortcut', 'ha')]),
-            ]
+        menuSpec = ('Screen',
+                            [
+                            ("Generate Mixtures ", self.showMixtureGenerationPopup, [('shortcut', 'cs')]),
+                            ("Mixtures Analysis ", self.showMixtureAnalysis, [('shortcut', 'st')]),
+                            ("Screening Pipeline", self.showScreeningPipeline, [('shortcut', 'sp')]),
+                            ("Hit Analysis", self.showHitAnalysisModule, [('shortcut', 'ha')]),
+                            ("Decomposition (PCA)", self.showDecompositionModule, [('shortcut', 'de')]),
+                            ]
                     )
 
         self.addApplicationMenuSpec(menuSpec)
@@ -71,13 +72,21 @@ class Screen(Assign):
         self.project._logger.info("application.showScreeningPipeline()")
 
     def showHitAnalysisModule(self, position='top', relativeTo=None):
-        # if not self.project.spectrumHits:
-        #   MessageDialog.showWarning('No Spectrum Hits Found','')
-        #   return
-        # else:
-        self.showScreeningHits = HitsAnalysis(mainWindow=self.ui.mainWindow)
-        self.ui.mainWindow.moduleArea.addModule(self.showScreeningHits, position, None)
-        self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showHitAnalysisModule()")
-        self.project._logger.info("application.showHitAnalysisModule()")
+        if len(self.project.spectrumHits) == 0:
+          MessageDialog.showWarning('No Spectrum Hits Found','')
+          return
+        else:
+            self.showScreeningHits = HitsAnalysis(mainWindow=self.ui.mainWindow)
+            self.ui.mainWindow.moduleArea.addModule(self.showScreeningHits, position, None)
+            self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showHitAnalysisModule()")
+            self.project._logger.info("application.showHitAnalysisModule()")
+
+    def showDecompositionModule(self):
+        try:
+            from ccpn.AnalysisMetabolomics.ui.gui.modules.PcaModule import PcaModule
+            pcaModule = PcaModule(mainWindow=self.ui.mainWindow)
+            self.ui.mainWindow.moduleArea.addModule(pcaModule, position='bottom')
+        except ImportError as ir:
+            MessageDialog.showError("PCA Not Available", "For this module is required the Metabolomics package.")
 
         #########################################    End setup Menus      #############################################
