@@ -32,7 +32,7 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.AnalysisScreen.lib.experimentAnalysis.STD import _find_STD_Hits
 from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit, _getReferencesFromSample
 from ccpn.util.Logging import getLogger, _debug3
-
+from ccpn.core.lib.ContextManagers import logCommandBlock
 
 ########################################################################################################################
 ###   Attributes:
@@ -54,7 +54,7 @@ MinEfficiency = 'Minimal_Efficiency'
 
 ## defaults
 DefaultEfficiency = 7
-DefaultMinDist = 0.01
+DefaultMinDist = 0.001
 DefaultPeakListIndex = -1
 
 ## PipeName
@@ -128,44 +128,46 @@ class STDHitFinder(SpectraPipe):
         minimumEfficiency = float(self._kwargs[MinEfficiency]) / 100
 
         references = []
-        if stdTargetSpectrumGroup is not None:
-            if set(stdTargetSpectrumGroup.spectra).issubset(spectra):  # make sure spectrumGroup.spectra are in the input spectra
-                if controlSpectrumGroup is None:
-                    controlSpectra = [None] * len(stdTargetSpectrumGroup.spectra)
-                else:
-                    controlSpectra = controlSpectrumGroup.spectra
-                for stdSpectrum, controlSTD in zip(stdTargetSpectrumGroup.spectra, controlSpectra):
-                    if stdSpectrum:
-                        if stdSpectrum.experimentType is None:
-                            stdSpectrum.experimentType = 'STD.H'
-                        if sampleComponents_as_References:
-                            references = _getReferencesFromSample(stdSpectrum)
-                        else:
-                            if referenceSpectrumGroup is not None:
-                                if set(referenceSpectrumGroup.spectra).issubset(spectra):
-                                    references = referenceSpectrumGroup.spectra  #make sure references are in the input spectra
-                        if len(stdSpectrum.peakLists) > 0:
-                            listsTargetHits = _find_STD_Hits(stdSpectrum=stdSpectrum, referenceSpectra=references, limitRange=minimumDistance,
-                                                             refPeakListIndex=DefaultPeakListIndex, minEfficiency=minimumEfficiency)
-
-                            if controlSTD is not None:
-                                listsControlHits = _find_STD_Hits(stdSpectrum=controlSTD, referenceSpectra=references,
-                                                                  limitRange=minimumDistance,
-                                                                  refPeakListIndex=DefaultPeakListIndex, minEfficiency=minimumEfficiency)
+        with logCommandBlock(get='self', withSideBar=False) as log:
+            log(self.pipeName)
+            if stdTargetSpectrumGroup is not None:
+                if set(stdTargetSpectrumGroup.spectra).issubset(spectra):  # make sure spectrumGroup.spectra are in the input spectra
+                    if controlSpectrumGroup is None:
+                        controlSpectra = [None] * len(stdTargetSpectrumGroup.spectra)
+                    else:
+                        controlSpectra = controlSpectrumGroup.spectra
+                    for stdSpectrum, controlSTD in zip(stdTargetSpectrumGroup.spectra, controlSpectra):
+                        if stdSpectrum:
+                            if stdSpectrum.experimentType is None:
+                                stdSpectrum.experimentType = 'STD.H'
+                            if sampleComponents_as_References:
+                                references = _getReferencesFromSample(stdSpectrum)
                             else:
-                                listsControlHits = []
-                            targetHits = [i for hit in listsTargetHits for i in hit]  # clean up the empty sublists
-                            controlHits = [i for hit in listsControlHits for i in hit]  # clean up the empty sublists
-                            filteredHits = self._filterFalsePositiveHits(targetHits, controlHits)
-                            print('stdSpectrum',stdSpectrum)
-                            if len(filteredHits) > 0:
-                                _addNewHit(stdSpectrum, filteredHits)
+                                if referenceSpectrumGroup is not None:
+                                    if set(referenceSpectrumGroup.spectra).issubset(spectra):
+                                        references = referenceSpectrumGroup.spectra  #make sure references are in the input spectra
+                            if len(stdSpectrum.peakLists) > 0:
+                                listsTargetHits = _find_STD_Hits(stdSpectrum=stdSpectrum, referenceSpectra=references, limitRange=minimumDistance,
+                                                                 refPeakListIndex=DefaultPeakListIndex, minEfficiency=minimumEfficiency)
 
-        else:
-            getLogger().warning('Aborted: STD SpectrumGroup not found')
-        # TODO this should return the spectrumHits only
-        SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
-        return set(list(spectra) + SGSpectra)
+                                if controlSTD is not None:
+                                    listsControlHits = _find_STD_Hits(stdSpectrum=controlSTD, referenceSpectra=references,
+                                                                      limitRange=minimumDistance,
+                                                                      refPeakListIndex=DefaultPeakListIndex, minEfficiency=minimumEfficiency)
+                                else:
+                                    listsControlHits = []
+                                targetHits = [i for hit in listsTargetHits for i in hit]  # clean up the empty sublists
+                                controlHits = [i for hit in listsControlHits for i in hit]  # clean up the empty sublists
+                                filteredHits = self._filterFalsePositiveHits(targetHits, controlHits)
+                                if len(filteredHits) > 0:
+                                    print(stdSpectrum.pid, '$$$')
+                                    _addNewHit(stdSpectrum, filteredHits)
+
+            else:
+                getLogger().warning('Aborted: STD SpectrumGroup not found')
+            # TODO this should return the spectrumHits only
+            SGSpectra = [sp for sg in self.spectrumGroups if sg is not None for sp in sg.spectra]
+            return set(list(spectra) + SGSpectra)
 
     def _filterFalsePositiveHits(self, targetHits, controlHits, limitRange=0.01):
         '''

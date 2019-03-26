@@ -62,6 +62,7 @@ def _find_STD_Hits(stdSpectrum, referenceSpectra: list, refPeakListIndex=0, limi
                     useFilteredHits = True
                     if targetPeak.figureOfMerit >= minEfficiency:
                         filteredMatches.append(match)
+
             if useFilteredHits:
                 hits.append(filteredMatches)
             else:

@@ -79,6 +79,7 @@ class HitsAnalysis(CcpnModule):
         self.project = None
         self.current = None
         self.preferences = None
+        self.hitsData = None
 
         if mainWindow is not None:
             self.mainWindow = mainWindow
@@ -169,6 +170,13 @@ class HitsAnalysis(CcpnModule):
         #
         # self.hitButtons.hide()
 
+    def _createMarksOnPeakHits(self):
+        if self._markHitPositions:
+            self.project.deleteObjects(*self.project.marks)
+            for p in self.current.spectrumHit._getPeakHits():
+                self.project.newMark(colour=p.peakList.spectrum.sliceColour, positions=p.position,
+                                     axisCodes=p.peakList.spectrum.axisCodes)
+
     def _openSpectrumHitOnNewDiplay(self, data):
         from ccpn.ui.gui.lib.MenuActions import _openItemObject
 
@@ -179,12 +187,7 @@ class HitsAnalysis(CcpnModule):
             if self.current.strip:
                 self.current.strip.spectrumDisplay.displaySpectrum(self.current.spectrumHit.spectrum)
 
-            if self._markHitPositions:
-                for mark in self.project.marks:
-                    mark.delete()
-                for p in self.current.spectrumHit._getPeakHits():
-                    self.project.newMark(colour=p.peakList.spectrum.sliceColour, positions=p.position,
-                                         axisCodes=p.peakList.spectrum.axisCodes)
+
 
     def _setPeakHitWidgets(self):
         self.peakHitTableLabel = Label(self.peakHitWidgetsFrame, text='Target Peak Hits', vAlign='t',
@@ -237,7 +240,12 @@ class HitsAnalysis(CcpnModule):
 
     @hitsData.getter
     def hitsData(self):
-        return hitsToDataFrame(self._spectrumHits)
+        if self._hitsData is None:
+            hd = hitsToDataFrame(self._spectrumHits)
+            self._hitsData = hd
+        else:
+            hd = self._hitsData
+        return hd
 
     @hitsData.setter
     def hitsData(self, df):
@@ -250,19 +258,15 @@ class HitsAnalysis(CcpnModule):
         vv = [(makeIterableList(b[dfColumnName])) for i, b in df.iterrows()]
         return [', '.join(str(i) for i in v) for v in vv]
 
-    def _setSpectrumHitTable(self):
+    def _setSpectrumHitTable(self, df=None):
         "Sets the SpectrumHitTable."
-        df = self.hitsData
+        if df is None:
+            df = self.hitsData
         if df is not None:
             df[DeltaPositions] = self._dfCell__ListsToStrs(df, DeltaPositions) # it has to be a str for the table
             df[ReferencePeakPositions] = self._dfCell__ListsToStrs(df, ReferencePeakPositions)
 
-            # del df[DeltaPositions]
-            # del df[ReferencePeakPositions]
-            del df[ExperimentTypeName]
-            del df[ReferenceFigureOfMerit]
-            del df[ReferenceLevel]
-            df = df.drop_duplicates(subset='Reference', keep="last")
+            # df = df.drop_duplicates(subset='Reference', keep="last")
             self.hitTable.setData(df)
 
 
@@ -470,6 +474,7 @@ class HitsAnalysis(CcpnModule):
                     else:
                         self.current.spectrumHit = spectrumHit
         self._showHitOnStrip()
+        # self._createMarksOnPeakHits()
 
     def _showHitOnStrip(self, *args):
         if self.current.strip:
