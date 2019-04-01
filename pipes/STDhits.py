@@ -129,7 +129,7 @@ class STDHitFinder(SpectraPipe):
 
         references = []
         with logCommandBlock(get='self', withSideBar=False) as log:
-            log(self.pipeName)
+
             if stdTargetSpectrumGroup is not None:
                 if set(stdTargetSpectrumGroup.spectra).issubset(spectra):  # make sure spectrumGroup.spectra are in the input spectra
                     if controlSpectrumGroup is None:
