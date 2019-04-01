@@ -84,7 +84,7 @@ def hitsToDataFrame(spectrumHits, roiLeft=[6,10], roiRight=[0,5], roundPositionD
                 if len(filteredPhits)>0:
                  ##  Positions columns
                     peakHitPos = [round(p.position[0],3) for p in filteredPhits]
-                    snr = abs(spectrumHit._getHitSNR(filteredPhits))
+                    snr = spectrumHit._getHitSNR(filteredPhits)
                     snrScore = np.mean(snr)
                     heights = [p.height for p in filteredPhits]
                     relScore = _scoreHits(heights)
