@@ -58,7 +58,7 @@ def _addNewHit(spectrum, hits):
     project = spectrum.project
     efficiencies = []
     with undoBlockWithoutSideBar():
-        spectrumHit = spectrum.newSpectrumHit(substanceName=spectrum.name)
+        spectrumHit = spectrum.newSpectrumHit(substanceName=spectrum.name + '-' + str(len(project.spectrumHits) + 1))
 
         newTargetPeakList = spectrum.newPeakList(title=SpectrumHitPeakList, isSimulated=True, comment='PeakList containing peak hits')
         spectrumHit._peakListsHit += [newTargetPeakList]

@@ -266,7 +266,7 @@ class HitsAnalysis(CcpnModule):
             df[DeltaPositions] = self._dfCell__ListsToStrs(df, DeltaPositions) # it has to be a str for the table
             df[ReferencePeakPositions] = self._dfCell__ListsToStrs(df, ReferencePeakPositions)
 
-            # df = df.drop_duplicates(subset='Reference', keep="last")
+            df = df.drop_duplicates(subset='Reference', keep="last")
             self.hitTable.setData(df)
 
 
