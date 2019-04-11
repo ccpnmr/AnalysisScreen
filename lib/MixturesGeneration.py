@@ -7,8 +7,8 @@ from ccpn.AnalysisScreen.lib.SimulatedAnnealing import randomDictMixtures, itera
 from ccpn.util.Logging import getLogger
 from ccpn.core.Spectrum import Spectrum
 from ccpn.ui.gui.widgets.MessageDialog import _stoppableProgressBar
-from ccpn.core.lib.ContextManagers import logCommandBlock, notificationEchoBlocking
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
 
 def _initialiseMixtures(params):

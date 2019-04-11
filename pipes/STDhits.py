@@ -32,7 +32,7 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.AnalysisScreen.lib.experimentAnalysis.STD import _find_STD_Hits
 from ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit import _addNewHit, _getReferencesFromSample
 from ccpn.util.Logging import getLogger, _debug3
-from ccpn.core.lib.ContextManagers import logCommandBlock
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
 ########################################################################################################################
 ###   Attributes:
@@ -128,7 +128,7 @@ class STDHitFinder(SpectraPipe):
         minimumEfficiency = float(self._kwargs[MinEfficiency]) / 100
 
         references = []
-        with logCommandBlock(get='self', withSideBar=False) as log:
+        with undoBlockWithoutSideBar():
 
             if stdTargetSpectrumGroup is not None:
                 if set(stdTargetSpectrumGroup.spectra).issubset(spectra):  # make sure spectrumGroup.spectra are in the input spectra
