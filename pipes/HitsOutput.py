@@ -48,8 +48,9 @@ Default_DataFrame = collections.OrderedDict((
                                             (NormalisedScore             ,None),
                                             (MatchesScore                ,None),
                                             ))
-from ccpn.util.decorators import profile
-@profile
+
+# from ccpn.util.decorators import profile
+# @profile
 def hitsToDataFrame(spectrumHits, roiLeft=[6,10], roiRight=[0,5], roundPositionDecimals=3)-> pd.DataFrame:
     """
     Each column to be like Default_DataFrame. NB. One spectrum/Hit can have multiple references as could be a mixture of substances
