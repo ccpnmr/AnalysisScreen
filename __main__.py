@@ -22,7 +22,6 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-
 from ccpn.framework import Framework
 from ccpn.AnalysisScreen.AnalysisScreen import Screen as Application
 from ccpn.framework.Version import applicationVersion
@@ -40,4 +39,5 @@ if __name__ == '__main__':
 
     application = Application(Framework.AnalysisScreen, applicationVersion, commandLineArguments)
     Framework._getApplication = lambda: application
+
     application.start()
