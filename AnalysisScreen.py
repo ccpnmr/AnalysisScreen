@@ -31,8 +31,8 @@ class Screen(Assign):
         menuSpec = ('Screen',
                             [
                             ("Generate Mixtures ", self.showMixtureGenerationPopup, [('shortcut', 'cs')]),
-                            ("Mixtures Analysis ", self.showMixtureAnalysis, [('shortcut', 'st')]),
-                            ("Screening Pipeline", self.showScreeningPipeline, [('shortcut', 'sp')]),
+                            ("Mixtures Analysis ", self.showMixtureAnalysis, [('shortcut', 'mx')]),
+                            ("Screening Pipeline", self.showScreeningPipeline, [('shortcut', 'pi')]),
                             ("Hit Analysis", self.showHitAnalysisModule, [('shortcut', 'ha')]),
                             ("Decomposition (PCA)", self.showDecompositionModule, [('shortcut', 'de')]),
                             ]
