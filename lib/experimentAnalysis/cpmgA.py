@@ -3,6 +3,7 @@ from ccpn.core.lib.ContextManagers import undoBlock,notificationEchoBlocking, un
 import numpy as np
 from scipy.stats import linregress
 
+
 with undoBlock():
     with notificationEchoBlocking():
         sg = project.spectrumGroups[-2]
@@ -87,12 +88,54 @@ for i in current.integrals:
     slope, intercept, r_value, p_value, std_err = linregress(X,Y)
     SF.update({i.integralList.spectrum.pid:slope})
 
-sg = project.getByPid('SG:SF_H')
-limits = (5.1924626349617871, 9.6461923150701221)
+#     /////
+sgSF = project.getByPid('SG:SF_cpmg_1')
+sgSP = project.getByPid('SG:SP_cpmg_1')
+# for sp in sg.spectra:
+#     il = sp.newIntegralList()
+il = sg.spectra[0].integralLists[-1]
+masterLimits, bM, bm = il.findLimits()
 with undoBlockWithoutSideBar():
     with notificationEchoBlocking():
+        nc  = project.fetchNmrChain(sg.name)
         for sp in sg.spectra:
-            il = sp.newIntegralList()
-            i = il.newIntegral()
-            i.limits = limits
 
+            il = sp.integralLists[-1]
+            for count, limits in enumerate(masterLimits):
+                nr = nc.fetchNmrResidue(str(count))
+                minI, maxI = min(limits), max(limits)
+                lineWidth = abs(maxI - minI)
+                if lineWidth:
+                    newIntegral = il.newIntegral(value=None, limits=[[minI, maxI], ])
+                    newIntegral._baseline = bM
+                    pl = sp.peakLists[-1]
+                    b, x, y = newIntegral._1Dregions
+                    try:
+                        height = np.max(y).astype(float)
+                    except:
+                        newIntegral.delete()
+                        nr.delete()
+                        continue # don't make a peak and delete objs
+                    bools = y == height
+                    position = x[bools]
+                    p = pl.newPeak(ppmPositions=[position[-1].astype(float), ], height=float(height))
+                    newIntegral.peak = p
+                    p.volume = newIntegral.value
+                    na = nr.fetchNmrAtom('H')
+                    _assignNmrAtomsToPeaks([p], [na])
+
+
+sg = project.getByPid('SG:References')
+shift = 0.111
+for sp in sg.spectra:
+    sp.positions += shift
+
+
+hhsp42 = []
+
+for i in current.peaks:
+    hhsp42.append(i.height)
+
+sum(hhsp42)/sum(hhsf42)
+ # 0.7477087141625922
+# 0.7309698505143472
