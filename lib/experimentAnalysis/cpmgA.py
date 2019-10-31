@@ -9,8 +9,9 @@ from tqdm import tqdm
 from ccpn.core.lib.peakUtils import getNmrResidueDeltas,_getKd, oneSiteBindingCurve, _fit1SiteBindCurve, _fitExpDecayCurve,\
                                     MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C, DISPLAYDATA, \
                                     getRawDataFrame, RAW, getNmrResiduePeakProperty, _getPeaksForNmrResidue
-from ccpn.AnalysisScreen.lib.experimentAnalysis.r2CalcutationMethods import calculateFit, percentageChange
+from ccpn.AnalysisScreen.lib.experimentAnalysis.r2CalcutationMethods import calculateFit, percentageChange, correlateProfiles
 import datetime
+from ccpn.util.Common import percentage
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 
@@ -99,16 +100,21 @@ with undoBlock():
 #     SF.update({i.integralList.spectrum.pid:slope})
 
 # Calculate auto integral etc....
-def _integrateAndAssign(integralList, nc, masterLimits):
+def _integrateAndAssign(integralList, nc, masterLimits, bM):
     il = integralList
     sp = il.spectrum
     for count, limits in enumerate(masterLimits):
         nr = nc.fetchNmrResidue(str(count))
         minI, maxI = min(limits), max(limits)
         lineWidth = abs(maxI - minI)
+        if lineWidth == 0:
+            continue
+        addLimits = percentage(10, lineWidth) #add a %of linewidths to left and right of predicted limits
+        minI -= addLimits
+        maxI += addLimits
         if lineWidth:
             newIntegral = il.newIntegral(value=None, limits=[[minI, maxI], ])
-            newIntegral._baseline = bM
+            newIntegral._baseline = np.nextafter(0, 1)
             pl = sp.peakLists[-1]
             b, x, y = newIntegral._1Dregions
             try:
@@ -147,6 +153,25 @@ def resetLists():
     for sp in project.spectra:
         il = sp.newIntegralList()
 
+def findReferenceIntegrals():
+
+    with undoBlockWithoutSideBar():
+        with notificationEchoBlocking():
+            ref = project.getByPid('SG:References')
+            for sp in ref.spectra:
+                nc = project.fetchNmrChain(sp.name + '_')
+                il = sp.integralLists[-1]
+                limits, bM, bm = il.findLimits()
+                sp.noiseLevel= bM
+                sp.negativeNoiseLevel  = bm
+                _integrateAndAssign(il, nc, limits, bM)
+                for p in sp.peakLists[-1].peaks:
+                    if p._getSNRatio() <= 3.54:
+                        if p.integral:
+                            p.integral.delete()
+                        p.delete()
+
+
 resetLists()
 sgSF = project.getByPid('SG:SF_cpmg_1')
 sgSP = project.getByPid('SG:SP_cpmg_1')
@@ -154,6 +179,7 @@ il = sgSF.spectra[0].integralLists[-1]
 masterLimits, bM, bm = il.findLimits()
 cpgmAnalysis(sgSF, masterLimits)
 cpgmAnalysis(sgSP, masterLimits)
+
 
  ##########////////////////////////////////////////
 
@@ -185,7 +211,7 @@ savePlot = True
 pdf = None
 SavePath = '/Users/luca/Desktop/DFCI/cpmg_development/bindingCurves/'
 if savePlot:
-    pdf = PdfPages(SavePath+'CPMG_1_.pdf')
+    pdf = PdfPages(SavePath+'CPMG_18.pdf')
     for i in tqdm(range(dfSF.shape[0])):
         nrPid = dfSF.iloc[i].to_frame().transpose().index[0]
         peaks = [p for p in nrPid.nmrAtoms[0].assignedPeaks]
@@ -201,20 +227,24 @@ if savePlot:
         changeSlope = percentageChange(slope, slope_SP)
         changeInt = percentageChange(interc, interc_SP)
         changeR2 = percentageChange(R2_rf, R2_rf_SP)
+        coefCorrRawYs = correlateProfiles(z, z_SP)
         positions.append(ppositions[0])
         changes_slope_exp.append(changeSlope)
         changes_Interc_exp.append(changeInt)
         changes_R2.append(changeR2)
         if savePlot:
-            plt.figure(dpi=300)
+            fig = plt.figure(dpi=300)
             plt.plot(xf, yf, color='blue', linestyle='dashed', label='SF-fitted')
-            plt.plot(xs, z,  'o', markerfacecolor='blue',  label='SF-observ')
+            plt.plot(xs, z,  'ob', label='SF-observ')
             plt.plot(xf_SP, yf_SP, color='red', label='SP-fitted')
-            plt.plot(xs_SP, z_SP,  '*', markerfacecolor='red', label='SP-observ')
+            plt.plot(xs_SP, z_SP,  '*r', label='SP-observ')
             plt.legend(loc='upper right')
-            plt.text(max(xs), 0.45, 'Slope SF %0.4f' % slope)
-            plt.text(max(xs),0.44, 'Slope SP %0.4f'%slope_SP)
-            plt.text(max(xs), 0.43, 'changeSlope %0.3f' % changeSlope)
+            plt.text(max(xs), 0.40, 'changeSlope %0.3f' % changeSlope)
+            plt.text(max(xs), 0.35, 'coef Corr Raw data %0.3f' % coefCorrRawYs)
+            text1 = 'SA1 SF Slope: %0.4f (%0.4f t) Intercept: %0.4f R2: %0.4f std_err Slope: %0.4f ' % (slope,1/slope, interc, R2_rf, std_err[0])
+            text2 = 'SA1 SP Slope: %0.4f (%0.4f t) Intercept: %0.4f R2: %0.4f std_err Slope: %0.4f ' % (slope_SP,1/slope_SP, interc_SP, R2_rf_SP, std_err_SP[0])
+            fig.text(0.5, 0.03, text1, ha='center')
+            fig.text(0.5, 0.01, text2, ha='center')
 
             nr = peaks[0].assignedNmrAtoms[0][0].nmrResidue
             title = 'NmrResidue: %s. Position: %0.3f ' %(nr.sequenceCode,ppositions[0])

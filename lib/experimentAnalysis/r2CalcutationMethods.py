@@ -7,12 +7,12 @@ from scipy.optimize import curve_fit
 from sklearn.metrics import r2_score
 from scipy.stats import linregress
 import matplotlib.pyplot as plt
-import numpy as np
 from sklearn.linear_model import LinearRegression
 from ccpn.util.Common import percentage
+from scipy.interpolate import interp1d
+import scipy.stats as ss
 
-
-def exponenial_func(x, a, b):
+def exponential_func(x, a, b):
     """
     x array, a is the intercept, b is the slope
     """
@@ -54,9 +54,12 @@ def _getXY_SA1_SP_():
 def _getXY_Test4():
     y = [1.75, 0.90, 0.76, 0.50, 0.45, 0.30, 0.25, 0.20, 0.17, 0.15, 0.13, 0.12,0.11,0.115,0.114,0.113,0.1111]
     x = [0, 0.01, 0.03, 0.05, 0.07, 0.1, 0.11, 0.13,  0.15, 0.17, 0.2, 0.21, 0.23, 0.25, 0.27, 0.3,0.31]
-    print(len(x), len(y))
     return x, y
 
+def _getXY_Test4b():
+    y = np.array([1.55, 1, 0.74, 0.60, 0.62, 0.27, 0.23, 0.20, 0.155, 0.133, 0.123, 0.112,0.101,0.1015,0.1,0.1,0.11])
+    x = [0, 0.01, 0.03, 0.05, 0.07, 0.1, 0.11, 0.13,  0.15, 0.17, 0.2, 0.21, 0.23, 0.25, 0.27, 0.3,0.31]
+    return x, y
 
 
 
@@ -93,6 +96,35 @@ def get_r2_numpy_manual(x, y):
 
 def get_r2_numpy_corrcoef(x, y):
     return np.corrcoef(x, y)[0, 1]**2
+
+def correlateProfiles(array1, array2, engine='correlation'):
+    """
+    :param array1 and array2:  curves to compare. 1d or nd array
+    :param engine: 'correlation' or 'spearmanr'.
+    :return: correlation value (float 0 to 1)
+    - if nd concatenate the single curves one after the other for array1 and 2 to create two single curves to be correlated.
+    - If not of same lenght they'll be interpolated.
+    - Apply np.corrcoef or spearmanr
+    """
+
+    corrcoef = None
+    c1, c2 = array1, array2
+    if array1.ndim >1 and array2.ndim >1:
+        c1, c2 = np.concatenate(array1), np.concatenate(array2)
+    if len(c1) != len(c2):  # we interpolate first to get same xs/ys length
+        points = int(np.mean([len(c1),len(c2)]))
+        x, x2 =  np.arange(len(c1)), np.arange(len(c2))
+        xnew, xnew2 = np.linspace(min(x), max(x), num=points), np.linspace(min(x2), max(x2), num=points)
+        f, f2 = interp1d(x, c1), interp1d(x2, c2)
+        c1, c2 = f(xnew), f2(xnew2)
+    if engine == 'correlation':
+        corrcoef = np.corrcoef(c1, c2)[0][1]  # Gives back the correlation matrix for the two arrays
+    if engine == 'spearmanr':
+        spearmanr = ss.spearmanr(c1, c2)  # Gives the spearman correlation for the two arrays
+        corrcoef = spearmanr.correlation
+        pvalue = spearmanr.pvalue
+    return corrcoef , c1, c2
+
 
 if False:
     s = time.time()
@@ -146,9 +178,9 @@ def percentageChange(v1, v2):
 
 def calculateFit(x,y, label = ''):
     xs, ys = x,y
-    p0=(1,0.1)
+    p0=(1,0)
     z = (ys-np.min(ys))/(np.max(ys)-np.min(ys))
-    popt, pcov = curve_fit(exponenial_func, xs, z, p0=p0)
+    popt, pcov = curve_fit(exponential_func, xs, z, p0=p0)
     interc, slope = popt
     # xfMax = np.max(xs)
     # xf = np.arange(0, xfMax)
@@ -158,9 +190,9 @@ def calculateFit(x,y, label = ''):
     xfMax = np.max(xs) + xfPerc
     print(xfMax, 'eee')
     xf = np.arange(0, xfMax, step=0.01)
-    popt, pcov = curve_fit(exponenial_func, xs, z, p0=[interc, slope])
+    popt, pcov = curve_fit(exponential_func, xs, z, p0=[interc, slope])
     interc, slope = popt
-    yf = exponenial_func(xf, *popt)
+    yf = exponential_func(xf, *popt)
     R2_rf = get_r2_statsmodels(xf, yf)
     print('slope fit ' + label, slope, )
     print('interc fit' + label, interc, )
@@ -174,7 +206,7 @@ def calculateFit(x,y, label = ''):
 # plt.plot(yintercept_ff)
 
 x,y = _getXY_Test4()
-# xSP,ySP = _getXY_SA1_SP_()
+xSP,ySP = _getXY_Test4b()
 
 
 plotItCurve = False
@@ -185,9 +217,15 @@ if plotItCurve:
     plt.show()
 
 xf,yf, xs, z, slope, interc, R2_rf, std_err = calculateFit(x,y, 'SF')
-# xf_SP,yf_SP, xs_SP, z_SP, slope_SP, interc_SP, R2_rf_SP, std_err_SP = calculateFit(xSP,ySP, 'SP')
+xf_SP,yf_SP, xs_SP, z_SP, slope_SP, interc_SP, R2_rf_SP, std_err_SP = calculateFit(xSP,ySP, 'SP')
 
-# changeSlope =  percentageChange(slope,slope_SP)
+fLine = 1/slope
+pLine = 1/slope_SP
+
+changeSlope =  percentageChange(slope,slope_SP)
+cor = correlateProfiles(z, z_SP)
+# print('correlateProfiles: %f. changeSlope:%f'% (cor,changeSlope))
+
 
 import pandas as pd
 # print('changeSlope',changeSlope)
@@ -209,12 +247,24 @@ t = time.time()
 #     writer.save()
 # print(time.time()-t,)
 
+ffLine = yf[xf<=fLine]
 
 plotFit = True
 if plotFit:
-    plt.plot(xf,yf)
-    # plt.plot(xf_SP, yf_SP)
-    plt.plot(xs, z, 'o')
-    # plt.plot(xs_SP, z_SP, '*')
+    fig = plt.figure(dpi=100)
+    plt.plot(xf,yf, 'r', label='fitted f')
+    plt.plot(xf_SP, yf_SP, 'b', label='fitted p')
+
+    plt.plot(xs, z, 'or',)
+    plt.plot(xs_SP, z_SP, '*b')
+
+    # plt.plot([fLine]*100,np.arange(0,1,0.01), '--r')
+    # plt.plot([pLine] * 100, np.arange(0, 1, 0.01), '--b')
+    plt.plot(np.arange(0, 1, 0.01),[0.367] * 100, '--')
+    plt.legend()
+    text1 = ' SF Slope: %0.4f Intercept: %0.4f R2: %0.4f std_err Slope: %0.4f ' % (slope, interc, R2_rf, std_err[0])
+    text2 = ' SP Slope: %0.4f Intercept: %0.4f R2: %0.4f std_err Slope: %0.4f ' % (slope_SP, interc_SP, R2_rf_SP, std_err_SP[0])
+    fig.text(0.5, 0.03, text1, ha='center')
+    fig.text(0.5, 0.01, text2, ha='center')
     plt.show()
 
