@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import datetime
 from itertools import combinations
+from numba import jit
 from ccpn.ui.gui.widgets.MessageDialog import _stoppableProgressBar
 
 from ccpn.AnalysisScreen.lib.experimentAnalysis.MatchPositions import matchingPosition
@@ -30,6 +31,7 @@ def _getScore(overlapCount, compoundPeaksCount,  scalingFactor=1):
     return (scalingFactor * (overlapCount / compoundPeaksCount))
   except ZeroDivisionError:
     return 0
+
 
 def _getOverlapCount(compoundA, compoundB, minDist):
   "for refactoring"
@@ -154,7 +156,7 @@ def mixTwoMixturesDict(mixtures):
   mixedMixtures = mixturesList + list(mixturesToMix.items())
   return dict(mixedMixtures)
 
-
+@jit(nopython=True)
 def getLinearSteps(startTemp=1000.0, finalTemp = 0.1, maxSteps = 1000):
   tSteps = (startTemp - finalTemp) / maxSteps  # 1)
   temp = startTemp
@@ -162,6 +164,7 @@ def getLinearSteps(startTemp=1000.0, finalTemp = 0.1, maxSteps = 1000):
     yield temp
     temp -= tSteps
 
+@jit(nopython=True)
 def getExponentialSteps(startTemp=1000.0, finalTemp = 0.1, maxSteps = 100):
   aTemp = math.exp((math.log(finalTemp / startTemp)) / maxSteps)
   temp = startTemp
@@ -179,6 +182,7 @@ def runCooling(type, startTemp=1000.0, finalTemp = 0.1, maxSteps = 1000):
     coolingSchedule = getLinearSteps()
   return coolingSchedule
 
+@jit(nopython=True)
 def getProbability(scoreDiff, currentTemp, tempK):
   if currentTemp == 0:
     return 0
