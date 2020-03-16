@@ -114,7 +114,7 @@ def _integrateAndAssign(integralList, nc, masterLimits, bM):
         maxI += addLimits
         if lineWidth:
             newIntegral = il.newIntegral(value=None, limits=[[minI, maxI], ])
-            newIntegral._baseline = np.nextafter(0, 1)
+            newIntegral.baseline = np.nextafter(0, 1)
             pl = sp.peakLists[-1]
             b, x, y = newIntegral._1Dregions
             try:
